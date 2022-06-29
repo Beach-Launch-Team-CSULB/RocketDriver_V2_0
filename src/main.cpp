@@ -1,6 +1,6 @@
 // RocketDriver V2.0 Propulsion Control and Data Acquisition - Embedded System Node Program
 // Originally by Dan Morgan and Mat Arnold
-// For Renegade, Beach Launch Team, Brandon Summers' personal machinations and more
+// For Renegade, Beach Launch Team, Dan Morgan + Brandon Summers' personal machinations and more
 //
 //
 // -------------------------------------------------------------
@@ -46,6 +46,7 @@
 #include <array>
 #include <string>
 #include <list>
+#include <unordered_map>
 using std::string;
 
 #include "ALARAUtilityFunctions.h"
@@ -72,7 +73,8 @@ bool abortHaltFlag; //creates halt flag that is a backup override of state machi
 
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
-uint8_t ALARAnodeID;                      // ALARA hardware node address
+ALARASN thisALARA;
+uint8_t ALARAnodeID = 3;                      // ALARA hardware node address
 uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromEEPROM_errorFlag;
@@ -142,8 +144,14 @@ void setup() {
   // ----- MUX Setups for ALARA -----
   // Board Addressing MUX
   MUXSetup(true, ALARA_DIGITAL_ADDRESS_1, ALARA_DIGITAL_ADDRESS_2, ALARA_DIGITAL_ADDRESS_3, ALARA_DIGITAL_ADDRESS_4);
+  
+  // MOVE NODEDETECTSHITHERE!!!
+  // Check map for ALARASN configutation
+  lookupALARASNmap(thisALARA, ALARAnodeID);
+
   // NOR Flash CS pin MUX
   MUXSetup(false, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
+///// ----- Insert a board rev check to pin defines here, if it fails disable our GPIO? ------ //
 
   // -----Read Last State off eeprom and update -----
   currentVehicleState = static_cast<VehicleState>(tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStateAddressfromEEPROM_errorFlag));
@@ -154,18 +162,11 @@ void setup() {
   startupStateCheck(currentVehicleState, currentCommand);
 
   // ----- Run the Node ID Detection Function -----
-  //nodeID = NodeIDDetect(nodeID, nodeIDdeterminefromEEPROM, nodeIDfromEEPROM); // - OVERHAUL WITH NEW FUNCTION AND SYSTEM
-  PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;       //For manually assigning NodeID isntead of the address read, make sure to comment out for operational use
+  //PropulsionSysNodeID = NodeIDDetect(nodeID, nodeIDdeterminefromEEPROM, nodeIDfromEEPROM); // - OVERHAUL WITH NEW FUNCTION AND SYSTEM
+  //PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;       //For manually assigning NodeID isntead of the address read, make sure to comment out for operational use
+  PropulsionSysNodeID = thisALARA.propulsionSysNodeID;
   // Write 0 to byte for nodeIDDetermineAddress after reading it after a reset
-  tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
-
-  // ----- Hardware Abort Pin Setup ----- NOT CURRENTLY IN USE
-  // This hardware abort allows us to command the Teensy to reboot itself by pulling the reset pin to ground
-/*   pinMode(pin::reset, OUTPUT);
-  digitalWrite(pin::reset, 1);
-  pinMode(pin::abort, INPUT_PULLDOWN);
-  attachInterrupt(digitalPinToInterrupt(pin::abort), abortReset, RISING);  */
-
+  //tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
 
   // -----Initialize ADCs-----
@@ -240,12 +241,12 @@ Serial.println(timeSubSecondsMicros); */
     }
 
 
-  // -----Process Commands Here-----
+/*   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
-  
+   */
   ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
   ////// DO NOT MOVE BEFORE "commandExecute" or after "valveTasks"/"pyroTasks"!!! /////
   //haltFlagCheck(abortHaltFlag, valveArray, pyroArray);
@@ -268,11 +269,11 @@ Serial.println(timeSubSecondsMicros); */
   // -----Update States on EEPROM -----
   tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
 
-  // CAN State Report and Sensor data send Functions
+/*   // CAN State Report and Sensor data send Functions
   CAN2PropSystemStateReport(Can0, currentVehicleState, currentCommand, valveArray, pyroArray, abortHaltFlag, PropulsionSysNodeID);
   CAN2AutosequenceTimerReport(Can0, autoSequenceArray, abortHaltFlag, PropulsionSysNodeID);
   CAN2SensorArraySend(Can0, sensorArray, PropulsionSysNodeID, CANSensorReportConverted);
-
+ */
   // Reset function to reboot Teensy with internal reset register
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
@@ -324,4 +325,10 @@ Serial.println(timeSubSecondsMicros); */
 startup = false;
   
   //Serial.println("main loop ran");
+
+    //ALARASN& thisALARA = ALARASNmap[ALARAnodeID];
+    Serial.print("prop system nodeID: ");
+    Serial.println(thisALARA.propulsionSysNodeID);
+    Serial.print("board rev: ");
+    Serial.println(static_cast<uint8_t>(thisALARA.boardRev));
 }

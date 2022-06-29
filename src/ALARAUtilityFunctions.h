@@ -33,9 +33,10 @@ void MUXSetup(bool MUX_Input, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinM
 
 // -------------------------------------------------------------
 uint8_t NodeIDDetect(uint8_t pinToReadMUXNodeID, uint8_t pinMUX_S0NodeID, uint8_t pinMUX_S1NodeID, uint8_t pinMUX_S2NodeID, uint8_t pinMUX_ANodeID,
-                    uint16_t nodeIDDetermineAddress, uint8_t nodeID, bool nodeIDdetermine, uint8_t nodeIDfromEEPROM1, uint8_t nodeIDfromEEPROM2, uint8_t nodeIDfromEEPROM3)       //Function to run the nodeID hardware addressing
+                    uint16_t nodeIDDetermineAddress1, uint16_t nodeIDDetermineAddress2, uint16_t nodeIDDetermineAddress3, uint8_t nodeID, bool nodeIDdetermine, uint8_t nodeIDfromEEPROM1, uint8_t nodeIDfromEEPROM2, uint8_t nodeIDfromEEPROM3)       //Function to run the nodeID hardware addressing
 {
 uint8_t NodeIDAddressRead;
+uint8_t NodeIDAddressReadEEPROM;
 for (size_t i = 0; i < 8; i++)
 {
   NodeIDAddressRead = readOnlyMUX(i, pinMUX_S0NodeID, pinMUX_S1NodeID,  pinMUX_S2NodeID, pinMUX_ANodeID) << i;
@@ -43,15 +44,14 @@ for (size_t i = 0; i < 8; i++)
 /* 
   if (nodeIDdetermine)
     {
-
-    cli(); // disables interrupts to protect write command
-    EEPROM.update(nodeIDDetermineAddress, 0);                                 // Never use .write()
-    sei(); // reenables interrupts after write is completed
+    tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3)
+    // write new node data to EEPROM below - NOT UPDATED YET
+    tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3)
     }
   else
-    NodeIDAddressRead = nodeIDfromEEPROM;      //Need to ADD FEATURE where the nodeIDdetermine is variable so on a quick power cycle it doesn't reset, but a manual "shutdown" can
-  return NodeIDAddressRead;
+    ???
    */
+  return NodeIDAddressRead;
 }
 // -------------------------------------------------------------
 
