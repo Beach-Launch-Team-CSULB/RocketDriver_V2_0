@@ -33,6 +33,7 @@
 #endif
 // -------------------------------------------------------------
 
+// ----- "COTS" includes ----- //
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <ADC.h>
@@ -48,6 +49,8 @@
 #include <list>
 #include <unordered_map>
 using std::string;
+#include <IntervalTimer.h>
+
 
 #include "ALARAUtilityFunctions.h"
 #include "ToMillisTimeTracker.h"
@@ -76,6 +79,7 @@ bool abortHaltFlag; //creates halt flag that is a backup override of state machi
 ALARASN thisALARA;
 uint8_t ALARAnodeID = 3;                      // ALARA hardware node address
 uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
+uint32_t ALARAnodeIDfromEEPROM_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromEEPROM_errorFlag;
 uint8_t PropulsionSysNodeID;              //engine node = 2, prop node = 3, Pasafire node = 8
@@ -132,6 +136,9 @@ uint16_t PropulsionSysNodeIDAddress3{18};
 uint16_t nodeIDDetermineAddress1{19};
 uint16_t nodeIDDetermineAddress2{20};
 uint16_t nodeIDDetermineAddress3{21};
+uint16_t NodeIDAddress1{22};
+uint16_t NodeIDAddress2{23};
+uint16_t NodeIDAddress3{24};
 
 ///// Temp Sensor for TC Cold Junction /////        ----- Move into sensor classes (if this is even retained)
 //Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
@@ -167,7 +174,8 @@ void setup() {
   PropulsionSysNodeID = thisALARA.propulsionSysNodeID;
   // Write 0 to byte for nodeIDDetermineAddress after reading it after a reset
   //tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
-
+  //CHEATER OVERRIDE!!!!!
+  PropulsionSysNodeID = 3;
 
   // -----Initialize ADCs-----
   MCUADCSetup(adc);
@@ -186,6 +194,12 @@ void setup() {
 
   // -----Run Valve Setup-----
   pyroSetUp(pyroArray);
+
+  // -----Run Valve Setup-----
+  engineControllerSetup(engineControllerArray);
+
+  // -----Run Valve Setup-----
+  tankPressControllerSetup(tankPressControllerArray);
 
   // -----Run AutoSequence Setup-----
   autoSequenceSetUp(autoSequenceArray);
@@ -241,12 +255,12 @@ Serial.println(timeSubSecondsMicros); */
     }
 
 
-/*   // -----Process Commands Here-----
+  // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
-  tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID);
-  engineControllerTasks(engineControllerArray, PropulsionSysNodeID);
+  tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
+  engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
-   */
+  
   ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
   ////// DO NOT MOVE BEFORE "commandExecute" or after "valveTasks"/"pyroTasks"!!! /////
   //haltFlagCheck(abortHaltFlag, valveArray, pyroArray);
@@ -327,8 +341,8 @@ startup = false;
   //Serial.println("main loop ran");
 
     //ALARASN& thisALARA = ALARASNmap[ALARAnodeID];
-    Serial.print("prop system nodeID: ");
+/*     Serial.print("prop system nodeID: ");
     Serial.println(thisALARA.propulsionSysNodeID);
     Serial.print("board rev: ");
-    Serial.println(static_cast<uint8_t>(thisALARA.boardRev));
+    Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
 }

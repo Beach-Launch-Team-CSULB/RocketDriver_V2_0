@@ -8,7 +8,7 @@
 enum class TankPressControllerState
 {
     Passive,                    // 0
-    Active,                     // 1
+    BangBangActive,             // 1
     DomePressActive,            // 2
     HiPressPassthroughVent,     // 3
     Armed,                      // 4
@@ -40,7 +40,7 @@ enum class EngineControllerState
     Shutdown,                   // 4
     Armed,                      // 5
     TestPassthrough,            // 6
-    AutosequenceCommanded,      // 7
+    FiringAutosequence,         // 7
     ControllerState_SIZE,       // 8
 };
 

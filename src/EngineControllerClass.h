@@ -16,22 +16,22 @@ class EngineController
         EngineControllerState state;
         EngineControllerState priorState;
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
+        int64_t currentAutosequenceTime;
+        int64_t fuelMVAutosequenceActuation;
+        int64_t loxMVAutosequenceActuation;
+        int64_t igniter1Actuation;
+        int64_t igniter2Actuation;
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         ValveState pilotMVFuelValveState;
         ValveState pilotMVLoxValveState;
         ValveState pneumaticVentState;
         PyroState igniter1State;
         PyroState igniter2State;
-        uint32_t targetValue;
-        uint32_t deadbandHighPoint;
-        uint32_t deadbandLowPoint;
-        uint32_t valveMinimumEnergizeTime;
-        uint32_t valveMinimumDeenergizeTime;
 
     public:
 
     // constructor
-        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, bool setNodeIDCheck = false);
+        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -41,7 +41,6 @@ class EngineController
         uint32_t getControllerID(){return controllerID;}
         uint8_t getControllerNodeID(){return controllerNodeID;}
         bool getNodeIDCheck(){return nodeIDCheck;}
-        uint32_t getTargetValue(){return targetValue;}
         EngineControllerState getState(){return state;}
         ValveState getPilotMVFuelValveState(){return pilotMVFuelValveState;}
         ValveState getPilotMVLoxValveState(){return pilotMVLoxValveState;}
@@ -61,6 +60,9 @@ class EngineController
                 }
                 state = newState;
             }
+    // autosequence get function
+        void setCurrentAutosequenceTime(int64_t countdownIn) {currentAutosequenceTime = countdownIn;}
+    
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds
 

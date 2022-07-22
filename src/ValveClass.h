@@ -11,7 +11,6 @@ enum ValveType
 {
     NormalClosed,
     NormalOpen,
-    NCFourWay,
 };
 
 class Valve
@@ -24,13 +23,12 @@ class Valve
         const uint8_t pinPWM;                              // Valve PWM pin for actuation
         const uint8_t pinDigital;                          // Valve Digital Out pin for actuation
         const uint32_t fullDutyTime;                // Time PWM needs to be at full duty for actuation, in MICROS
-        const int32_t fireSequenceTime;             // Time to wait until actuation after fire command given, in MICROS
         ValveState state;
         ValveState priorState;                           // Tracks the valve state
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         const uint16_t fullDuty{256};                // full duty cycle for servo initial actuation
         const uint8_t holdDuty{};                   // partial duty cycle to hold valve in actuated state
-        bool fireCommandBool;                       // Whether this valve is on the Ignition AutoSequence for FireCommand timer check
+        //bool fireCommandBool;                       // Whether this valve is on the Ignition AutoSequence for FireCommand timer check
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool abortHaltDeviceBool;                    // Whether this valve is set by the abort halt flag override
         ValveState abortedState;
@@ -39,8 +37,8 @@ class Valve
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
-        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime, bool setFireCommandBool,  
-        bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, int32_t setFireSequenceTime = 2147483647, uint8_t setHoldDuty = 64, bool setNodeIDCheck = false);
+        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime,  
+        bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, uint8_t setHoldDuty = 64, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -54,12 +52,10 @@ class Valve
         uint8_t getPinDigital(){return pinDigital;}
         uint32_t getFullDutyTime(){return fullDutyTime;}
         uint8_t getHoldDuty(){return holdDuty;}
-        int32_t getFireSequenceTime(){return fireSequenceTime;}
         ValveState getState(){return state;}
         ValveState getPriorState(){return priorState;}
         ValveState getAbortedState(){return abortedState;}
         uint32_t getTimer(){return timer;}
-        bool getFireCommandBool(){return fireCommandBool;}
         bool getNodeIDCheck(){return nodeIDCheck;}
         bool getAbortHaltDeviceBool(){return abortHaltDeviceBool;}
 
@@ -76,9 +72,6 @@ class Valve
         //every time a state is set, the timer should reset
         //Is the above still true?
 
-    // set the Fire Sequence bool function
-        void setFireCommandBool(bool updatedFireCommandBool) {fireCommandBool = updatedFireCommandBool;}
-
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
@@ -92,7 +85,7 @@ class Valve
         void stateOperations();
 
     // Sensor pull in function for control
-        void controlSensorFetch(uint16_t updateControlSensor1Value){controlSensor1Value = updateControlSensor1Value;}
+        //void controlSensorFetch(uint16_t updateControlSensor1Value){controlSensor1Value = updateControlSensor1Value;}
 };
 
 #endif

@@ -49,7 +49,7 @@ void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn)
 }
 
 template <typename T, std::size_t size>
-void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArray, uint8_t& nodeIDReadIn)
+void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArray, uint8_t& nodeIDReadIn, AutoSequence& ignitionAutoSequenceRef)
 {
     // iterate through valve array and run the stateOperations method
     for(auto tankPressController : tankPressControllerArray)
@@ -57,6 +57,7 @@ void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArra
     
         if (tankPressController->getControllerNodeID() == nodeIDReadIn)
         {
+            tankPressController->setCurrentAutosequenceTime(ignitionAutoSequenceRef->getCurrentCountdown());
             tankPressController->stateOperations();
             //tankPressController->deviceSetOperations();
             //Serial.print("LoopRan");
@@ -65,7 +66,7 @@ void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArra
 }
 
 template <typename T, std::size_t size>
-void engineControllerTasks(const std::array<T, size>& engineControllerArray, uint8_t& nodeIDReadIn)
+void engineControllerTasks(const std::array<T, size>& engineControllerArray, uint8_t& nodeIDReadIn, AutoSequence& ignitionAutoSequenceRef)
 {
     // iterate through valve array and run the stateOperations method
     for(auto engineController : engineControllerArray)
@@ -73,6 +74,7 @@ void engineControllerTasks(const std::array<T, size>& engineControllerArray, uin
     
         if (engineController->getControllerNodeID() == nodeIDReadIn)
         {
+            engineController->setCurrentAutosequenceTime(ignitionAutoSequenceRef->getCurrentCountdown());
             engineController->stateOperations();
             //tankPressController->deviceSetOperations();
             //Serial.print("LoopRan");
@@ -150,6 +152,28 @@ void autoSequenceSetUp(const std::array<T, size>& autoSequenceArray)
     for(auto autoSequence : autoSequenceArray)
     {
         autoSequence->begin();
+        //Serial.print("LoopRan");
+    }
+}
+
+template <typename T, std::size_t size>
+void engineControllerSetup(const std::array<T, size>& engineControllerArray)
+{
+    // iterate through valve array and run the stateOperations method
+    for(auto engineController : engineControllerArray)
+    {
+        engineController->begin();
+        //Serial.print("LoopRan");
+    }
+}
+
+template <typename T, std::size_t size>
+void tankPressControllerSetup(const std::array<T, size>& tankPressControllerArray)
+{
+    // iterate through valve array and run the stateOperations method
+    for(auto tankPressController : tankPressControllerArray)
+    {
+        tankPressController->begin();
         //Serial.print("LoopRan");
     }
 }

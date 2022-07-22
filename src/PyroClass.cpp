@@ -3,8 +3,8 @@
 
 
 
-Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t setLiveOutTime, bool setFireCommandBool, int32_t setFireSequenceTime,  bool setNodeIDCheck)
-                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, firePin{setFirePin}, armPin{setArmPin}, liveOutTime{setLiveOutTime}, fireCommandBool{setFireCommandBool}, fireSequenceTime{setFireSequenceTime}, nodeIDCheck{setNodeIDCheck}
+Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t setLiveOutTime,  bool setNodeIDCheck)
+                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, firePin{setFirePin}, armPin{setArmPin}, liveOutTime{setLiveOutTime}, nodeIDCheck{setNodeIDCheck}
 {
     state = PyroState::Off;
     timer = 0;
@@ -34,13 +34,13 @@ void Pyro::stateOperations()
     // if a valve has been commanded to fire, it will start actuation after appropriate delay, normal closed actuate open, normal open actuate closed
     // every state change should reset the timer
     case PyroState::FireCommanded:
-        if (fireCommandBool)
-        {
+        //if (fireCommandBool)
+        //{
             state = PyroState::OnCommanded;
             timer = 0;
             break;
   
-        }
+        //}
         break;
 
     // if a pyro is commanded on, turns on 

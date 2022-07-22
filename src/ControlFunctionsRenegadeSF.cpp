@@ -15,8 +15,8 @@
 #define FuelDomeRegVent_ArrayPointer 9
 
 // pyroArray position defines for pointers
-#define EngineIgniter0_ArrayPointer 0
-#define EngineIgniter1_ArrayPointer 1
+#define EngineIgniter1_ArrayPointer 0
+#define EngineIgniter2_ArrayPointer 1
 
 // autosequenceArray position defines for pointers
 #define IgnitionAutoSequence 0
@@ -54,6 +54,9 @@
 
 // engine controller defines for pointers
 #define Engine1Controller_ArrayPointer 0
+
+ValveState transitionalValveState;
+
 
 // -------------------------------------------------------------
 
@@ -181,8 +184,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             {
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
             currentState = VehicleState::TankPressPressurized;
             }
@@ -192,8 +195,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             {
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
             currentState = VehicleState::fireArmed;
             }
@@ -203,9 +206,9 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             {
             autoSequenceArray.at(0)->setState(AutoSequenceState::RunCommanded);            
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::DomePressActive);
-            engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::AutosequenceCommanded);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
+            engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::FiringAutosequence);
             currentState = VehicleState::fire;
             }
             break;
@@ -450,116 +453,6 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             }              
             break;
 
-        case command_allSensorsOff:
-            if(currentState == VehicleState::test)
-            {
-            sensorArray.at(0)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(1)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(2)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(3)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(4)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(5)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(6)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(7)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(8)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(9)->setState(SensorState::Off);         // Renegade SF Stand
-            sensorArray.at(10)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(11)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(12)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(13)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(14)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(15)->setState(SensorState::Off);        // Renegade SF Stand
-            sensorArray.at(16)->setState(SensorState::Off);        // Renegade SF Stand
-            }            
-            break;
-        case command_allSensorsSlow:
-            if(currentState == VehicleState::test)
-            {
-            sensorArray.at(0)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(1)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(2)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(3)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(4)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(5)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(6)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(7)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(8)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(9)->setState(SensorState::Slow);         // Renegade SF Stand
-            sensorArray.at(10)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(11)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(12)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(13)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(14)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(15)->setState(SensorState::Slow);        // Renegade SF Stand
-            sensorArray.at(16)->setState(SensorState::Slow);        // Renegade SF Stand
-            }             
-            break;
-        case command_allSensorsMedium:
-            if(currentState == VehicleState::test)
-            {
-            sensorArray.at(0)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(1)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(2)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(3)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(4)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(5)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(6)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(7)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(8)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(9)->setState(SensorState::Medium);         // Renegade SF Stand
-            sensorArray.at(10)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(11)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(12)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(13)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(14)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(15)->setState(SensorState::Medium);        // Renegade SF Stand
-            sensorArray.at(16)->setState(SensorState::Medium);        // Renegade SF Stand
-            }             
-            break;
-        case command_allSensorsFast:
-            if(currentState == VehicleState::test)
-            {
-            sensorArray.at(0)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(1)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(2)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(3)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(4)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(5)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(6)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(7)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(8)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(9)->setState(SensorState::Fast);         // Renegade SF Stand
-            sensorArray.at(10)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(11)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(12)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(13)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(14)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(15)->setState(SensorState::Fast);        // Renegade SF Stand
-            sensorArray.at(16)->setState(SensorState::Fast);        // Renegade SF Stand
-            }            
-            break;
-        case command_allSensorsCalibration:
-            if(currentState == VehicleState::test)
-            {
-            sensorArray.at(0)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(1)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(2)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(3)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(4)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(5)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(6)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(7)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(8)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(9)->setState(SensorState::Calibration);         // Renegade SF Stand
-            sensorArray.at(10)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(11)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(12)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(13)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(14)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(15)->setState(SensorState::Calibration);        // Renegade SF Stand
-            sensorArray.at(16)->setState(SensorState::Calibration);        // Renegade SF Stand
-            }            
-            break;
         default:
             break;
     }
@@ -570,7 +463,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
 // state machine for the mission state (launch, ascent, apogee, descent et cetera)
 void missionStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, bool &HaltFlag)
 {
-
+    //eventually give a shit to do stuff for flight
 }
 
 void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
@@ -578,7 +471,8 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
     
     //Serial.println("Is this even on???");
-        // COPV
+    //Renegade (WIP) - might still crash???
+/*         // COPV/High Press
         valveArray.at(HiPress_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPrimaryPressValveState());
         valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
         // Lox Tank
@@ -590,14 +484,44 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         valveArray.at(FuelDomeRegVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPressLineVentState());
         valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
         // Engine 1
-        valveArray.at(FuelDomeReg_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
-        valveArray.at(FuelDomeRegVent_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
-        valveArray.at(FuelVent_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPneumaticVentState());
-        pyroArray.at(FuelDomeReg_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
-        pyroArray.at(FuelDomeRegVent_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
-    
+        valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
+        valveArray.at(LoxMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
+        pyroArray.at(EngineIgniter1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
+        pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
+ */
+        // BANGER SF Config
+        // Lox Tank
+        valveArray.at(LoxDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
+        tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang1(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPressLineVentState());
+        valveArray.at(LoxVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
+        // Fuel Tank
+        valveArray.at(FuelDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState());
+        tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang2(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPressLineVentState());
+        valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
+        // COPV/High Press - RUN AFTER PROP TANKS - for bang controllers to sync vent line settings
+        valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
+        // Engine 1
+        valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
+        valveArray.at(LoxMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
+        pyroArray.at(EngineIgniter1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
+        pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
+
     sei(); // reenables interrupts after controller sync
 
     // Print Statement for debugging
-    //Serial.print(static_cast<uint8_t>(valveArray.at(LoxVent_ArrayPointer)->getState()));
+    //Serial.print(static_cast<uint8_t>(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState()));
+/*     Serial.println(static_cast<uint8_t>(valveArray.at(0)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(1)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(2)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(3)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(4)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(5)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(6)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(7)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(8)->getState()));
+    Serial.println(static_cast<uint8_t>(valveArray.at(9)->getState())); */
+
+/*     valveArray.at(9)->setState(ValveState::FireCommanded);
+    Serial.print("will it blend");
+    Serial.println(static_cast<uint8_t>(valveArray.at(9)->getState()));   */  
 }

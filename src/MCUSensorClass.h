@@ -53,17 +53,20 @@ class MCU_SENSOR
     bool nodeIDCheck;                           // Whether this object should operate on this node
     bool internalMCUTemp;                       // Is this sensor the MCU internal temp
     
-    uint32_t currentConvertedValue{};
+    float currentConvertedValue{};
     bool newConversionCheck;                      // Is the current raw value a new read that hasn't been sent yet?
     
     float linConvCoef1_m;                     // Base calibration coefficients
     float linConvCoef1_b;                     // Base calibration coefficients
     float linConvCoef2_m;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
     float linConvCoef2_b;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
-    uint16_t rollingSensorArrayRaw[10];       // Array for doing averages of readings
-    uint8_t currentRollingArrayPosition = 0;
+    //uint16_t rollingSensorArrayRaw[10];       // Array for doing averages of readings
+    //uint8_t currentRollingArrayPosition = 0;
     uint32_t currentCalibrationValue{};               // holds the current value for the sensor
-    uint32_t currentRunningSUM = 0;
+    //uint32_t currentRunningSUM = 0;
+    float priorEMAOutput;
+    float alphaEMA = 0.7;
+    float newEMAOutput = 0;
 
   public:
     // constructor 1,
@@ -77,11 +80,11 @@ class MCU_SENSOR
     uint32_t getADCinput(){return ADCinput;}
     uint32_t getCurrentSampleRate(){return currentSampleRate;}
     uint32_t getCurrentRawValue(){return currentRawValue;}
-    uint32_t getCurrentConvertedValue(){return currentConvertedValue;}
+    float getCurrentConvertedValue(){return currentConvertedValue;}
     uint16_t getCANTimestamp(){return currentCANtimestamp;}
     uint32_t getTimestampSeconds(){return currentTimestampSeconds;}
     uint32_t getTimestampMicros(){return currentTimestampMicros;}
-    uint8_t getCurrentRollingArrayPosition(){return currentRollingArrayPosition;}
+    //uint8_t getCurrentRollingArrayPosition(){return currentRollingArrayPosition;}
     uint32_t getCurrentRollingAverage(){return currentCalibrationValue;}
     bool getNodeIDCheck(){return nodeIDCheck;}
     bool getNewSensorValueCheck(){return newSensorValueCheck;}
@@ -118,21 +121,42 @@ class MCU_SENSOR
 
     void linearConversion();          //Runs a linear sensor conversion 
 
-    //void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
+void exponentialMovingAverage()
+{
+  //function written to accept and return floats
+  //alpha must be between 0 and 1, force overflows to max and min weights
+  
+  //Serial.print("alphaEMA");
+  //Serial.println(alphaEMA);
+  if (alphaEMA >= 1)
+  {
+    alphaEMA = 1;
+  }
+  else if (alphaEMA <= 0)
+  {
+    alphaEMA = 0;
+  }
+  
+  //quick maffs
+  newEMAOutput = (alphaEMA*currentConvertedValue) + ((1 - alphaEMA)*(priorEMAOutput));
+  priorEMAOutput = newEMAOutput;
+}
+
+/*     //void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
     void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
       {
         rollingSensorArrayRaw[arrayPosition] = sensorValueToArray;
         arrayPosition++;
-      }
+      } */
 
-    void setCurrentCalibrationValue()
+/*     void setCurrentCalibrationValue()
     {
     for (size_t i = 0; i < 10; i++)
     {
       currentRunningSUM = currentRunningSUM + rollingSensorArrayRaw[i];
     }
     currentCalibrationValue = currentRunningSUM / 10;
-    }
+    } */
 
 };
 
