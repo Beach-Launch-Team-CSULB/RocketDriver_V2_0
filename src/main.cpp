@@ -6,7 +6,19 @@
 // -------------------------------------------------------------
 // Use top level define conditional to determine which system the code is operating
 // Maintain definition header sets for a given propulsion system and update here accordingly
-#define RENEGADESF
+#define PASABANG
+
+//----- Pasafire BangBang Static Fire Stand/Vehicle -----
+#ifdef PASABANG
+#include "ValveDefinitionsPasaBang.h"
+#include "PyroDefinitionsPasaBang.h"
+#include "AutoSequenceDefinitionsPasaBang.h"
+#include "SensorDefinitionsPasaBang.h"
+#include "TankPressControllerDefinitionsPasaBang.h"
+#include "EngineControllerDefinitionsPasaBang.h"
+#include "ControlFunctionsPasaBang.h"
+#include "ALARASensorControllerDefinitionsPasaBang.h"
+#endif
 
 //----- Renegade Static Fire Stand -----
 #ifdef RENEGADESF
@@ -175,7 +187,7 @@ void setup() {
   // Write 0 to byte for nodeIDDetermineAddress after reading it after a reset
   //tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
   //CHEATER OVERRIDE!!!!!
-  PropulsionSysNodeID = 2;
+  PropulsionSysNodeID = 8;
 
   // -----Initialize ADCs-----
   MCUADCSetup(adc);

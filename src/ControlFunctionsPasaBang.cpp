@@ -1,18 +1,15 @@
-#include "ControlFunctionsRenegadeSF.h"
+#include "ControlFunctionsPasaBang.h"
 
 // -------------------------------------------------------------
 // CONFIRM All DEFINES MATCH DEVICE DEFINITIONS
 // valveArray position defines for pointers
-#define HiPress_ArrayPointer 0
-#define HiPressVent_ArrayPointer 1
-#define LoxMV_ArrayPointer 2
-#define FuelMV_ArrayPointer 3
-#define LoxVent_ArrayPointer 4
-#define LoxDomeReg_ArrayPointer 5
-#define LoxDomeRegVent_ArrayPointer 6
-#define FuelVent_ArrayPointer 7
-#define FuelDomeReg_ArrayPointer 8
-#define FuelDomeRegVent_ArrayPointer 9
+#define HiPressVent_ArrayPointer 0
+#define LoxMV_ArrayPointer 1
+#define FuelMV_ArrayPointer 2
+#define LoxVent_ArrayPointer 3
+#define LoxBang_ArrayPointer 4
+#define FuelVent_ArrayPointer 5
+#define FuelBang_ArrayPointer 6
 
 // pyroArray position defines for pointers
 #define EngineIgniter1_ArrayPointer 0
@@ -54,9 +51,6 @@
 
 // engine controller defines for pointers
 #define Engine1Controller_ArrayPointer 0
-
-ValveState transitionalValveState;
-
 
 // -------------------------------------------------------------
 
@@ -469,36 +463,16 @@ void missionStateMachine(VehicleState& currentState, VehicleState& priorState, C
 void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
 {
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
-    
-    //Serial.println("Is this even on???");
-    //Renegade (WIP) - might still crash???
-/*         // COPV/High Press
-        valveArray.at(HiPress_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPrimaryPressValveState());
-        valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
+        // Pasa Bang SF Config
         // Lox Tank
-        valveArray.at(LoxDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
-        valveArray.at(LoxDomeRegVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPressLineVentState());
-        valveArray.at(LoxVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
-        // Fuel Tank
-        valveArray.at(FuelDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState());
-        valveArray.at(FuelDomeRegVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPressLineVentState());
-        valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
-        // Engine 1
-        valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
-        valveArray.at(LoxMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
-        pyroArray.at(EngineIgniter1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
-        pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
- */
-        // BANGER SF Config
-        // Lox Tank
-        valveArray.at(LoxDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
+        valveArray.at(LoxBang_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
         tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang1(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPressLineVentState());
         valveArray.at(LoxVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
         // Fuel Tank
-        valveArray.at(FuelDomeReg_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState());
+        valveArray.at(FuelBang_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState());
         tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang2(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPressLineVentState());
         valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
-        // COPV/High Press - RUN AFTER PROP TANKS - for bang controllers to sync vent line settings
+        // COPV/High Press - RUN AFTER PROP TANKS (for now, not sure if necessary long term) - for bang controllers to sync vent line settings
         valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
         // Engine 1
         valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
@@ -507,21 +481,5 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
 
     sei(); // reenables interrupts after controller sync
-
-    // Print Statement for debugging
-    //Serial.print(static_cast<uint8_t>(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState()));
-/*     Serial.println(static_cast<uint8_t>(valveArray.at(0)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(1)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(2)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(3)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(4)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(5)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(6)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(7)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(8)->getState()));
-    Serial.println(static_cast<uint8_t>(valveArray.at(9)->getState())); */
-
-/*     valveArray.at(9)->setState(ValveState::FireCommanded);
-    Serial.print("will it blend");
-    Serial.println(static_cast<uint8_t>(valveArray.at(9)->getState()));   */  
+ 
 }
