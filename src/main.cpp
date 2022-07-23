@@ -175,7 +175,7 @@ void setup() {
   // Write 0 to byte for nodeIDDetermineAddress after reading it after a reset
   //tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
   //CHEATER OVERRIDE!!!!!
-  PropulsionSysNodeID = 3;
+  PropulsionSysNodeID = 2;
 
   // -----Initialize ADCs-----
   MCUADCSetup(adc);
@@ -259,6 +259,7 @@ Serial.println(timeSubSecondsMicros); */
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
+  autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   
   ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
@@ -305,19 +306,31 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print( ": TankControllerState: ");
             Serial.print(static_cast<uint8_t>(tankPressController->getState()));
             Serial.println(": ");
-            Serial.println(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getPrimaryPressValveState()));
-            Serial.println(": ");
+            Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
-            Serial.println(": ");
+            Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
+            Serial.println(": ");
+
+    }    for(auto engineController : engineControllerArray)
+    {
+            Serial.print( ": EngineControllerState: ");
+            Serial.print(static_cast<uint8_t>(engineController->getState()));
+            Serial.println(": ");
+            Serial.print(static_cast<uint8_t>(engineController->getPilotMVFuelValveState()));
+            Serial.print(": ");
+            Serial.print(static_cast<uint8_t>(engineController->getPilotMVLoxValveState()));
+            Serial.print(": ");
+            Serial.print(static_cast<uint8_t>(engineController->getIgniter1State()));
+            Serial.print(": ");
+            Serial.print(static_cast<uint8_t>(engineController->getIgniter2State()));
             Serial.println(": ");
 
     }
     
     for(auto valve : valveArray)
     {
-    
         if (valve->getValveNodeID() == PropulsionSysNodeID)
         {
             Serial.print("ValveID: ");
@@ -325,10 +338,22 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
             Serial.println(": ");
-
         }
-
     }
+    for(auto pyro : pyroArray)
+    {
+        if (pyro->getPyroNodeID() == PropulsionSysNodeID)
+        {
+            Serial.print("PyroID: ");
+            Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
+            Serial.print( ": PyroState: ");
+            Serial.print(static_cast<uint8_t>(pyro->getState()));
+            Serial.println(": ");
+        }
+    }
+
+  Serial.print("Current Autosequence Time: ");
+  Serial.println(IgnitionAutoSequence.getCurrentCountdown());
 
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   //Serial.print("EEPROM Node ID Read :");

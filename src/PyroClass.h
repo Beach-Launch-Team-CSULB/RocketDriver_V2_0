@@ -14,6 +14,7 @@ class Pyro
         const uint8_t armPin;
         elapsedMicros timer;
         PyroState state;
+        PyroState priorState;
         const uint32_t liveOutTime;
         bool nodeIDCheck;                           // Whether this object should operate on this node
 
@@ -42,9 +43,15 @@ class Pyro
         bool getNodeIDCheck(){return nodeIDCheck;}
 
     // set functions, allows the setting of a variable
-        void setState(PyroState newState) {state = newState; timer = 0;} //every time a state is set, the timer should reset
-    
-    // set the Node ID Check bool function
+        //void setState(PyroState newState) {state = newState; timer = 0;} //every time a state is set, the timer should reset
+        void setState(PyroState newState) 
+            {
+                if (newState != state)
+                {
+                    priorState = state;
+                }
+                state = newState;
+            }    // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
     // functions with executables defined in ValveClasses.cpp

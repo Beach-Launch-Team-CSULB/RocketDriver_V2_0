@@ -23,6 +23,6 @@ Valve FuelDomeReg{22, 3, NormalClosed, 7, 26, 25000, false};
 Valve FuelDomeRegVent{23, 3, NormalClosed, 8, 26, 25000, false};
 
 // ADD VALVES TO THIS VALVE ARRAY IN THE FORM: &VALVE
-std::array<Valve*, NUM_VALVES> valveArray{&HiPress, &HiPressVent, &LoxVent, &LoxDomeReg, &LoxDomeRegVent, &FuelVent, &FuelDomeReg, &FuelDomeRegVent, &FuelMV, &LoxMV};
+std::array<Valve*, NUM_VALVES> valveArray{&HiPress, &HiPressVent, &LoxMV, &FuelMV, &LoxVent, &LoxDomeReg, &LoxDomeRegVent, &FuelVent, &FuelDomeReg, &FuelDomeRegVent};
 
 #endif

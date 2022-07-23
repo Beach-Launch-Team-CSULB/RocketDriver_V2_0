@@ -33,20 +33,19 @@ void Pyro::stateOperations()
     {
     // if a valve has been commanded to fire, it will start actuation after appropriate delay, normal closed actuate open, normal open actuate closed
     // every state change should reset the timer
-    case PyroState::FireCommanded:
-        //if (fireCommandBool)
-        //{
-            state = PyroState::OnCommanded;
-            timer = 0;
-            break;
-  
-        //}
+/*     case PyroState::FireCommanded:
+        state = PyroState::OnCommanded;
+        timer = 0;
         break;
-
+ */
     // if a pyro is commanded on, turns on 
     case PyroState::OnCommanded:
+        if (priorState != PyroState::On)
+        {
         state = PyroState::On;
         timer = 0;
+        }
+        else {state = PyroState::On;}
         break;
 
     case PyroState::On:
@@ -61,8 +60,12 @@ void Pyro::stateOperations()
 
     // if a pyro is commanded off, turns off immediately, not sure I need this at all the way we do on valves
     case PyroState::OffCommanded:
+        if (priorState != PyroState::Off)
+        {
         state = PyroState::Off;
         timer = 0;
+        }
+        else {state = PyroState::Off;}
         break;
         
     case PyroState::Off:

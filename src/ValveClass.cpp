@@ -43,31 +43,6 @@ void Valve::stateOperations()
 
     switch (state)
     {
-    // if a valve has been commanded to fire, it will start actuation after appropriate delay, normal closed actuate open, normal open actuate closed
-    // every state change should reset the timer
-/*     case ValveState::FireCommanded:
-        
-     //if (IgnitionAutoSequence.getCurrentCountdown() >= fireSequenceTime)
-        //if (AutoSequenceCompare >= fireSequenceTime)
-        if (fireCommandBool)
-        {
-            switch (valveType)
-            {
-                case NormalClosed:
-                    state = ValveState::OpenCommanded;
-                    timer = 0;
-                    break;
-                case NormalOpen:
-                    state = ValveState::CloseCommanded;
-                    timer = 0;
-                    break;
-                default:
-                    break;
-            }
-        }
-        break;
-
- */    
     // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
     case ValveState::OpenCommanded:
         if (priorState != ValveState::Open)

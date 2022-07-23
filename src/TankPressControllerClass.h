@@ -15,6 +15,7 @@ class TankPressController
         const uint8_t controllerNodeID;
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool isSystemBang;
+        bool testPass = false;
         TankPressControllerState state;
         TankPressControllerState priorState;
         int64_t currentAutosequenceTime;

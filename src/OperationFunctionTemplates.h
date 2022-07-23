@@ -57,7 +57,7 @@ void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArra
     
         if (tankPressController->getControllerNodeID() == nodeIDReadIn)
         {
-            tankPressController->setCurrentAutosequenceTime(ignitionAutoSequenceRef->getCurrentCountdown());
+            tankPressController->setCurrentAutosequenceTime(ignitionAutoSequenceRef.getCurrentCountdown());
             tankPressController->stateOperations();
             //tankPressController->deviceSetOperations();
             //Serial.print("LoopRan");
@@ -74,7 +74,7 @@ void engineControllerTasks(const std::array<T, size>& engineControllerArray, uin
     
         if (engineController->getControllerNodeID() == nodeIDReadIn)
         {
-            engineController->setCurrentAutosequenceTime(ignitionAutoSequenceRef->getCurrentCountdown());
+            engineController->setCurrentAutosequenceTime(ignitionAutoSequenceRef.getCurrentCountdown());
             engineController->stateOperations();
             //tankPressController->deviceSetOperations();
             //Serial.print("LoopRan");

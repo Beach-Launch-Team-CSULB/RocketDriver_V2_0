@@ -62,11 +62,44 @@ class Valve
     // set functions, allows the setting of a variable
         void setState(ValveState newState) 
             {
+                if (newState == ValveState::OpenCommanded)
+                {
+                    if (priorState == ValveState::OpenProcess || priorState == ValveState::Open)
+                    {
+                        //Don't update the state, it's already doing opening operations
+                    }
+                    else
+                    {
+                    if (newState != state)
+                    {
+                        priorState = state;
+                    }
+                    state = newState;
+                    }
+                }
+                else if (newState == ValveState::CloseCommanded)
+                {
+                    if (priorState == ValveState::CloseProcess || priorState == ValveState::Closed)
+                    {
+                        //Don't update the state, it's already doing closing operations
+                    }
+                    else
+                    {
+                    if (newState != state)
+                    {
+                        priorState = state;
+                    }
+                    state = newState;
+                    }
+                }
+                else
+                {
                 if (newState != state)
                 {
                     priorState = state;
                 }
                 state = newState;
+                }
             }
             
         //every time a state is set, the timer should reset

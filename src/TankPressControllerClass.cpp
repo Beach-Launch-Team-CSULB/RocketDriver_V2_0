@@ -25,6 +25,7 @@ void TankPressController::stateOperations()
     switch (state)
     {
     case TankPressControllerState::Passive:
+        testPass = false;
         //don't do shit
         primaryPressValveState = ValveState::CloseCommanded;
         pressLineVentState = ValveState::CloseCommanded;
@@ -32,6 +33,7 @@ void TankPressController::stateOperations()
         sensorState = SensorState::Slow;
         break;
     case TankPressControllerState::DomePressActive:
+        testPass = false;
         //do shit
         if (priorState != TankPressControllerState::DomePressActive)
         {
@@ -42,6 +44,7 @@ void TankPressController::stateOperations()
         }
         break;
     case TankPressControllerState::Armed:
+        testPass = false;
         // Arming turns sensor read rates up to operational levels before opening valves
         sensorState = SensorState::Fast;
         primaryPressValveState = ValveState::CloseCommanded;
@@ -49,6 +52,7 @@ void TankPressController::stateOperations()
         tankVentState = ValveState::CloseCommanded;
         break;
     case TankPressControllerState::Vent:
+        testPass = false;
         if (priorState != TankPressControllerState::Vent)
         {
         sensorState = SensorState::Fast;
@@ -58,6 +62,7 @@ void TankPressController::stateOperations()
         }
         break;
     case TankPressControllerState::HiPressPassthroughVent:
+        testPass = false;
         if (priorState != TankPressControllerState::HiPressPassthroughVent)
         {
         sensorState = SensorState::Fast;
@@ -67,14 +72,17 @@ void TankPressController::stateOperations()
         }
         break;
     case TankPressControllerState::TestPassthrough:
+        testPass = false;
         sensorState = SensorState::Slow;
-        // How to handle test and offnominal pass through? figure out after I've got valveArray pointers passed functioning
+        //
+        testPass = true;
         break;
     case TankPressControllerState::AutosequenceCommanded:
+        testPass = false;
         // If specific press routine is on autosequence, include a state switch on timer in here
         break;
     case TankPressControllerState::BangBangActive:
-        
+        testPass = false;
         //minimum bang time lockouts, once they are up the valves go to plain Open/Closed states which unlocks them to be commanded again
         if (primaryPressValveState == ValveState::BangingOpen)
         {

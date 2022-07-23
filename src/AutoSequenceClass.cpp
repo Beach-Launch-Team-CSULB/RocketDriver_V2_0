@@ -19,6 +19,7 @@ void AutoSequence::begin()
 
 void AutoSequence::stateOperations()
 {
+    //Serial.println("does autosequence state ops run?");
     switch (state)
     {
     case AutoSequenceState::Standby:
@@ -50,7 +51,7 @@ void AutoSequence::stateOperations()
             currentCountdown = signedTimer + countdownStart;
             //Serial.print("currentCountdown");
             //Serial.println(currentCountdown);
-            //setCurrentCountdown(currentCountdown);
+            setCurrentCountdown(currentCountdown);
         //}
         break;
 

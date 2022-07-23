@@ -42,12 +42,12 @@ void MCU_SENSOR::read(ADC* adc)
             if (internalMCUTemp) //Stupid library forces ADCs to internal reference 1V2 and I can't figure out how to override currently
             {
                 currentRawValue = InternalTemperature.readTemperatureC();
-                setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
+                //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
             }
             else
             {
                 currentRawValue = adc->analogRead(ADCinput);
-                setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
+                //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
                 /////linear conversions here, y = m*x + b
                 // This automatically stores converted value for the on board nodes
                 //currentConvertedValue = linConvCoef1_m*currentRawValue + linConvCoef1_b;

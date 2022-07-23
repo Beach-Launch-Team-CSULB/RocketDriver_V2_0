@@ -13,6 +13,7 @@ class EngineController
         const uint32_t controllerID;                          // Controller ID number 
         const uint8_t controllerNodeID;
         bool nodeIDCheck;                           // Whether this object should operate on this node
+        bool testPass = false;
         EngineControllerState state;
         EngineControllerState priorState;
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
@@ -27,6 +28,10 @@ class EngineController
         ValveState pneumaticVentState;
         PyroState igniter1State;
         PyroState igniter2State;
+        uint32_t igniter1LiveOutTime = 500000;
+        uint32_t igniter2LiveOutTime = 500000;
+        elapsedMicros igniter1timer = 0;
+        elapsedMicros igniter2timer = 0;
 
     public:
 
