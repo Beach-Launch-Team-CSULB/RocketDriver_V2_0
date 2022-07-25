@@ -22,6 +22,9 @@ void TankPressController::resetTimer()
 
 void TankPressController::stateOperations()
 {
+    //run the PID calculation each time state operations runs
+    bangPIDoutput = PIDmath();
+    // Controller State switch case
     switch (state)
     {
     case TankPressControllerState::Passive:
@@ -141,22 +144,17 @@ else
     pressLineVentState = pressLineVentStateBang1;
 }
 
-
-
 }
 
-  float funcOutput = 0;
-  float p_rollingAve = 0;
-  float P_p = 0;
-  float P_i = 0;
-  float P_d = 0;
-  float e_p = 0;
-  float e_i = 0;
-  float e_d = 0;
-  int arrayMostRecentPositionPID = 0;
-  bool PIDmathPrintFlag = false;
-  float timeStepPIDMath = 0;
-float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d)
+void TankPressController::setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue)
+{
+    e_p = targetValue - proportionalValue;
+    e_i = integralValue;
+    e_d = derivativeValue;
+}
+
+//float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d)
+float TankPressController::PIDmath()
 {
   //timeStepPIDMath = 1;
   funcOutput = 0;
@@ -164,22 +162,21 @@ float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPID
   P_p = 0;
   P_i = 0;
   P_d = 0;
-  e_p = 0;
+/*   e_p = 0;
   //e_i = 0;
-  e_d = 0;
-  arrayMostRecentPositionPID = static_cast<int>(inputArrayPID[1]+0.5);
+  e_d = 0; */
+  //arrayMostRecentPositionPID = static_cast<int>(inputArrayPID[1]+0.5);
 
   // PID function calculations - new integral differenced int style
-  p_rollingAve = proportionalRollingAverage(inputArrayPID, 8);
-  e_p = controllerSetPoint - p_rollingAve;    // proportional offset calculation
+/*   e_p = controllerSetPoint - p_rollingAve;    // proportional offset calculation
   e_i += accumulatedI_PID_float(inputArrayPID, timeStepPIDMath, controllerSetPoint)* timeStepPIDMath;
   //e_p = controllerSetPoint - inputArrayPID[arrayMostRecentPositionPID];    // proportional offset calculation
-  e_d = linearRegressionLeastSquared_PID(inputArrayPID, 5, timeStepPIDMath);    // derivative function calculation
+  e_d = linearRegressionLeastSquared_PID(inputArrayPID, 5, timeStepPIDMath);    // derivative function calculation */
 
   //
   P_p = K_p*(e_p);
   P_i = K_i*(e_i);
-  P_d = K_d*(e_d * timeStepPIDMath);
+  P_d = K_d*(e_d * controllerTimeStep);
 
 if (isnan(P_p))
 {
@@ -212,7 +209,7 @@ if (isnan(P_d))
     Serial.print(" : ");
     Serial.print(e_i);
     Serial.print(" : ");
-    Serial.println(K_i*(e_i/integrationSteps));
+    Serial.println(K_i*(e_i));
     Serial.print(K_d);  
     Serial.print(" : ");
     Serial.print(e_d);  
@@ -221,8 +218,8 @@ if (isnan(P_d))
     Serial.println(funcOutput);
   }
     //Serial.print("insidePID p_rollingAve,");
-    Serial.print(p_rollingAve);
-    Serial.println(",");
+    //Serial.print(p_rollingAve);
+    //Serial.println(",");
 
   return funcOutput;
 }

@@ -1,59 +1,68 @@
-#ifndef MCUSENSORCLASS_H
-#define MCUSENSORCLASS_H
+#ifndef EXTSENSORCLASS_H
+#define EXTSENSORCLASS_H
 
 #include <Arduino.h>
 #include <string>
 #include <bitset>
 #include <ADC.h>
 #include "SensorStates.h"
+#include "SensorClass.h"
+#include "ALARAUtilityFunctions.h"
 
 //using std::string;
 
+//Declaring setup of the ADC itself for main to find it
+void MCUADCSetup();
+
 ///// MOVE THIS STUFF FOR NEW POLYMORPHISM SENSOR STRUCTURE /////
 // enum for holding sensor types
-enum SensorType
+/* enum SensorType
 {
   pt,
   loadcellOneWireRead,
   KtypeTC,
   TtypeTC,
   rtd,
-};
+}; */
 
 // enum for holding ADC input types, may not use this way
 enum ADCType
 {
-  TeensyMCUADC,
+  TeensyMCUADC, //built in ADC
   ADS1258,  //not in use yet
   ADS1263,  //not in use yet
-  I2Cext, //currently used for RTD
+  simulatedInput, //for simulated sensor inputs
 };
 
 
-class MCU_SENSOR
+class EXT_SENSOR : public SENSORBASE
 {
   private:
     const uint32_t sensorID;
     const uint32_t sensorNodeID;                      // NodeID the valve is controlled by
+    ADCType sensorSource = TeensyMCUADC;  //default source here is Teensy ADC
     //const string sens_name;           //your own name for sensor to reference it
     SensorState sensorState;
-    const uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
-    const uint32_t sampleRateSlowMode;        //the sample rate this given sensor will be read at
-    const uint32_t sampleRateMedMode;         //the sample rate this given sensor will be read at
-    const uint32_t sampleRateFastMode;        //the sample rate this given sensor will be read at
+    uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
+    const uint32_t sampleRateSlowMode = 1;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateMedMode = 10;         //the sample rate this given sensor will be read at
+    const uint32_t sampleRateFastMode = 100;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode = 10;        //the sample rate this given sensor will be read at
-    uint32_t currentSampleRate;
+    uint32_t currentSampleRate = 10;
     elapsedMicros timer;                      // timer for sensor timing operations
     uint32_t currentRawValue{};               // holds the current value for the sensor
     bool newSensorValueCheck;                      // Is the current raw value a new read that hasn't been sent yet?
     uint16_t currentCANtimestamp = 0;
     uint32_t currentTimestampSeconds = 0;
     uint32_t currentTimestampMicros = 0;
+    uint32_t priorTimestampSeconds = 0;
+    uint32_t priorTimestampMicros = 0;
     //const uint8_t bitDepth;                   // bit depth of the sample, for output chopping?
     bool nodeIDCheck;                           // Whether this object should operate on this node
     bool internalMCUTemp;                       // Is this sensor the MCU internal temp
     
     float currentConvertedValue{};
+    float priorConvertedValue{};
     bool newConversionCheck;                      // Is the current raw value a new read that hasn't been sent yet?
     
     float linConvCoef1_m;                     // Base calibration coefficients
@@ -64,15 +73,30 @@ class MCU_SENSOR
     //uint8_t currentRollingArrayPosition = 0;
     uint32_t currentCalibrationValue{};               // holds the current value for the sensor
     //uint32_t currentRunningSUM = 0;
-    float priorEMAOutput;
+    bool EMA = true;  //needs a set function still
+    float priorEMAOutput = 0;
     float alphaEMA = 0.7;
     float newEMAOutput = 0;
 
+    bool enableIntegralCalc = true;
+    bool enableLinearRegressionCalc = true;
+    float currentIntegralSum = 0;
+    float currentLinReg_a1 = 0;
+    uint32_t regressionSamples = 5;
+    float convertedValueArray[5+3] = {};  //should be the same size as regression samples +3 for rolling array index stuff
+    float timeStep = 0.01; //timeStep in seconds
+    float targetValue = 0;
+
+
   public:
-    // constructor 1,
-    //MCU_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, bool internalMCUTemp, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false);
-    // constructor 2, define attributes for conversions, gui updates, et cetera
-    MCU_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, bool internalMCUTemp, float setLinConvCoef1_m = 1, float setLinConvCoef1_b = 0, float setLinConvCoef2_m = 1, float setLinConvCoef2_b = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false, bool setNewConversionCheck = false);
+    void begin();                     // run in setup to get pins going
+    void read();              // updates currentRawValue with current reading, using an activated ADC object
+    void stateOperations();
+    
+    // constructor 1 - standard MCU external ADC read
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, float setLinConvCoef1_m = 1, float setLinConvCoef1_b = 0, float setLinConvCoef2_m = 1, float setLinConvCoef2_b = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false, bool setNewConversionCheck = false);
+    // constructor 2 - simulated sensor object
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, ADCType setSensorSource = simulatedInput);
 
     // Access functions defined in place
     uint32_t getSensorID(){return sensorID;}
@@ -90,12 +114,20 @@ class MCU_SENSOR
     bool getNewSensorValueCheck(){return newSensorValueCheck;}
     bool getNewSensorConversionCheck(){return newConversionCheck;}
 
+    float getEMAConvertedValue(){return newEMAOutput;}
+    float getIntegralSum(){return currentIntegralSum;}
+    float getLinRegSlope(){return currentLinReg_a1;}
 
     // further fuctions defined in SensorClass.cpp
-    void begin();                     // run in setup to get pins going
-    
+/*     void begin();                     // run in setup to get pins going
+
+    void read();              // updates currentRawValue with current reading, using an activated ADC object
+
+    void stateOperations();
+ */    
     // set functions, allows the setting of a variable
-    void setState(SensorState newState) {sensorState = newState;} //every time a state is set, the timer should reset
+    //void setState(SensorState newState) {sensorState = newState;} //every time a state is set, the timer should reset
+    void setState(SensorState newState);
 
     // set the Node ID Check bool function
     void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
@@ -108,39 +140,37 @@ class MCU_SENSOR
 
     void setCANTimestamp(uint16_t CANTimestamp){currentCANtimestamp = CANTimestamp;}
     
-    void setSYSTimestamp(uint32_t timestampSeconds, uint32_t timestampMicros){currentTimestampSeconds = timestampSeconds; currentTimestampMicros = timestampMicros;}
+    void setSYSTimestamp(uint32_t timestampSeconds, uint32_t timestampMicros)
+      {
+        priorTimestampSeconds = currentTimestampSeconds;  //shifts the previous current into prior variables
+        priorTimestampMicros = currentTimestampMicros;
+        currentTimestampSeconds = timestampSeconds;       //sets the new current timestamps from input arguments
+        currentTimestampMicros = timestampMicros;
+      }
 
     //void setCurrentSampleRate(uint32_t updateCurrentSampleRate) {currentSampleRate = updateCurrentSampleRate; newSensorValueCheck = true; newConversionCheck = false;}
     void setCurrentSampleRate(uint32_t updateCurrentSampleRate) {currentSampleRate = updateCurrentSampleRate;}
 
+    void setTargetValue(float targetValueIn){targetValue = targetValueIn;}
+
     void resetTimer();                // resets timer to zero
 
-    void read(ADC* adc);              // updates currentRawValue with current reading, using an activated ADC object
-
-    void stateOperations();
+    //void read(ADC* adc);              // updates currentRawValue with current reading, using an activated ADC object
 
     void linearConversion();          //Runs a linear sensor conversion 
 
-void exponentialMovingAverage()
-{
-  //function written to accept and return floats
-  //alpha must be between 0 and 1, force overflows to max and min weights
-  
-  //Serial.print("alphaEMA");
-  //Serial.println(alphaEMA);
-  if (alphaEMA >= 1)
-  {
-    alphaEMA = 1;
-  }
-  else if (alphaEMA <= 0)
-  {
-    alphaEMA = 0;
-  }
-  
-  //quick maffs
-  newEMAOutput = (alphaEMA*currentConvertedValue) + ((1 - alphaEMA)*(priorEMAOutput));
-  priorEMAOutput = newEMAOutput;
-}
+    void exponentialMovingAverage();
+
+    void initializeLinReg(uint8_t arraySizeIn);
+
+    void setEnableIntegralCalc(bool setEnableIn){enableIntegralCalc = setEnableIn;}
+
+    void resetIntegralCalc(float integralCalcIn = 0){currentIntegralSum = integralCalcIn;}  //resets the integral sum, default arg zeros it
+
+    float linearRegressionLeastSquared_PID();
+
+    void accumulatedI_float();
+
 
 /*     //void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
     void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
@@ -157,7 +187,7 @@ void exponentialMovingAverage()
     }
     currentCalibrationValue = currentRunningSUM / 10;
     } */
-
+    //};
 };
 
 // need to add differential read toggle somehow 

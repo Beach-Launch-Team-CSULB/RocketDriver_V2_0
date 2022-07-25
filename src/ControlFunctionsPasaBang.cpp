@@ -19,26 +19,15 @@
 #define IgnitionAutoSequence 0
 
 // sensorArray position defines for pointers
-#define ThrustMountLoadCell1pos_ArrayPointer 0
-#define ThrustMountLoadCell1neg_ArrayPointer 1
-#define ThrustMountLoadCell2pos_ArrayPointer 2
-#define ThrustMountLoadCell2neg_ArrayPointer 3
-#define ThrustMountLoadCell3pos_ArrayPointer 4
-#define ThrustMountLoadCell3neg_ArrayPointer 5
-#define ChamberPT2_ArrayPointer 6
-#define ChamberPT1_ArrayPointer 7
-#define FuelInletPropSidePT_ArrayPointer 8
-#define FuelInjectorPT_ArrayPointer 9
-#define LoxInletPropSidePT_ArrayPointer 10
-#define MVPneumaticsPT_ArrayPointer 11
-#define DomeRegFuelPT_ArrayPointer 12
-#define DomeRegLoxPT_ArrayPointer 13
-#define FuelTankPT_ArrayPointer 14
-#define LoxTankPT_ArrayPointer 15
-#define HiPressFuelPT_ArrayPointer 16
-#define HiPressLoxPT_ArrayPointer 17
-#define MCUtempNode2_ArrayPointer 18
-#define MCUtempNode3_ArrayPointer 19
+
+#define ChamberPT1_ArrayPointer 0
+#define FuelLinePT_ArrayPointer 1
+#define LoxLinePT_ArrayPointer 2
+#define FuelTank1PT_ArrayPointer 3
+#define FuelTank2PT_ArrayPointer 4
+#define LoxTank1PT_ArrayPointer 5
+#define LoxTank2PT_ArrayPointer 6
+#define HiPressPT_ArrayPointer 7
 
 // actuator position defines for pointers
 #define Engine1TVC_Y_ArrayPointer 0
@@ -94,7 +83,7 @@ void startupStateCheck(const VehicleState& currentState, Command& currentCommand
 }
 
 
-void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
+void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
 {
     switch (currentCommand)
     {
@@ -455,12 +444,12 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
 ///// ----- NEW FUNCTIONS, WORK IN PROGRESS ----- /////
 
 // state machine for the mission state (launch, ascent, apogee, descent et cetera)
-void missionStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, bool &HaltFlag)
+void missionStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, bool &HaltFlag)
 {
     //eventually give a shit to do stuff for flight
 }
 
-void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<MCU_SENSOR*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
+void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
 {
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
         // Pasa Bang SF Config
@@ -482,4 +471,18 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
 
     sei(); // reenables interrupts after controller sync
  
+}
+
+void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
+{
+    //cli(); // disables interrupts during controller sync to protect from partial propulsion system states
+    //Lox Tank sensor target value update
+    sensorArray.at(LoxTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
+    //Fuel Tank sensor target value update
+    sensorArray.at(FuelTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
+    //Lox Tank Controller Sensor Data fetch
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
+    //Lox Tank Controller Sensor Data fetch
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
+    //sei(); // reenables interrupts after controller sync
 }

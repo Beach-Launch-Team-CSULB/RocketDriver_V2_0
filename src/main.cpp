@@ -75,7 +75,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#define PROPULSIONSYSNODEIDPRESET 3;     //NOT in use normally, for testing with the address IO register inactive
+#define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
@@ -102,9 +102,9 @@ uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read 
 elapsedMillis propulsionControlWatchdog;                  // Watchdog timer that must be reset by ground control over bus to prevent an autovent
 uint32_t propulsionControlWatchdogVentTime = 120000;   // 120 seconds in millis gives two minutes to reestablish control before autovent, DISABLE IN FLIGHT
 
-///// ADC /////
+/* ///// ADC /////
 ADC* adc = new ADC();
-
+ */
 ///// LED /////
 elapsedMillis sinceLED;
 
@@ -190,7 +190,7 @@ void setup() {
   PropulsionSysNodeID = 8;
 
   // -----Initialize ADCs-----
-  MCUADCSetup(adc);
+  MCUADCSetup();
 
   // -----Run Valve PropulsionSysNodeID Check-----
   ValveNodeIDCheck(valveArray, PropulsionSysNodeID);
@@ -269,6 +269,7 @@ Serial.println(timeSubSecondsMicros); */
 
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+  controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
@@ -287,7 +288,8 @@ Serial.println(timeSubSecondsMicros); */
   valveTasks(valveArray, PropulsionSysNodeID);
   pyroTasks(pyroArray, PropulsionSysNodeID);
   sei(); // reenables interrupts after propulsion output state set is completed
-  sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
+  //sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
+  sensorTasks(sensorArray, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
   
 // For Testing to verify abort halt flag is active as intended
 /*     Serial.print("abortHaltFlag: ");
@@ -323,9 +325,17 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
             Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
-            Serial.println(": ");
+            Serial.print(": e_p");
+            Serial.print(tankPressController->getPfunc(),10);
+            Serial.print(": e_i");
+            Serial.print(tankPressController->getIfunc(),10);
+            Serial.print(": e_d");
+            Serial.print(tankPressController->getDfunc(),10);
+            Serial.print(": PID result");
+            Serial.println(tankPressController->getPIDoutput(),10);
 
-    }    for(auto engineController : engineControllerArray)
+    }    
+/*     for(auto engineController : engineControllerArray)
     {
             Serial.print( ": EngineControllerState: ");
             Serial.print(static_cast<uint8_t>(engineController->getState()));
@@ -363,9 +373,30 @@ Serial.println(timeSubSecondsMicros); */
             Serial.println(": ");
         }
     }
+ */    
+    
+    for(auto sensor : sensorArray)
+    {
+        if (sensor->getSensorNodeID() == PropulsionSysNodeID)
+        {
+        sensor->setState(SensorState::Slow);
+        
+            Serial.print("SensorID: ");
+            Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
+            Serial.print( ": converted: ");
+            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
+            Serial.print( ": EMA: ");
+            Serial.print(sensor->getEMAConvertedValue(),10);
+            Serial.print( ": I: ");
+            Serial.print(sensor->getIntegralSum(),10);
+            Serial.print( ": D: ");
+            Serial.print(sensor->getLinRegSlope(),10);
+            Serial.println(": ");
+        }
+    }
 
-  Serial.print("Current Autosequence Time: ");
-  Serial.println(IgnitionAutoSequence.getCurrentCountdown());
+  //Serial.print("Current Autosequence Time: ");
+  //Serial.println(IgnitionAutoSequence.getCurrentCountdown());
 
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   //Serial.print("EEPROM Node ID Read :");
@@ -382,4 +413,6 @@ startup = false;
     Serial.println(thisALARA.propulsionSysNodeID);
     Serial.print("board rev: ");
     Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
+
+
 }

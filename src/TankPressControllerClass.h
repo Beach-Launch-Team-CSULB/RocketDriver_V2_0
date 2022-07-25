@@ -29,20 +29,32 @@ class TankPressController
         ValveState pressLineVentStateBang1;
         ValveState pressLineVentStateBang2;
         
-        uint32_t targetValue;
-        float Kp;
-        float Ki; //initial Ki, KEEP 0 for tank press
-        float Ki_run; //bang run Ki
-        float Kd;
+        float targetValue;
+        float K_p = 1;
+        float K_i = 0; //initial Ki, KEEP 0 for tank press
+        float K_i_run = 0; //bang run Ki
+        float K_d = 0;
         float controllerThreshold;
         float bangPIDoutput;
 
         uint32_t valveMinimumEnergizeTime = 75;      // in ms
         uint32_t valveMinimumDeenergizeTime = 50;    // in ms
-        float controllerTimeStep;
-        float sensorIntervalTimeStep;
+        float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
+        float sensorIntervalTimeStep = 0.01;
 
         //do i need to create a float array for sensors here or can I pass a reference/similar?
+        float funcOutput = 0;
+        float p_rollingAve = 0;
+        float P_p = 0;
+        float P_i = 0;
+        float P_d = 0;
+        float e_p = 0;
+        float e_i = 0;
+        float e_d = 0;
+        int arrayMostRecentPositionPID = 0;
+        bool PIDmathPrintFlag = false;
+        float timeStepPIDMath = 0;
+
 
     public:
 
@@ -57,13 +69,19 @@ class TankPressController
         uint32_t getControllerID(){return controllerID;}
         uint8_t getControllerNodeID(){return controllerNodeID;}
         bool getNodeIDCheck(){return nodeIDCheck;}
-        uint32_t getTargetValue(){return targetValue;}
+        float getTargetValue(){return targetValue;}
         TankPressControllerState getState(){return state;}
         ValveState getPrimaryPressValveState(){return primaryPressValveState;}
         ValveState getPressLineVentState(){return pressLineVentState;}
         ValveState getTankVentState(){return tankVentState;}
-    
+        float getPfunc(){return e_p;}
+        float getIfunc(){return e_i;}
+        float getDfunc(){return e_d;}
+        float getPIDoutput(){return bangPIDoutput;}
+
     // set functions, allows the setting of a variable
+        void setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue);
+
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
     // controller state set function
@@ -92,7 +110,8 @@ class TankPressController
     // and it needs to be run every loop so that once enough time has pass the 
         void stateOperations();
 
-        float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d);
+        //float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d);
+        float PIDmath();
     
     // controller set point function
         void setControllerTargetValue(float controllerSetPointIn){targetValue = controllerSetPointIn;}

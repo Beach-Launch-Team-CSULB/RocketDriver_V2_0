@@ -98,7 +98,8 @@ void autoSequenceTasks(const std::array<T, size>& autoSequenceArray, uint8_t& no
 }
 
 template <typename T, std::size_t size>
-void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
+//void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
+void sensorTasks(const std::array<T, size>& sensorArray, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
 {
     // iterate through valve array and run the stateOperations method
     for(auto sensor : sensorArray)
@@ -108,14 +109,14 @@ void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& seco
         {
             sensor->stateOperations();
             //Serial.print("LoopRan");
-            sensor->read(adc);
+            sensor->read();
             sensor->setSYSTimestamp(secondsRD, microsecondsRD);
             sensor->linearConversion();
         }
-        else if (nodeIDReadIn == 6)
+/*         else if (nodeIDReadIn == 6) //shitty way to make logger node only convert
         {
             sensor->linearConversion();
-        }
+        } */
     }
 }
 
@@ -189,7 +190,7 @@ void sensorSetUp(const std::array<T, size>& sensorArray)
     }
 }
 
-void MCUADCSetup(ADC* adc)
+/* void MCUADCSetup()
 { 
 //Ideally get some conditionals here for which MCU it is so this is compatible at least also with Teensy LC
 
@@ -213,7 +214,7 @@ void MCUADCSetup(ADC* adc)
   adc->adc1->recalibrate();
 
 }
-
+ */
 template <typename T, std::size_t size>
 void autoSequenceValveUpdate(const std::array<T, size>& valveArray, int64_t& fireCurrentCountdown)
 {
@@ -477,14 +478,14 @@ if (PropSysReportTimer >= 100000)
                     }
                     
                     //msgOut1.buf[canByte] = valveID + ShiftedValveStateEnumToInt;
-                    Serial.print("ValveID: ");
+/*                     Serial.print("ValveID: ");
                     Serial.print(valveID);
                     Serial.print( ": ValveState: ");
                     Serial.print(ValveStateEnumToInt);
-                    Serial.print(": ");
+                    Serial.print(": "); */
                     //Serial.print(ShiftedValveStateEnumToInt);
                     //Serial.print("CANbyte: ");
-                    Serial.println(canByte);
+                    //Serial.println(canByte);
                     canByte++;
                     }
                 //canByte++;

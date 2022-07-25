@@ -12,10 +12,10 @@
 
 // NEED TO FIX PIN MAPPING FOR THE SECOND OUTPUT TO NEW REAL STAND WIRING
 // Engine Node
-Pyro EngineIgniter0{26, 8, 31, 31, 2000000};   // 0
-Pyro EngineIgniter1{27, 8, 32, 32, 2000000};    // 1
+Pyro EngineIgniter1{26, 8, ALARA_HIGHPOWER_PWMOUT9, ALARA_HIGHPOWER_DIGITALOUT9, 2000000};   // 0
+Pyro EngineIgniter2{27, 8, ALARA_HIGHPOWER_PWMOUT10, ALARA_HIGHPOWER_DIGITALOUT10, 2000000};    // 1
 
 // ADD PYROS TO THIS VALVE ARRAY IN THE FORM: &PYRO
-std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter0, &EngineIgniter1};
+std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter1, &EngineIgniter2};
 
 #endif
