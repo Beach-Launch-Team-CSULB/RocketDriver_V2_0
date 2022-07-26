@@ -78,8 +78,8 @@ class EXT_SENSOR : public SENSORBASE
     float alphaEMA = 0.7;
     float newEMAOutput = 0;
 
-    bool enableIntegralCalc = true;
-    bool enableLinearRegressionCalc = true;
+    bool enableIntegralCalc = false;
+    bool enableLinearRegressionCalc = false;
     float currentIntegralSum = 0;
     float currentLinReg_a1 = 0;
     uint32_t regressionSamples = 5;
@@ -108,15 +108,15 @@ class EXT_SENSOR : public SENSORBASE
     uint16_t getCANTimestamp(){return currentCANtimestamp;}
     uint32_t getTimestampSeconds(){return currentTimestampSeconds;}
     uint32_t getTimestampMicros(){return currentTimestampMicros;}
-    //uint8_t getCurrentRollingArrayPosition(){return currentRollingArrayPosition;}
     uint32_t getCurrentRollingAverage(){return currentCalibrationValue;}
     bool getNodeIDCheck(){return nodeIDCheck;}
     bool getNewSensorValueCheck(){return newSensorValueCheck;}
     bool getNewSensorConversionCheck(){return newConversionCheck;}
-
+    bool getEnableLinearRegressionCalc(){return enableLinearRegressionCalc;}
+    
     float getEMAConvertedValue(){return newEMAOutput;}
     float getIntegralSum(){return currentIntegralSum;}
-    float getLinRegSlope(){return currentLinReg_a1;}
+    float getLinRegSlope(){currentLinReg_a1 = linearRegressionLeastSquared_PID(); return currentLinReg_a1;}
 
     // further fuctions defined in SensorClass.cpp
 /*     void begin();                     // run in setup to get pins going
@@ -165,7 +165,7 @@ class EXT_SENSOR : public SENSORBASE
 
     void setEnableIntegralCalc(bool setEnableIn){enableIntegralCalc = setEnableIn;}
 
-    void resetIntegralCalc(float integralCalcIn = 0){currentIntegralSum = integralCalcIn;}  //resets the integral sum, default arg zeros it
+    void resetIntegralCalc(bool resetBoolIn, float integralCalcIn = 0){if(resetBoolIn){currentIntegralSum = integralCalcIn;}}  //resets the integral sum, default arg zeros it
 
     float linearRegressionLeastSquared_PID();
 

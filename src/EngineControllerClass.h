@@ -47,6 +47,7 @@ class EngineController
         uint8_t getControllerNodeID(){return controllerNodeID;}
         bool getNodeIDCheck(){return nodeIDCheck;}
         EngineControllerState getState(){return state;}
+        EngineControllerState getPriorState(){return priorState;}
         ValveState getPilotMVFuelValveState(){return pilotMVFuelValveState;}
         ValveState getPilotMVLoxValveState(){return pilotMVLoxValveState;}
         PyroState getIgniter1State(){return igniter1State;}
@@ -65,6 +66,19 @@ class EngineController
                 }
                 state = newState;
             }
+    //valve and pyro state set functions
+        void setPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {pilotMVFuelValveState = pilotMVFuelValveStateIn;}
+        void setPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {pilotMVLoxValveState = pilotMVLoxValveStateIn;}
+        void setIgniter1State(PyroState igniter1StateIn) {igniter1State = igniter1StateIn;}
+        void setIgniter2State(PyroState igniter2StateIn) {igniter2State = igniter2StateIn;}
+
+
+        void testSetPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {if(testPass) {pilotMVFuelValveState = pilotMVFuelValveStateIn;}}
+        void testSetPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {if(testPass) {pilotMVLoxValveState = pilotMVLoxValveStateIn;}}
+        void testSetIgniter1State(PyroState igniter1StateIn) {if(testPass) {igniter1State = igniter1StateIn;}}
+        void testSetIgniter2State(PyroState igniter2StateIn) {if(testPass) {igniter2State = igniter2StateIn;}}
+
+
     // autosequence get function
         void setCurrentAutosequenceTime(int64_t countdownIn) {currentAutosequenceTime = countdownIn;}
     

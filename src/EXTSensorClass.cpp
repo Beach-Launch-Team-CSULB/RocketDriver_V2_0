@@ -98,7 +98,7 @@ if (sensorSource == TeensyMCUADC)
                     writeToRollingArray(convertedValueArray, currentConvertedValue);
                     exponentialMovingAverage();
                     accumulatedI_float();
-                    currentLinReg_a1 = linearRegressionLeastSquared_PID();
+                    //currentLinReg_a1 = linearRegressionLeastSquared_PID();
 
                 //if (sensorID == 58)
                 //{
@@ -206,13 +206,16 @@ void EXT_SENSOR::exponentialMovingAverage()
 
 void EXT_SENSOR::initializeLinReg(uint8_t arraySizeIn)
 {
+    if(!enableLinearRegressionCalc) //only initializes the array if it wasn't already
+    {
     enableLinearRegressionCalc = true;
-    delete[]convertedValueArray;  //destroys the old version of the array
-    float convertedValueArray[arraySizeIn+3] = {};
+    //delete[]convertedValueArray;  //destroys the old version of the array
+    //float convertedValueArray[arraySizeIn+3] = {};
     //rolling array setup
     convertedValueArray[0] = {3};
     convertedValueArray[1] = {3};
-    convertedValueArray[2] = {static_cast<float>(arraySizeIn)};
+    //convertedValueArray[2] = {static_cast<float>(arraySizeIn)};
+    }
 
 /*   uint32_t arrayIndexFirstValueLinReg = 0;
   uint32_t arrayWrapSizeLinReg = 0;

@@ -1,10 +1,18 @@
 #include "TankPressControllerClass.h"
 #include <Arduino.h>
 
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, uint32_t setTargetValue, bool setIsSystemBang, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, targetValue{setTargetValue}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, nodeIDCheck{setNodeIDCheck}
 {
     // Instantiation stuff?
+}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool setIsSystemBang, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, K_p{set_K_p}, K_i{set_K_i}, K_d{set_K_d}, controllerThreshold{setControllerThreshold}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+{
+    // force K_i = 0 at instantiation
+    K_i_run = K_i;  //stashes K_i value for later
+    K_i = 0;
+    //TankPressController::setK_i(0);
 }
 
 void TankPressController::begin()
@@ -20,10 +28,29 @@ void TankPressController::resetTimer()
     timer = 0;
 }
 
+void TankPressController::ventPressureCheck()
+{
+    if (isSystemBang)   // lazy check to not run on high press currently, would break on dome reg system for tanks
+    {
+    
+    if (bangSensor1EMA >= ventFailsafePressure)
+    {
+/*         Serial.print(bangSensor1EMA);
+        Serial.print(" : ");
+        Serial.println(ventFailsafePressure);
+ */        tankVentState = ValveState::OpenCommanded;
+    }
+    }
+}
+
 void TankPressController::stateOperations()
 {
     //run the PID calculation each time state operations runs
+    //if (isSystemBang)
+    //{
     bangPIDoutput = PIDmath();
+    //}
+    
     // Controller State switch case
     switch (state)
     {
@@ -35,15 +62,16 @@ void TankPressController::stateOperations()
         tankVentState = ValveState::CloseCommanded;
         sensorState = SensorState::Slow;
         break;
-    case TankPressControllerState::DomePressActive:
+    case TankPressControllerState::RegPressActive:
         testPass = false;
         //do shit
-        if (priorState != TankPressControllerState::DomePressActive)
+        if (priorState != TankPressControllerState::RegPressActive)
         {
         sensorState = SensorState::Fast;
         primaryPressValveState = ValveState::OpenCommanded;
         pressLineVentState = ValveState::CloseCommanded;
         tankVentState = ValveState::CloseCommanded;
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         }
         break;
     case TankPressControllerState::Armed:
@@ -53,6 +81,7 @@ void TankPressController::stateOperations()
         primaryPressValveState = ValveState::CloseCommanded;
         pressLineVentState = ValveState::CloseCommanded;
         tankVentState = ValveState::CloseCommanded;
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
     case TankPressControllerState::Vent:
         testPass = false;
@@ -64,30 +93,47 @@ void TankPressController::stateOperations()
         tankVentState = ValveState::OpenCommanded;
         }
         break;
-    case TankPressControllerState::HiPressPassthroughVent:
+    case TankPressControllerState::Abort:
+        testPass = false;
+        if (priorState != TankPressControllerState::Abort)
+        {
+        sensorState = SensorState::Fast;
+        primaryPressValveState = ValveState::CloseCommanded;
+        pressLineVentState = ValveState::CloseCommanded;
+        tankVentState = ValveState::CloseCommanded;
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
+        }
+        break;
+    case TankPressControllerState::HiPressPassthroughVent:  //uhh what the fuck was this, the valve states are ???
         testPass = false;
         if (priorState != TankPressControllerState::HiPressPassthroughVent)
         {
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::OpenCommanded;
-        pressLineVentState = ValveState::CloseCommanded;
-        tankVentState = ValveState::OpenCommanded;
+        primaryPressValveState = ValveState::CloseCommanded;
+        pressLineVentState = ValveState::OpenCommanded;
+        tankVentState = ValveState::CloseCommanded;
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         }
         break;
     case TankPressControllerState::TestPassthrough:
-        testPass = false;
         sensorState = SensorState::Slow;
         //
         testPass = true;
         break;
+    case TankPressControllerState::OffNominalPassthrough:
+        //
+        testPass = true;
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
+        break;
     case TankPressControllerState::AutosequenceCommanded:
         testPass = false;
         // If specific press routine is on autosequence, include a state switch on timer in here
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
     case TankPressControllerState::BangBangActive:
         testPass = false;
         //minimum bang time lockouts, once they are up the valves go to plain Open/Closed states which unlocks them to be commanded again
-        if (primaryPressValveState == ValveState::BangingOpen)
+        if (primaryPressValveState == ValveState::BangingOpen || primaryPressValveState == ValveState::BangOpenProcess)
         {
             if (bangtimer >= valveMinimumEnergizeTime)    // X ms opening/closing time
             {
@@ -121,7 +167,7 @@ void TankPressController::stateOperations()
             bangtimer = 0;
             }
         }
-
+        ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
     default:
         break;
@@ -148,6 +194,7 @@ else
 
 void TankPressController::setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue)
 {
+    bangSensor1EMA = proportionalValue;
     e_p = targetValue - proportionalValue;
     e_i = integralValue;
     e_d = derivativeValue;

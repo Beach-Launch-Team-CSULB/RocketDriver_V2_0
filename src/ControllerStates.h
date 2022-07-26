@@ -9,13 +9,15 @@ enum class TankPressControllerState
 {
     Passive,                    // 0
     BangBangActive,             // 1
-    DomePressActive,            // 2
+    RegPressActive,            // 2
     HiPressPassthroughVent,     // 3
     Armed,                      // 4
     Vent,                       // 5
-    TestPassthrough,            // 6
-    AutosequenceCommanded,      // 7
-    ControllerState_SIZE,       // 8
+    Abort,                      // 6
+    TestPassthrough,            // 7
+    OffNominalPassthrough,      // 8
+    AutosequenceCommanded,      // 9
+    ControllerState_SIZE,       // 10
 };
 
 // generic below, probably supercede/replace as I get to other controllers
@@ -25,9 +27,10 @@ enum class ControllerState
     Active,                     // 1
     Armed,                      // 2
     Vent,                       // 3
-    TestPassthrough,            // 4
-    AutosequenceCommanded,      // 5
-    ControllerState_SIZE,       // 6
+    Abort,                      // 4
+    TestPassthrough,            // 5
+    AutosequenceCommanded,      // 6
+    ControllerState_SIZE,       // 7
 };
 
 
@@ -40,8 +43,9 @@ enum class EngineControllerState
     Shutdown,                   // 4
     Armed,                      // 5
     TestPassthrough,            // 6
-    FiringAutosequence,         // 7
-    ControllerState_SIZE,       // 8
+    OffNominalPassthrough,      // 7
+    FiringAutosequence,         // 8
+    ControllerState_SIZE,       // 9
 };
 
 enum class ALARAV2SensorControllerState

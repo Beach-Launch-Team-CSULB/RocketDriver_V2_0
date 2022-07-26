@@ -120,7 +120,9 @@ void EngineController::stateOperations()
     case EngineControllerState::TestPassthrough:
         testPass = true;
         sensorState = SensorState::Slow;
-        // How to handle test and offnominal pass through? figure out after I've got valveArray pointers passed functioning
+        break;
+    case EngineControllerState::OffNominalPassthrough:
+        testPass = true;
         break;
     default:
         break;

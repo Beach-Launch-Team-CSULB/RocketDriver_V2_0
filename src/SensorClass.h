@@ -32,6 +32,7 @@ class SENSORBASE
     virtual bool getNodeIDCheck();
     virtual bool getNewSensorValueCheck();
     virtual bool getNewSensorConversionCheck();
+    virtual bool getEnableLinearRegressionCalc();
 
     virtual void setNodeIDCheck(bool updatedNodeIDCheck);
     virtual void setState(SensorState newState);
@@ -43,6 +44,10 @@ class SENSORBASE
     virtual float getEMAConvertedValue();
     virtual float getIntegralSum();
     virtual float getLinRegSlope();
+
+    virtual void initializeLinReg(uint8_t arraySizeIn);
+    virtual void setEnableIntegralCalc(bool setEnableIn);
+    virtual void resetIntegralCalc(bool resetBoolIn, float integralCalcIn = 0);
 
     // constructor 1,
     //MCU_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, bool internalMCUTemp, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false);

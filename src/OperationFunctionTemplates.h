@@ -215,7 +215,8 @@ void sensorSetUp(const std::array<T, size>& sensorArray)
 
 }
  */
-template <typename T, std::size_t size>
+
+/* template <typename T, std::size_t size>
 void autoSequenceValveUpdate(const std::array<T, size>& valveArray, int64_t& fireCurrentCountdown)
 {
     // iterate through valve array and run the stateOperations method
@@ -230,9 +231,9 @@ void autoSequenceValveUpdate(const std::array<T, size>& valveArray, int64_t& fir
             valve->setFireCommandBool(true);
         }    
     }
-}
+} */
 
-template <typename T, std::size_t size>
+/* template <typename T, std::size_t size>
 void autoSequencePyroUpdate(const std::array<T, size>& pyroArray, int64_t& fireCurrentCountdown)
 {
     // iterate through pyro array and run the stateOperations method
@@ -244,17 +245,14 @@ void autoSequencePyroUpdate(const std::array<T, size>& pyroArray, int64_t& fireC
         }
         if (fireCurrentCountdown >= pyro->getFireSequenceTime())
         {
-/*         Serial.print("fireCurrentCountdown >= ");
-        Serial.print(fireCurrentCountdown);
-        Serial.print(", getFireSequenceTime");
-        Serial.println(pyro->getFireSequenceTime()); */
+
         
             pyro->setFireCommandBool(true);
         }
         
     }
 
-}
+} */
 
 template <typename T, std::size_t size>
 void ValveNodeIDCheck(const std::array<T, size>& valveArray, uint8_t nodeIDfromMain)

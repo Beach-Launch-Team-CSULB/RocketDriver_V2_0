@@ -9,12 +9,15 @@ Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType
     {
         case NormalClosed:
             state = ValveState::Closed;
+            priorState = ValveState::Closed;
             break;
         case NormalOpen:
             state = ValveState::Open;
+            priorState = ValveState::Open;
             break;
         default:
             state = ValveState::Closed;
+            priorState = ValveState::Closed;
             break;
     }
     timer = 0;
@@ -45,7 +48,7 @@ void Valve::stateOperations()
     {
     // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
     case ValveState::OpenCommanded:
-        if (priorState != ValveState::Open)
+        if (!(priorState == ValveState::Open))
         {
             switch (valveType)
             {
@@ -143,7 +146,7 @@ void Valve::stateOperations()
                     timer = 0;
                     state = ValveState::BangingClosed;
                     break;
-                case NormalOpen:
+                case NormalOpen:    //I think this is bogus??
                     analogWrite(pinPWM, fullDuty);
                     digitalWriteFast(pinDigital, HIGH);
                     timer = 0;
@@ -167,6 +170,15 @@ void Valve::stateOperations()
             digitalWriteFast(pinDigital, HIGH);
             timer = 0;
             state = ValveState::Open;
+        }
+        break;
+    case ValveState::BangOpenProcess:
+        if(timer >= fullDutyTime)
+        {
+            analogWrite(pinPWM, holdDuty);
+            digitalWriteFast(pinDigital, HIGH);
+            timer = 0;
+            state = ValveState::BangingOpen;
         }
         break;
 
@@ -203,8 +215,22 @@ void Valve::stateOperations()
         digitalWriteFast(pinDigital, LOW);
         break;
     
-    
-    
+    case ValveState::FireCommanded:
+        //not sure what to do here to fix issues
+
+
+/*         switch (valveType)
+        {
+            case NormalClosed:
+                analogWrite(pinPWM, 0);
+                digitalWriteFast(pinDigital, LOW);
+                break;
+            case NormalOpen:
+                analogWrite(pinPWM, holdDuty);
+                digitalWriteFast(pinDigital, HIGH);
+            default:
+                break; */
+        break;
     // All other states require no action
     default:
         break;

@@ -79,6 +79,7 @@ using std::string;
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
+elapsedMillis ezModeControllerTimer;
 
 //For use in doing serial inputs as CAN commands for testing
 uint8_t fakeCANmsg;
@@ -218,6 +219,9 @@ void setup() {
   
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
+  // ----- Set Controller Dependent Sensor Settings -----
+  controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+
 
   // pin setup
   // NEEDS LOTS OF UPDATES FOR ALARA V2
@@ -268,13 +272,16 @@ Serial.println(timeSubSecondsMicros); */
 
 
   // -----Process Commands Here-----
-  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  if (ezModeControllerTimer >= 100)
+  {
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
-  
+  ezModeControllerTimer = 0;
+  }
   ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
   ////// DO NOT MOVE BEFORE "commandExecute" or after "valveTasks"/"pyroTasks"!!! /////
   //haltFlagCheck(abortHaltFlag, valveArray, pyroArray);
@@ -307,7 +314,7 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 500)
+  if (mainLoopTestingTimer >= 20)
   {
   //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
   Serial.print("currentVehicleState :");
@@ -325,17 +332,26 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
             Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
+            if (tankPressController->getIsBang())
+            {
+            Serial.print(": K_p");
+            Serial.print(tankPressController->getKp(),10);
+            Serial.print(": K_i");
+            Serial.print(tankPressController->getKi(),10);
+            Serial.print(": K_d");            
+            Serial.print(tankPressController->getKd(),10);
             Serial.print(": e_p");
             Serial.print(tankPressController->getPfunc(),10);
             Serial.print(": e_i");
             Serial.print(tankPressController->getIfunc(),10);
-            Serial.print(": e_d");
+            Serial.print(": e_d");            
             Serial.print(tankPressController->getDfunc(),10);
             Serial.print(": PID result");
             Serial.println(tankPressController->getPIDoutput(),10);
+            }
 
     }    
-/*     for(auto engineController : engineControllerArray)
+    for(auto engineController : engineControllerArray)
     {
             Serial.print( ": EngineControllerState: ");
             Serial.print(static_cast<uint8_t>(engineController->getState()));
@@ -373,7 +389,7 @@ Serial.println(timeSubSecondsMicros); */
             Serial.println(": ");
         }
     }
- */    
+
     
     for(auto sensor : sensorArray)
     {
@@ -381,7 +397,7 @@ Serial.println(timeSubSecondsMicros); */
         {
         sensor->setState(SensorState::Slow);
         
-            Serial.print("SensorID: ");
+/*             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
             Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
@@ -389,10 +405,13 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(sensor->getEMAConvertedValue(),10);
             Serial.print( ": I: ");
             Serial.print(sensor->getIntegralSum(),10);
+            if (sensor->getEnableLinearRegressionCalc())
+            {
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
+            }
             Serial.println(": ");
-        }
+ */        }
     }
 
   //Serial.print("Current Autosequence Time: ");

@@ -18,10 +18,10 @@ EXT_SENSOR FuelLinePT{57, 8, ALARA_ANALOG_IN5, 2, 10, 100, 0.0185, -125.74};    
 EXT_SENSOR LoxLinePT{59, 8, ALARA_ANALOG_IN6, 2, 10, 100, 0.0186, -128.58};           // 10
 //EXT_SENSOR MVPneumaticsPT{78, 3, A15, 2, 10, 50, false, 0.0186, -126.56};                // 11
 EXT_SENSOR FuelTankPT1{81, 8, ALARA_ANALOG_IN7, 2, 10, 100, 0.0186, -129.3};                    // 14
-EXT_SENSOR FuelTankPT2{81, 8, ALARA_ANALOG_IN8, 2, 10, 100, 0.0123, -123.11};                    // 14
-EXT_SENSOR LoxTankPT1{82, 8, ALARA_ANALOG_IN2, 2, 10, 100, 0.0187, -125.36};                    // 15
-EXT_SENSOR LoxTankPT2{82, 8, ALARA_ANALOG_IN3, 2, 10, 100, 0.0124, -123.43};                    // 15
-EXT_SENSOR HiPressPT{83, 8, ALARA_ANALOG_IN1, 2, 10, 50, 0.0933, -638.38};                 // 16
+EXT_SENSOR FuelTankPT2{82, 8, ALARA_ANALOG_IN8, 2, 10, 100, 0.0123, -123.11};                    // 14
+EXT_SENSOR LoxTankPT1{83, 8, ALARA_ANALOG_IN2, 2, 10, 100, 0.0187, -125.36};                    // 15
+EXT_SENSOR LoxTankPT2{84, 8, ALARA_ANALOG_IN3, 2, 10, 100, 0.0124, -123.43};                    // 15
+EXT_SENSOR HiPressPT{85, 8, ALARA_ANALOG_IN1, 2, 10, 50, 0.0933, -638.38};                 // 16
 //EXT_SENSOR MCUtempNode8{200, 8, 70, 2, 5, 10};                                    // 18
 
 //FAKESHIT
