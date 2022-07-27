@@ -1,6 +1,6 @@
 #include "ValveClass.h"
 #include <Arduino.h>
-
+#include "extendedIO/extendedIO.h"
 
 Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime, bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, uint8_t setHoldDuty,  bool setNodeIDCheck)
                 : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType{setValveType}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime{setFullDutyTime}, abortHaltDeviceBool{setAbortHaltDeviceBool}, abortedState{setAbortedState}, holdDuty{setHoldDuty}, nodeIDCheck{setNodeIDCheck}
@@ -32,11 +32,11 @@ Valve::Valve(ValveType setValveType) : valveType{setValveType}
 void Valve::begin()
 {
     if (nodeIDCheck)
-    {
-        pinMode(pinPWM, OUTPUT);
-        pinMode(pinDigital, OUTPUT);
+    {       
+        pinModeExtended(pinPWM, OUTPUT);
+        pinModeExtended(pinDigital, OUTPUT);
         analogWrite(pinPWM, 0);
-        digitalWriteFast(pinDigital, LOW);
+        digitalWriteExtended(pinDigital, LOW);
     }
 }
 
@@ -193,7 +193,7 @@ void Valve::stateOperations()
         //if(timer >= fullDutyTime)
         //{
             analogWrite(pinPWM, holdDuty);
-            digitalWriteFast(pinDigital, HIGH);
+            digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::Open;
             //controllerUpdate = true;
@@ -203,7 +203,7 @@ void Valve::stateOperations()
         //if(timer >= fullDutyTime)
         //{
             analogWrite(pinPWM, holdDuty);
-            digitalWriteFast(pinDigital, HIGH);
+            digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::BangingOpen;
             //controllerUpdate = true;
@@ -215,7 +215,7 @@ void Valve::stateOperations()
         //if(timer >= fullDutyTime)
         //{
             analogWrite(pinPWM, holdDuty);
-            digitalWriteFast(pinDigital, HIGH);
+            digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::Closed;
             //controllerUpdate = true;
@@ -226,22 +226,22 @@ void Valve::stateOperations()
         {
             case NormalClosed:
                 analogWrite(pinPWM, 0);
-                digitalWriteFast(pinDigital, LOW);
+                digitalWriteExtended(pinDigital, LOW);
                 break;
             case NormalOpen:
                 analogWrite(pinPWM, holdDuty);
-                digitalWriteFast(pinDigital, HIGH);
+                digitalWriteExtended(pinDigital, HIGH);
             default:
                 break;
         }
         break;
     case ValveState::BangingOpen:
-        digitalWriteFast(pinPWM, HIGH);
-        digitalWriteFast(pinDigital, HIGH);
+        digitalWriteExtended(pinPWM, HIGH);
+        digitalWriteExtended(pinDigital, HIGH);
         break;
     case ValveState::BangingClosed:
-        digitalWriteFast(pinPWM, LOW);
-        digitalWriteFast(pinDigital, LOW);
+        digitalWriteExtended(pinPWM, LOW);
+        digitalWriteExtended(pinDigital, LOW);
         break;
     
     case ValveState::FireCommanded:

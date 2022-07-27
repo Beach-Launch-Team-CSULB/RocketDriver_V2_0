@@ -1,5 +1,6 @@
 #include "PyroClass.h"
 #include <Arduino.h>
+#include "extendedIO/extendedIO.h"
 
 
 
@@ -19,10 +20,10 @@ void Pyro::begin()
 {
     if (nodeIDCheck)
     {
-        pinMode(firePin, OUTPUT);
-        pinMode(armPin, OUTPUT);
-        digitalWriteFast(firePin, 0);
-        digitalWriteFast(armPin, 0);
+        pinModeExtended(firePin, OUTPUT);
+        pinModeExtended(armPin, OUTPUT);
+        digitalWriteExtended(firePin, 0);
+        digitalWriteExtended(armPin, 0);
     }
 }
 
@@ -63,8 +64,8 @@ void Pyro::stateOperations()
         break; */
 
     case PyroState::On:
-        digitalWriteFast(firePin, 1);
-        digitalWriteFast(armPin, 1);
+        digitalWriteExtended(firePin, 1);
+        digitalWriteExtended(armPin, 1);
 /*         if(timer >= liveOutTime)
         {
             state = PyroState::Off;
@@ -84,8 +85,8 @@ void Pyro::stateOperations()
         break; */
         
     case PyroState::Off:
-        digitalWriteFast(firePin, 0);
-        digitalWriteFast(armPin, 0);
+        digitalWriteExtended(firePin, 0);
+        digitalWriteExtended(armPin, 0);
         //timer = 0;
         break;        
     

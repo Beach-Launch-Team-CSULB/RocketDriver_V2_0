@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <cstring>
+#include "extendedIO/extendedIO.h"
 
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3)
 {
@@ -55,27 +56,27 @@ uint8_t tripleEEPROMread(uint32_t byteAddress1, uint32_t byteAddress2, uint32_t 
 
 bool readOnlyMUX(uint8_t pinToReadMUX, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2, uint8_t pinMUX_A) // SN74CB3Q3251 MUX pin read operation for use only when MUX has OE tied to GND
 {
-  digitalWrite(pinMUX_S0, (pinToReadMUX >> 0) & 1L);
-  digitalWrite(pinMUX_S1, (pinToReadMUX >> 1) & 1L);
-  digitalWrite(pinMUX_S2, (pinToReadMUX >> 2) & 1L);
-  return digitalRead(pinMUX_A);
+  digitalWriteExtended(pinMUX_S0, (pinToReadMUX >> 0) & 1L);
+  digitalWriteExtended(pinMUX_S1, (pinToReadMUX >> 1) & 1L);
+  digitalWriteExtended(pinMUX_S2, (pinToReadMUX >> 2) & 1L);
+  return digitalReadExtended(pinMUX_A);
 }
 
 void SPI_CS_MUX(uint8_t pinToWriteMUX, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2) // SN74CB3Q3251 MUX pin output operation for use as multiplexed CS pins
 {
-  digitalWrite(pinMUX_S0, (pinToWriteMUX >> 0) & 1L);
-  digitalWrite(pinMUX_S1, (pinToWriteMUX >> 1) & 1L);
-  digitalWrite(pinMUX_S2, (pinToWriteMUX >> 2) & 1L);
+  digitalWriteExtended(pinMUX_S0, (pinToWriteMUX >> 0) & 1L);
+  digitalWriteExtended(pinMUX_S1, (pinToWriteMUX >> 1) & 1L);
+  digitalWriteExtended(pinMUX_S2, (pinToWriteMUX >> 2) & 1L);
 }
 
 void MUXSetup(bool MUX_Input, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2, uint8_t pinMUX_A = 0)       // SN74CB3Q3251 MUX pin output setup function, set MUX_Input = false and leave pinMUX_A empty for output MUX
 {
-    pinMode(pinMUX_S0, OUTPUT);
-    pinMode(pinMUX_S1, OUTPUT);
-    pinMode(pinMUX_S2, OUTPUT);
+    pinModeExtended(pinMUX_S0, OUTPUT);
+    pinModeExtended(pinMUX_S1, OUTPUT);
+    pinModeExtended(pinMUX_S2, OUTPUT);
     if (MUX_Input)                  // Use MUX_Input boolean to set the input pin only if this MUX will be used as input, output MUX doesn't use
     {
-      pinMode(pinMUX_A, INPUT);
+      pinModeExtended(pinMUX_A, INPUT);
     }
 }
 
@@ -96,12 +97,12 @@ uint8_t NodeIDDetect(uint8_t pinToReadMUXNodeID, uint8_t pinMUX_S0NodeID, uint8_
   if (NodeIDAddressRead == 0 || NodeIDAddressRead == 255)
   {
     // reset the MUX outputs to Inputs
-    pinMode(pinMUX_S0NodeID, INPUT);
-    pinMode(pinMUX_S1NodeID, INPUT);
-    pinMode(pinMUX_S2NodeID, INPUT);
+    pinModeExtended(pinMUX_S0NodeID, INPUT);
+    pinModeExtended(pinMUX_S1NodeID, INPUT);
+    pinModeExtended(pinMUX_S2NodeID, INPUT);
     // read the MUX pins as plain digital input addressing pins
     NodeIDAddressRead = 0;  //reset the nodeID to all zeroes in case of MUX read of 255, redundant step to make sure previous read bits are cleared
-    NodeIDAddressRead = (digitalRead(pinMUX_S0NodeID) >> 0) + (pinMUX_S1NodeID >> 1) + (pinMUX_S2NodeID >> 2) + (pinMUX_ANodeID >> 3);
+    NodeIDAddressRead = (digitalReadExtended(pinMUX_S0NodeID) >> 0) + (pinMUX_S1NodeID >> 1) + (pinMUX_S2NodeID >> 2) + (pinMUX_ANodeID >> 3);
 
   }
   // if the nodeIDdetermine bool is true that means read the address and write that as the address to EEPROM
@@ -153,12 +154,12 @@ void analogWriteSoft(uint8_t outputPin, bool outputState, uint32_t freqIN, uint1
     {
         if (fakePWMMicros >= (periodMicros))
         {
-            digitalWrite(outputPin,1);
+            digitalWriteExtended(outputPin,1);
             fakePWMMicros = 0;
         }
         if (fakePWMMicros >= dutyOnMicros)
         {
-            digitalWrite(outputPin,0);
+            digitalWriteExtended(outputPin,0);
         }
     } 
 }
