@@ -4,6 +4,7 @@
 #include "PyroClass.h"
 #include <array>
 #include "ALARApinDefines.h"
+#pragma once
 
 // Define number of pyros here
 #define NUM_PYROS 2

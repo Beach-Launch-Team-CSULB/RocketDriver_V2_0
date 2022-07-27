@@ -4,9 +4,10 @@
 #include <Arduino.h>
 #include "ControllerStates.h"
 //#include <array>
-#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
+//#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
 #include "SensorStates.h"
 #include "ControllerMathFunctions.h"
+#include "ValveClass.h"
 
 class TankPressController
 {
@@ -22,12 +23,18 @@ class TankPressController
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         elapsedMicros bangtimer;                        // timer for the valve, used for changing duty cycles, in MICROS
-        ValveState primaryPressValveState;
+/*         ValveState primaryPressValveState;
         ValveState pressLineVentState;
         ValveState tankVentState;
         ValveState MainValveState;      //not for controlling, but for use as an input
-        ValveState pressLineVentStateBang1;
+ */        ValveState pressLineVentStateBang1;
         ValveState pressLineVentStateBang2;
+        //rework to use full Valve Objects
+        Valve primaryPressValve;
+        Valve pressLineVent;
+        Valve tankVent;
+        //Valve MainValve{};
+
         float ventFailsafePressure;
 
         float targetValue;
@@ -66,9 +73,9 @@ class TankPressController
     public:
 
     // constructor - hipress
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck = false);
     // constructor - tank bangers
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool isSystemBang = true, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool isSystemBang = true, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -82,9 +89,9 @@ class TankPressController
         float getTargetValue(){return targetValue;}
         TankPressControllerState getState(){return state;}
         TankPressControllerState getPriorState(){return priorState;}
-        ValveState getPrimaryPressValveState(){return primaryPressValveState;}
-        ValveState getPressLineVentState(){return pressLineVentState;}
-        ValveState getTankVentState(){return tankVentState;}
+        ValveState getPrimaryPressValveState(){return primaryPressValve.getState();}
+        ValveState getPressLineVentState(){return pressLineVent.getState();}
+        ValveState getTankVentState(){return tankVent.getState();}
         bool getResetIntegralCalcBool()
             {
                 tempBoolContainer = resetIntegralCalcBool;
@@ -119,13 +126,13 @@ class TankPressController
     // vent line setting - for bang bang with two tank controllers sharing vent line control
         void setPressVentLineStateBang2(ValveState ventLineSetIn) {pressLineVentStateBang2 = ventLineSetIn;}
 
-        void setPrimaryPressValveState(ValveState primaryPressValveStateIn) {primaryPressValveState = primaryPressValveStateIn;}
-        void setPressLineVentState(ValveState pressLineVentStateIn) {pressLineVentState = pressLineVentStateIn;}
-        void setTankVentState(ValveState tankVentStateIn) {tankVentState = tankVentStateIn;}
+        void setPrimaryPressValveState(ValveState primaryPressValveStateIn) {if (primaryPressValveStateIn != ValveState::NullReturn) {primaryPressValve.setState(primaryPressValveStateIn);}}
+        void setPressLineVentState(ValveState pressLineVentStateIn) {if (pressLineVentStateIn != ValveState::NullReturn) {pressLineVent.setState(pressLineVentStateIn);}}
+        void setTankVentState(ValveState tankVentStateIn) {if (tankVentStateIn != ValveState::NullReturn) {tankVent.setState(tankVentStateIn);}}
         //test state set functions
-        void testSetPrimaryPressValveState(ValveState primaryPressValveStateIn) {if(testPass) {primaryPressValveState = primaryPressValveStateIn;}}
-        void testSetPressLineVentState(ValveState pressLineVentStateIn) {if(testPass) {pressLineVentState = pressLineVentStateIn;}}
-        void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVentState = tankVentStateIn;}}
+        void testSetPrimaryPressValveState(ValveState primaryPressValveStateIn) {if(testPass) {primaryPressValve.setState(primaryPressValveStateIn);}}
+        void testSetPressLineVentState(ValveState pressLineVentStateIn) {if(testPass) {pressLineVent.setState(pressLineVentStateIn);}}
+        void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVent.setState(tankVentStateIn);}}
     //setting PID parameters
         void setK_p(float K_pin){K_p = K_pin;}
         void setK_i(float K_iin){K_i = K_iin;}

@@ -18,7 +18,8 @@ enum class ValveState
     BangCloseProcess,   // 10
     BangingOpen,        // 11
     BangingClosed,      // 12
-    ValveState_SIZE,    // 13
+    NullReturn,         // 13
+    ValveState_SIZE,    // 14
 };
 
 #endif

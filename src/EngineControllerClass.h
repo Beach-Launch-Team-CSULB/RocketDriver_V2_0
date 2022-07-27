@@ -3,9 +3,11 @@
 
 #include <Arduino.h>
 #include "ControllerStates.h"
-#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
+//#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
 #include "SensorStates.h"
-#include "PyroStates.h"
+//#include "PyroStates.h"
+#include "ValveClass.h"
+#include "PyroClass.h"
 
 class EngineController
 {
@@ -23,11 +25,18 @@ class EngineController
         int64_t igniter1Actuation;
         int64_t igniter2Actuation;
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
-        ValveState pilotMVFuelValveState;
+/*         ValveState pilotMVFuelValveState;
         ValveState pilotMVLoxValveState;
         ValveState pneumaticVentState;
         PyroState igniter1State;
-        PyroState igniter2State;
+        PyroState igniter2State; */
+
+        Valve pilotMVFuelValve;
+        Valve pilotMVLoxValve;
+        Valve pneumaticVent;
+        Pyro igniter1;
+        Pyro igniter2;
+
         uint32_t igniter1LiveOutTime = 500000;
         uint32_t igniter2LiveOutTime = 500000;
         elapsedMicros igniter1timer = 0;
@@ -36,7 +45,9 @@ class EngineController
     public:
 
     // constructor
-        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
+        //EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
+    // constructor 2
+        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPilotMVFuelValve, Valve* setPilotMVLoxValve, Valve* setPneumaticVent, Pyro* setIgniter1, Pyro* setIgniter2, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -48,11 +59,11 @@ class EngineController
         bool getNodeIDCheck(){return nodeIDCheck;}
         EngineControllerState getState(){return state;}
         EngineControllerState getPriorState(){return priorState;}
-        ValveState getPilotMVFuelValveState(){return pilotMVFuelValveState;}
-        ValveState getPilotMVLoxValveState(){return pilotMVLoxValveState;}
-        PyroState getIgniter1State(){return igniter1State;}
-        PyroState getIgniter2State(){return igniter2State;}
-        ValveState getPneumaticVentState(){return pneumaticVentState;}
+        ValveState getPilotMVFuelValveState(){return pilotMVFuelValve.getState();}
+        ValveState getPilotMVLoxValveState(){return pilotMVLoxValve.getState();}
+        PyroState getIgniter1State(){return igniter1.getState();}
+        PyroState getIgniter2State(){return igniter2.getState();}
+        ValveState getPneumaticVentState(){return pneumaticVent.getState();}
 
     // set functions, allows the setting of a variable
     // set the Node ID Check bool function
@@ -67,16 +78,16 @@ class EngineController
                 state = newState;
             }
     //valve and pyro state set functions
-        void setPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {pilotMVFuelValveState = pilotMVFuelValveStateIn;}
-        void setPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {pilotMVLoxValveState = pilotMVLoxValveStateIn;}
-        void setIgniter1State(PyroState igniter1StateIn) {igniter1State = igniter1StateIn;}
-        void setIgniter2State(PyroState igniter2StateIn) {igniter2State = igniter2StateIn;}
+        void setPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {if (pilotMVFuelValveStateIn != ValveState::NullReturn){pilotMVFuelValve.setState(pilotMVFuelValveStateIn);}}
+        void setPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {if (pilotMVLoxValveStateIn != ValveState::NullReturn){pilotMVLoxValve.setState(pilotMVLoxValveStateIn);}}
+        void setIgniter1State(PyroState igniter1StateIn) {if (igniter1StateIn != PyroState::NullReturn){igniter1.setState(igniter1StateIn);}}
+        void setIgniter2State(PyroState igniter2StateIn) {if (igniter2StateIn != PyroState::NullReturn){igniter2.setState(igniter2StateIn);}}
 
 
-        void testSetPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {if(testPass) {pilotMVFuelValveState = pilotMVFuelValveStateIn;}}
-        void testSetPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {if(testPass) {pilotMVLoxValveState = pilotMVLoxValveStateIn;}}
-        void testSetIgniter1State(PyroState igniter1StateIn) {if(testPass) {igniter1State = igniter1StateIn;}}
-        void testSetIgniter2State(PyroState igniter2StateIn) {if(testPass) {igniter2State = igniter2StateIn;}}
+        void testSetPilotMVFuelValveState(ValveState pilotMVFuelValveStateIn) {if(testPass) {pilotMVFuelValve.setState(pilotMVFuelValveStateIn);}}
+        void testSetPilotMVLoxValveState(ValveState pilotMVLoxValveStateIn) {if(testPass) {pilotMVLoxValve.setState(pilotMVLoxValveStateIn);}}
+        void testSetIgniter1State(PyroState igniter1StateIn) {if(testPass) {igniter1.setState(igniter1StateIn);}}
+        void testSetIgniter2State(PyroState igniter2StateIn) {if(testPass) {igniter2.setState(igniter2StateIn);}}
 
 
     // autosequence get function

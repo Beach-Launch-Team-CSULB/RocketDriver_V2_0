@@ -10,7 +10,7 @@
 
 //----- Pasafire BangBang Static Fire Stand/Vehicle -----
 #ifdef PASABANG
-#include "ValveDefinitionsPasaBang.h"
+//#include "ValveDefinitionsPasaBang.h"
 #include "PyroDefinitionsPasaBang.h"
 #include "AutoSequenceDefinitionsPasaBang.h"
 #include "SensorDefinitionsPasaBang.h"

@@ -24,6 +24,11 @@ Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType
     
 }
 
+Valve::Valve(ValveType setValveType) : valveType{setValveType}
+{
+    
+}
+
 void Valve::begin()
 {
     if (nodeIDCheck)
@@ -40,14 +45,23 @@ void Valve::resetTimer()
     timer = 0;
 }
 
+ValveState Valve::getSyncState()
+{
+    if(controllerUpdate)
+    {
+        controllerUpdate = false;
+        return state;
+    }
+    else {return ValveState::NullReturn;}
+}
+
+
 void Valve::stateOperations()
 {
-
-
     switch (state)
     {
     // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
-    case ValveState::OpenCommanded:
+/*     case ValveState::OpenCommanded:
         if (!(priorState == ValveState::Open))
         {
             switch (valveType)
@@ -56,7 +70,8 @@ void Valve::stateOperations()
                     analogWrite(pinPWM, fullDuty);
                     digitalWriteFast(pinDigital, HIGH);
                     timer = 0;
-                    state = ValveState::OpenProcess;
+                    //state = ValveState::OpenProcess;
+                    controllerUpdate = true;
                     //Serial.print("NC OpenCommanded: ");
                     //Serial.println(valveID);
                     break;
@@ -64,7 +79,8 @@ void Valve::stateOperations()
                     analogWrite(pinPWM, 0);
                     digitalWriteFast(pinDigital, LOW);
                     timer = 0;
-                    state = ValveState::Open;
+                    //state = ValveState::Open;
+                    controllerUpdate = true;
                     //Serial.print("NO OpenCommanded: ");
                     //Serial.println(valveID);                
                     break;
@@ -77,7 +93,8 @@ void Valve::stateOperations()
             state = ValveState::Open;
         }
         break;
-    case ValveState::BangOpenCommanded:
+ */
+/*     case ValveState::BangOpenCommanded:
         if (priorState != ValveState::Open)
         {
             switch (valveType)
@@ -87,6 +104,7 @@ void Valve::stateOperations()
                     digitalWriteFast(pinDigital, HIGH);
                     timer = 0;
                     state = ValveState::BangOpenProcess;
+                    controllerUpdate = true;
                     //Serial.print("NC OpenCommanded: ");
                     //Serial.println(valveID);
                     break;
@@ -95,6 +113,7 @@ void Valve::stateOperations()
                     digitalWriteFast(pinDigital, LOW);
                     timer = 0;
                     state = ValveState::Open;
+                    controllerUpdate = true;
                     //Serial.print("NO OpenCommanded: ");
                     //Serial.println(valveID);                
                     break;
@@ -105,11 +124,12 @@ void Valve::stateOperations()
         else
         {
             state = ValveState::Open;
+            //controllerUpdate = true; //do I need it here?
         }
         break;
-
+ */
     // if a valve is commanded closed, a normal closed removes power, normal open starts activation sequence
-    case ValveState::CloseCommanded:
+/*     case ValveState::CloseCommanded:
         if (priorState != ValveState::Closed)
         {
             switch (valveType)
@@ -119,12 +139,14 @@ void Valve::stateOperations()
                     digitalWriteFast(pinDigital, LOW);
                     timer = 0;
                     state = ValveState::Closed;
+                    controllerUpdate = true;
                     break;
                 case NormalOpen:
                     analogWrite(pinPWM, fullDuty);
                     digitalWriteFast(pinDigital, HIGH);
                     timer = 0;
                     state = ValveState::CloseProcess;
+                    controllerUpdate = true;
                     break;
                 default:
                     break;
@@ -135,7 +157,8 @@ void Valve::stateOperations()
             state = ValveState::Closed;
         }
         break;
-    case ValveState::BangCloseCommanded:
+ */        
+/*     case ValveState::BangCloseCommanded:
         if (priorState != ValveState::Closed)
         {
             switch (valveType)
@@ -145,12 +168,14 @@ void Valve::stateOperations()
                     digitalWriteFast(pinDigital, LOW);
                     timer = 0;
                     state = ValveState::BangingClosed;
+                    controllerUpdate = true;
                     break;
                 case NormalOpen:    //I think this is bogus??
                     analogWrite(pinPWM, fullDuty);
                     digitalWriteFast(pinDigital, HIGH);
                     timer = 0;
                     state = ValveState::CloseProcess;
+                    controllerUpdate = true;
                     break;
                 default:
                     break;
@@ -159,38 +184,42 @@ void Valve::stateOperations()
         else
         {
             state = ValveState::Closed;
+            //controllerUpdate = true; //do I need it here
         }
         break;
-
+ */
     // if a valve is in OpenProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
     case ValveState::OpenProcess:
-        if(timer >= fullDutyTime)
-        {
+        //if(timer >= fullDutyTime)
+        //{
             analogWrite(pinPWM, holdDuty);
             digitalWriteFast(pinDigital, HIGH);
-            timer = 0;
-            state = ValveState::Open;
-        }
+            //timer = 0;
+            //state = ValveState::Open;
+            //controllerUpdate = true;
+        //}
         break;
     case ValveState::BangOpenProcess:
-        if(timer >= fullDutyTime)
-        {
+        //if(timer >= fullDutyTime)
+        //{
             analogWrite(pinPWM, holdDuty);
             digitalWriteFast(pinDigital, HIGH);
-            timer = 0;
-            state = ValveState::BangingOpen;
-        }
+            //timer = 0;
+            //state = ValveState::BangingOpen;
+            //controllerUpdate = true;
+        //}
         break;
 
     // if a valve is in CloseProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
     case ValveState::CloseProcess:
-        if(timer >= fullDutyTime)
-        {
+        //if(timer >= fullDutyTime)
+        //{
             analogWrite(pinPWM, holdDuty);
             digitalWriteFast(pinDigital, HIGH);
-            timer = 0;
-            state = ValveState::Closed;
-        }
+            //timer = 0;
+            //state = ValveState::Closed;
+            //controllerUpdate = true;
+        //}
         break;
     case ValveState::Closed:
         switch (valveType)
@@ -230,6 +259,377 @@ void Valve::stateOperations()
                 digitalWriteFast(pinDigital, HIGH);
             default:
                 break; */
+        break;
+    // All other states require no action
+    default:
+        break;
+    }
+}
+
+//banging the old version while I brick this
+/* void Valve::stateOperations()
+{
+    switch (state)
+    {
+    // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
+    case ValveState::OpenCommanded:
+        if (!(priorState == ValveState::Open))
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    analogWrite(pinPWM, fullDuty);
+                    digitalWriteFast(pinDigital, HIGH);
+                    timer = 0;
+                    state = ValveState::OpenProcess;
+                    controllerUpdate = true;
+                    //Serial.print("NC OpenCommanded: ");
+                    //Serial.println(valveID);
+                    break;
+                case NormalOpen:
+                    analogWrite(pinPWM, 0);
+                    digitalWriteFast(pinDigital, LOW);
+                    timer = 0;
+                    state = ValveState::Open;
+                    controllerUpdate = true;
+                    //Serial.print("NO OpenCommanded: ");
+                    //Serial.println(valveID);                
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Open;
+        }
+        break;
+    case ValveState::BangOpenCommanded:
+        if (priorState != ValveState::Open)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    analogWrite(pinPWM, fullDuty);
+                    digitalWriteFast(pinDigital, HIGH);
+                    timer = 0;
+                    state = ValveState::BangOpenProcess;
+                    controllerUpdate = true;
+                    //Serial.print("NC OpenCommanded: ");
+                    //Serial.println(valveID);
+                    break;
+                case NormalOpen:
+                    analogWrite(pinPWM, 0);
+                    digitalWriteFast(pinDigital, LOW);
+                    timer = 0;
+                    state = ValveState::Open;
+                    controllerUpdate = true;
+                    //Serial.print("NO OpenCommanded: ");
+                    //Serial.println(valveID);                
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Open;
+            //controllerUpdate = true; //do I need it here?
+        }
+        break;
+
+    // if a valve is commanded closed, a normal closed removes power, normal open starts activation sequence
+    case ValveState::CloseCommanded:
+        if (priorState != ValveState::Closed)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    analogWrite(pinPWM, 0);
+                    digitalWriteFast(pinDigital, LOW);
+                    timer = 0;
+                    state = ValveState::Closed;
+                    controllerUpdate = true;
+                    break;
+                case NormalOpen:
+                    analogWrite(pinPWM, fullDuty);
+                    digitalWriteFast(pinDigital, HIGH);
+                    timer = 0;
+                    state = ValveState::CloseProcess;
+                    controllerUpdate = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Closed;
+        }
+        break;
+    case ValveState::BangCloseCommanded:
+        if (priorState != ValveState::Closed)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    analogWrite(pinPWM, 0);
+                    digitalWriteFast(pinDigital, LOW);
+                    timer = 0;
+                    state = ValveState::BangingClosed;
+                    controllerUpdate = true;
+                    break;
+                case NormalOpen:    //I think this is bogus??
+                    analogWrite(pinPWM, fullDuty);
+                    digitalWriteFast(pinDigital, HIGH);
+                    timer = 0;
+                    state = ValveState::CloseProcess;
+                    controllerUpdate = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Closed;
+            //controllerUpdate = true; //do I need it here
+        }
+        break;
+
+    // if a valve is in OpenProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
+    case ValveState::OpenProcess:
+        if(timer >= fullDutyTime)
+        {
+            analogWrite(pinPWM, holdDuty);
+            digitalWriteFast(pinDigital, HIGH);
+            timer = 0;
+            state = ValveState::Open;
+            controllerUpdate = true;
+        }
+        break;
+    case ValveState::BangOpenProcess:
+        if(timer >= fullDutyTime)
+        {
+            analogWrite(pinPWM, holdDuty);
+            digitalWriteFast(pinDigital, HIGH);
+            timer = 0;
+            state = ValveState::BangingOpen;
+            controllerUpdate = true;
+        }
+        break;
+
+    // if a valve is in CloseProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
+    case ValveState::CloseProcess:
+        if(timer >= fullDutyTime)
+        {
+            analogWrite(pinPWM, holdDuty);
+            digitalWriteFast(pinDigital, HIGH);
+            timer = 0;
+            state = ValveState::Closed;
+            controllerUpdate = true;
+        }
+        break;
+    case ValveState::Closed:
+        switch (valveType)
+        {
+            case NormalClosed:
+                analogWrite(pinPWM, 0);
+                digitalWriteFast(pinDigital, LOW);
+                break;
+            case NormalOpen:
+                analogWrite(pinPWM, holdDuty);
+                digitalWriteFast(pinDigital, HIGH);
+            default:
+                break;
+        }
+        break;
+    case ValveState::BangingOpen:
+        digitalWriteFast(pinPWM, HIGH);
+        digitalWriteFast(pinDigital, HIGH);
+        break;
+    case ValveState::BangingClosed:
+        digitalWriteFast(pinPWM, LOW);
+        digitalWriteFast(pinDigital, LOW);
+        break;
+    
+    case ValveState::FireCommanded:
+        //not sure what to do here to fix issues
+
+
+
+        break;
+    // All other states require no action
+    default:
+        break;
+    }
+}
+ */
+
+
+void Valve::controllerStateOperations()
+{
+
+
+    switch (state)
+    {
+    // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
+    case ValveState::OpenCommanded:
+        if (!(priorState == ValveState::Open))
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    timer = 0;
+                    state = ValveState::OpenProcess;
+                    //controllerUpdate = true;
+                    //Serial.print("NC OpenCommanded: ");
+                    //Serial.println(valveID);
+                    break;
+                case NormalOpen:
+                    timer = 0;
+                    state = ValveState::Open;
+                    //controllerUpdate = true;
+                    //Serial.print("NO OpenCommanded: ");
+                    //Serial.println(valveID);                
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Open;
+        }
+        break;
+    case ValveState::BangOpenCommanded:
+        if (priorState != ValveState::Open)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    timer = 0;
+                    state = ValveState::BangOpenProcess;
+                    //controllerUpdate = true;
+                    //Serial.print("NC OpenCommanded: ");
+                    //Serial.println(valveID);
+                    break;
+                case NormalOpen:
+                    timer = 0;
+                    state = ValveState::Open;
+                    //controllerUpdate = true;
+                    //Serial.print("NO OpenCommanded: ");
+                    //Serial.println(valveID);                
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Open;
+            //controllerUpdate = true; //do I need it here?
+        }
+        break;
+
+    // if a valve is commanded closed, a normal closed removes power, normal open starts activation sequence
+    case ValveState::CloseCommanded:
+        if (priorState != ValveState::Closed)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    timer = 0;
+                    state = ValveState::Closed;
+                    //controllerUpdate = true;
+                    break;
+                case NormalOpen:
+                    timer = 0;
+                    state = ValveState::CloseProcess;
+                    //controllerUpdate = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Closed;
+        }
+        break;
+    case ValveState::BangCloseCommanded:
+        if (priorState != ValveState::Closed)
+        {
+            switch (valveType)
+            {
+                case NormalClosed:
+                    timer = 0;
+                    state = ValveState::BangingClosed;
+                    //controllerUpdate = true;
+                    break;
+                case NormalOpen:    //I think this is bogus??
+                    timer = 0;
+                    state = ValveState::CloseProcess;
+                    //controllerUpdate = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            state = ValveState::Closed;
+            //controllerUpdate = true; //do I need it here
+        }
+        break;
+
+    // if a valve is in OpenProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
+    case ValveState::OpenProcess:
+        if(timer >= fullDutyTime)
+        {
+            timer = 0;
+            state = ValveState::Open;
+            //controllerUpdate = true;
+        }
+        break;
+    case ValveState::BangOpenProcess:
+        if(timer >= fullDutyTime)
+        {
+            timer = 0;
+            state = ValveState::BangingOpen;
+            controllerUpdate = true;
+        }
+        break;
+
+    // if a valve is in CloseProcess, check if the fullDutyTime has passed. If it has, cycle down to hold duty
+    case ValveState::CloseProcess:
+        if(timer >= fullDutyTime)
+        {
+            //analogWrite(pinPWM, holdDuty);
+            //digitalWriteFast(pinDigital, HIGH);
+            timer = 0;
+            state = ValveState::Closed;
+            //controllerUpdate = true;
+        }
+        break;
+    case ValveState::Closed:
+        switch (valveType)
+        {
+            case NormalClosed:
+                break;
+            case NormalOpen:
+            default:
+                break;
+        }
+        break;
+    case ValveState::BangingOpen:
+        break;
+    case ValveState::BangingClosed:
+        break;
+    
+    case ValveState::FireCommanded:
+        //not sure what to do here to fix issues
+
         break;
     // All other states require no action
     default:

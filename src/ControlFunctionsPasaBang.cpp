@@ -417,11 +417,16 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     //cli(); // disables interrupts during controller sync to protect from partial propulsion system states
     // update the controller valves based on the valve objects before Controller stateOperations
     // Lox Tank
-    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(LoxBang_ArrayPointer)->getState());
-    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setTankVentState(valveArray.at(LoxVent_ArrayPointer)->getState());
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(LoxBang_ArrayPointer)->getSyncState());
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setTankVentState(valveArray.at(LoxVent_ArrayPointer)->getSyncState());
     // Fuel Tank
-    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(FuelBang_ArrayPointer)->getState());
-    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setTankVentState(valveArray.at(FuelVent_ArrayPointer)->getState());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(FuelBang_ArrayPointer)->getSyncState());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setTankVentState(valveArray.at(FuelVent_ArrayPointer)->getSyncState());
+    // Engine Controller
+    engineControllerArray.at(Engine1Controller_ArrayPointer)->setIgniter1State(pyroArray.at(EngineIgniter1_ArrayPointer)->getSyncState());
+    engineControllerArray.at(Engine1Controller_ArrayPointer)->setIgniter2State(pyroArray.at(EngineIgniter2_ArrayPointer)->getSyncState());
+    engineControllerArray.at(Engine1Controller_ArrayPointer)->setPilotMVFuelValveState(valveArray.at(FuelMV_ArrayPointer)->getSyncState());
+    engineControllerArray.at(Engine1Controller_ArrayPointer)->setPilotMVLoxValveState(valveArray.at(LoxMV_ArrayPointer)->getSyncState());
 
     //integral unwinds
     sensorArray.at(LoxTank1PT_ArrayPointer)->resetIntegralCalc(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getResetIntegralCalcBool(), 0);
@@ -435,5 +440,6 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
     //Lox Tank Controller Sensor Data fetch
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
+   
     //sei(); // reenables interrupts after controller sync
 }

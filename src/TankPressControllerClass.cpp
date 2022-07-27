@@ -1,13 +1,13 @@
 #include "TankPressControllerClass.h"
 #include <Arduino.h>
 
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, nodeIDCheck{setNodeIDCheck}
 {
     // Instantiation stuff?
 }
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool setIsSystemBang, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, K_p{set_K_p}, K_i{set_K_i}, K_d{set_K_d}, controllerThreshold{setControllerThreshold}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool setIsSystemBang, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, K_p{set_K_p}, K_i{set_K_i}, K_d{set_K_d}, controllerThreshold{setControllerThreshold}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
 {
     // force K_i = 0 at instantiation
     K_i_run = K_i;  //stashes K_i value for later
@@ -38,7 +38,7 @@ void TankPressController::ventPressureCheck()
 /*         Serial.print(bangSensor1EMA);
         Serial.print(" : ");
         Serial.println(ventFailsafePressure);
- */        tankVentState = ValveState::OpenCommanded;
+ */        //tankVent.setState(ValveState::OpenCommanded);
     }
     }
 }
@@ -46,20 +46,20 @@ void TankPressController::ventPressureCheck()
 void TankPressController::stateOperations()
 {
     //run the PID calculation each time state operations runs
-    //if (isSystemBang)
-    //{
+    if (isSystemBang)
+    {
     bangPIDoutput = PIDmath();
-    //}
-    
+    }
+
     // Controller State switch case
     switch (state)
     {
     case TankPressControllerState::Passive:
         testPass = false;
         //don't do shit
-        primaryPressValveState = ValveState::CloseCommanded;
-        pressLineVentState = ValveState::CloseCommanded;
-        tankVentState = ValveState::CloseCommanded;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::CloseCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
         sensorState = SensorState::Slow;
         break;
     case TankPressControllerState::RegPressActive:
@@ -68,19 +68,22 @@ void TankPressController::stateOperations()
         if (priorState != TankPressControllerState::RegPressActive)
         {
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::OpenCommanded;
-        pressLineVentState = ValveState::CloseCommanded;
-        tankVentState = ValveState::CloseCommanded;
+        primaryPressValve.setState(ValveState::OpenCommanded);
+        pressLineVent.setState(ValveState::CloseCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         }
         break;
     case TankPressControllerState::Armed:
         testPass = false;
+        if (priorState != TankPressControllerState::Armed)
+        {
         // Arming turns sensor read rates up to operational levels before opening valves
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::CloseCommanded;
-        pressLineVentState = ValveState::CloseCommanded;
-        tankVentState = ValveState::CloseCommanded;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::CloseCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
+        }
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
     case TankPressControllerState::Vent:
@@ -88,9 +91,9 @@ void TankPressController::stateOperations()
         if (priorState != TankPressControllerState::Vent)
         {
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::CloseCommanded;
-        pressLineVentState = ValveState::OpenCommanded;
-        tankVentState = ValveState::OpenCommanded;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::OpenCommanded);
+        tankVent.setState(ValveState::OpenCommanded);
         }
         break;
     case TankPressControllerState::Abort:
@@ -98,9 +101,9 @@ void TankPressController::stateOperations()
         if (priorState != TankPressControllerState::Abort)
         {
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::CloseCommanded;
-        pressLineVentState = ValveState::CloseCommanded;
-        tankVentState = ValveState::CloseCommanded;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::CloseCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         }
         break;
@@ -109,9 +112,9 @@ void TankPressController::stateOperations()
         if (priorState != TankPressControllerState::HiPressPassthroughVent)
         {
         sensorState = SensorState::Fast;
-        primaryPressValveState = ValveState::CloseCommanded;
-        pressLineVentState = ValveState::OpenCommanded;
-        tankVentState = ValveState::CloseCommanded;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::OpenCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         }
         break;
@@ -133,27 +136,27 @@ void TankPressController::stateOperations()
     case TankPressControllerState::BangBangActive:
         testPass = false;
         //minimum bang time lockouts, once they are up the valves go to plain Open/Closed states which unlocks them to be commanded again
-        if (primaryPressValveState == ValveState::BangingOpen || primaryPressValveState == ValveState::BangOpenProcess)
+        if (primaryPressValve.getState() == ValveState::BangingOpen || primaryPressValve.getState() == ValveState::BangOpenProcess)
         {
             if (bangtimer >= valveMinimumEnergizeTime)    // X ms opening/closing time
             {
-            primaryPressValveState = ValveState::Open;
+            primaryPressValve.setState(ValveState::Open);
             }
         }
-        if (primaryPressValveState == ValveState::BangingClosed)
+        if (primaryPressValve.getState() == ValveState::BangingClosed)
         {
             if (bangtimer >= valveMinimumDeenergizeTime)    // X ms opening/closing time
             {
-            primaryPressValveState = ValveState::Closed;
+            primaryPressValve.setState(ValveState::Closed);
             }
         }
         // Update ValveState if Open/Closed based on PID controller output
         if (bangPIDoutput > (controllerThreshold))
         {
             //open valve
-            if (primaryPressValveState == ValveState::Closed)
+            if (primaryPressValve.getState() == ValveState::Closed)
             {
-            primaryPressValveState = ValveState::BangOpenCommanded;
+            primaryPressValve.setState(ValveState::BangOpenCommanded);
             bangtimer = 0;
             }
             
@@ -161,9 +164,9 @@ void TankPressController::stateOperations()
         if (bangPIDoutput < ((-1)*controllerThreshold))
         {
             //close valve
-            if (primaryPressValveState == ValveState::Open)
+            if (primaryPressValve.getState() == ValveState::Open)
             {
-            primaryPressValveState = ValveState::BangCloseCommanded;
+            primaryPressValve.setState(ValveState::BangCloseCommanded);
             bangtimer = 0;
             }
         }
@@ -180,16 +183,20 @@ if (pressLineVentStateBang1 != pressLineVentStateBang2)
     //Most important one, allows the vent line opened if either bang tank controller commands it
     if (pressLineVentStateBang1 == ValveState::OpenCommanded || pressLineVentStateBang2 == ValveState::OpenCommanded)
     {
-        pressLineVentState = ValveState::OpenCommanded;
+        pressLineVent.setState(ValveState::OpenCommanded);
     }
     
 
 }
 else
 {
-    pressLineVentState = pressLineVentStateBang1;
+    pressLineVent.setState(pressLineVentStateBang1);
 }
 
+// controller Valve object stateOperations
+    primaryPressValve.controllerStateOperations();
+    pressLineVent.controllerStateOperations();
+    tankVent.controllerStateOperations();
 }
 
 void TankPressController::setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue)

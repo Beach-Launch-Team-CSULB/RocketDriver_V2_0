@@ -8,20 +8,23 @@
 class Pyro
 {
     private:
-        const uint32_t pyroID;
-        const uint32_t pyroNodeID;
-        const uint8_t firePin;
-        const uint8_t armPin;
+        const uint32_t pyroID = 99;
+        const uint32_t pyroNodeID = 99;
+        const uint8_t firePin = 99;
+        const uint8_t armPin = 99;
         elapsedMicros timer;
         PyroState state;
         PyroState priorState;
-        const uint32_t liveOutTime;
+        uint32_t liveOutTime;
         bool nodeIDCheck;                           // Whether this object should operate on this node
+        bool controllerUpdate = false;
 
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
         Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t setLiveOutTime, bool setNodeIDCheck = false); 
+    // default constructor
+        Pyro(uint32_t setLiveOutTime = 250);
     // Alternate constructor with future full implementation, needs the clonedpyro features still
     //    Pyro(int setPyroID, int setPyroNodeID, int setFirePin, int setShuntPin, int setContPin, uint32_t setFireDelay = 0);
 
@@ -39,6 +42,8 @@ class Pyro
         //uint32_t getContPin(){return contCheckPin;}        
         uint32_t getLiveOutTime(){return liveOutTime;}
         PyroState getState(){return state;}
+        PyroState getSyncState();
+        
         uint32_t getTimer(){return timer;}
         bool getNodeIDCheck(){return nodeIDCheck;}
 
@@ -62,7 +67,7 @@ class Pyro
     // for example, if the valve is commanded to open, this needs to be run so that the valve can start opening
     // and it needs to be run every loop so that once enough time has pass the 
         void stateOperations();
-
+        void controllerStateOperations();
 
 
 };

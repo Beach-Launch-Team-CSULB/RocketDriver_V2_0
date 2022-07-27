@@ -4,6 +4,7 @@
 #include "ValveClass.h"
 #include <array>
 #include "ALARApinDefines.h"
+#pragma once
 
 // Define number of valves here
 #define NUM_VALVES 7
