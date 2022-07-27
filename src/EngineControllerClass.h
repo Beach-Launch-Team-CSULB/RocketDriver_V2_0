@@ -59,6 +59,7 @@ class EngineController
         bool getNodeIDCheck(){return nodeIDCheck;}
         EngineControllerState getState(){return state;}
         EngineControllerState getPriorState(){return priorState;}
+        SensorState getControllerSensorState(){return sensorState;}
         ValveState getPilotMVFuelValveState(){return pilotMVFuelValve.getState();}
         ValveState getPilotMVLoxValveState(){return pilotMVLoxValve.getState();}
         PyroState getIgniter1State(){return igniter1.getState();}

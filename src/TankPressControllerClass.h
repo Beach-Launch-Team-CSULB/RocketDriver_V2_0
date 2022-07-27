@@ -89,6 +89,7 @@ class TankPressController
         float getTargetValue(){return targetValue;}
         TankPressControllerState getState(){return state;}
         TankPressControllerState getPriorState(){return priorState;}
+        SensorState getControllerSensorState(){return sensorState;}
         ValveState getPrimaryPressValveState(){return primaryPressValve.getState();}
         ValveState getPressLineVentState(){return pressLineVent.getState();}
         ValveState getTankVentState(){return tankVent.getState();}

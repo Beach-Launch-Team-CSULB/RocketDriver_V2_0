@@ -21,7 +21,7 @@ class tankObject
     float TankMass = 0;
     float CurrPressure = 0;
     float TankPressure = 0;
-    float gasDensity = 0;    
+    float gasDensity = 0;
     ValveState inletValveState = ValveState::Closed;
     ValveState outletValveState = ValveState::Closed;
     ValveState ventValveState = ValveState::Closed;

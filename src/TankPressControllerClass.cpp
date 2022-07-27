@@ -170,6 +170,7 @@ void TankPressController::stateOperations()
             bangtimer = 0;
             }
         }
+        sensorState = SensorState::Fast;
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
     default:
@@ -185,7 +186,6 @@ if (pressLineVentStateBang1 != pressLineVentStateBang2)
     {
         pressLineVent.setState(ValveState::OpenCommanded);
     }
-    
 
 }
 else

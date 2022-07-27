@@ -9,6 +9,7 @@ uint32_t tankPressDelay = 10000;
 //bool MVOpen = false;
 
 
+
 elapsedMillis bangMVtimer = 0;
 //ValveState bang1ValveState = ValveState::Closed;
 //ValveState bang2ValveState = ValveState::Closed;
@@ -107,3 +108,7 @@ else
     loopyboi2 = static_cast<int>(currentConvertedValue1+0.5); */
 
   
+void FluidSystemSimulation::fluidSystemUpdate()
+{
+  FuelTank.CurrPressure = FuelTank.CurrTankPress(FuelTank.TankMass);
+}
