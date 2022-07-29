@@ -64,13 +64,13 @@ float PressurantTank::ChokedMassFlow(float TimeDelta)
 
 void tankObject::SetValveStates(ValveState InState, ValveState OutState, ValveState VentState)
 {
-  ValveState inletValveState = valveStateFlowSimSimplify(InState);
-  ValveState outletValveState = valveStateFlowSimSimplify(OutState);
-  ValveState ventValveState = valveStateFlowSimSimplify(VentState);
-Serial.print("sim set valve states");
+  inletValveState = valveStateFlowSimSimplify(InState);
+  outletValveState = valveStateFlowSimSimplify(OutState);
+  ventValveState = valveStateFlowSimSimplify(VentState);
+/* Serial.print("sim set valve states");
 Serial.print(static_cast<uint8_t>(inletValveState));
 Serial.print(static_cast<uint8_t>(outletValveState));
-Serial.println(static_cast<uint8_t>(ventValveState));
+Serial.println(static_cast<uint8_t>(ventValveState)); */
 
 
 };
@@ -80,30 +80,37 @@ Serial.println(static_cast<uint8_t>(ventValveState));
 //for interrupt timers, not sure how to setup to run the other stuff yet. Need to pass everything into this, then into other functions inside?
 // it should work fine, anything that needs to be updated to pass into the functions will pass through every time the interrupt runs (I think)
 void tankObject::pressureUpdateFunction(float TimeDelta, PressurantTank PressTank)
-{  
-if (!(outletValveState == ValveState::Closed))
 {
-  if (inletValveState == ValveState::Open)
-  {
+Serial.print("valve states inside update func");
+Serial.print(" : inlet");
+Serial.print(static_cast<uint8_t>(inletValveState));
+Serial.print(" : outlet");
+Serial.print(static_cast<uint8_t>(outletValveState));
+Serial.print(" : vent : ");
+Serial.println(static_cast<uint8_t>(ventValveState));
+if (outletValveState == ValveState::Closed && inletValveState == ValveState::Open)
+{
+    Serial.print("supposed to be Tank Press");
     float pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
     UllageMass += pressMassFlow*TimeDelta;
-  }
+    CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
 }
-else
+else if (outletValveState == ValveState::Open && inletValveState == ValveState::Open)
 {
-  if (inletValveState == ValveState::Open)
-  {
+    Serial.print("supposed to be MV open");
     float pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
-    UllageVolume += UllageMass/PropDensity*TimeDelta;
+    UllageMass += pressMassFlow*TimeDelta;
     IncompressibleMassFlow(TimeDelta);
+    
   }
-  if (inletValveState == ValveState::Closed)
-  {
+else if (outletValveState == ValveState::Open && inletValveState == ValveState::Closed)
+{
+    Serial.print("supposed nuttin");
     IncompressibleMassFlow(TimeDelta);
+}
+    Serial.print("N/A");
+}
 
-  }
-}
-}
 
 ValveState valveStateFlowSimSimplify(ValveState inputValveState)
 {
