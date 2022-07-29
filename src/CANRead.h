@@ -8,6 +8,8 @@
 
 // header file for the function to call every loop, function returns true if a new message was read
 
+void serialToCAN2Read();
+
 bool CANread(FlexCAN& CANbus, Command& CurrentCommand);
     // passes the CAN bus to be read by reference so methods can be called and buffers emptied as messages are read
     // passes the current command global variable by reference to be updated after the CAN read

@@ -7,6 +7,7 @@
 #include <ADC.h>
 #include "SensorStates.h"
 #include "SensorClass.h"
+#include "fluidSystemSimulation.h"
 #include "ALARAUtilityFunctions.h"
 
 //using std::string;
@@ -48,7 +49,7 @@ class EXT_SENSOR : public SENSORBASE
     const uint32_t sampleRateMedMode = 10;         //the sample rate this given sensor will be read at
     const uint32_t sampleRateFastMode = 100;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode = 10;        //the sample rate this given sensor will be read at
-    uint32_t currentSampleRate = 10;
+    uint32_t currentSampleRate = 100;
     elapsedMicros timer;                      // timer for sensor timing operations
     uint32_t currentRawValue{};               // holds the current value for the sensor
     bool newSensorValueCheck;                      // Is the current raw value a new read that hasn't been sent yet?
@@ -86,7 +87,7 @@ class EXT_SENSOR : public SENSORBASE
     float convertedValueArray[5+3] = {};  //should be the same size as regression samples +3 for rolling array index stuff
     float timeStep = 0.01; //timeStep in seconds
     float targetValue = 0;
-
+  FluidSystemSimulation &fluidSim;
 
   public:
     void begin();                     // run in setup to get pins going
@@ -96,7 +97,7 @@ class EXT_SENSOR : public SENSORBASE
     // constructor 1 - standard MCU external ADC read
     EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, float setLinConvCoef1_m = 1, float setLinConvCoef1_b = 0, float setLinConvCoef2_m = 1, float setLinConvCoef2_b = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false, bool setNewConversionCheck = false);
     // constructor 2 - simulated sensor object
-    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, ADCType setSensorSource = simulatedInput);
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource = simulatedInput);
 
     // Access functions defined in place
     uint32_t getSensorID(){return sensorID;}

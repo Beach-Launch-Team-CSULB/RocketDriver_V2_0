@@ -199,17 +199,51 @@ else
     tankVent.controllerStateOperations();
 }
 
-void TankPressController::setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue)
+void TankPressController::setPIDSensorInput1(float proportionalValue, float integralValue, float derivativeValue)
 {
     bangSensor1EMA = proportionalValue;
-    e_p = targetValue - proportionalValue;
-    e_i = integralValue;
-    e_d = derivativeValue;
+    bangSensor1Integral = integralValue;
+    bangSensor1Derivative = derivativeValue;
+}
+void TankPressController::setPIDSensorInput2(float proportionalValue, float integralValue, float derivativeValue)
+{
+    bangSensor2EMA = proportionalValue;
+    bangSensor2Integral = integralValue;
+    bangSensor2Derivative = derivativeValue;
+}
+void TankPressController::setPIDSensorInput3(float proportionalValue, float integralValue, float derivativeValue)
+{
+    bangSensor3EMA = proportionalValue;
+    bangSensor3Integral = integralValue;
+    bangSensor3Derivative = derivativeValue;
+}
+
+void TankPressController::PIDinputSetting()
+{
+    if (trustBangSensor1)
+    {
+    e_p = targetValue - bangSensor1EMA;
+    e_i = bangSensor1Integral;
+    e_d = bangSensor1Derivative;
+    }
+    if (!trustBangSensor1 && trustBangSensor2)
+    {
+    e_p = targetValue - bangSensor2EMA;
+    e_i = bangSensor2Integral;
+    e_d = bangSensor2Derivative;
+    }
+    if (trustBangSensor3 && !trustBangSensor1 && !trustBangSensor2)
+    {
+    e_p = targetValue - bangSensor3EMA;
+    e_i = bangSensor3Integral;
+    e_d = bangSensor3Derivative;
+    }
 }
 
 //float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d)
 float TankPressController::PIDmath()
 {
+    PIDinputSetting();
   //timeStepPIDMath = 1;
   funcOutput = 0;
   p_rollingAve = 0;

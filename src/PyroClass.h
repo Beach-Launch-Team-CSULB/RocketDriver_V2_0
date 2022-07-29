@@ -57,6 +57,9 @@ class Pyro
                 }
                 state = newState;
             }    // set the Node ID Check bool function
+        // Bypasses state logic to reset the Pyro to Off, used to reset after device has been fired
+        void resetPyro(){state = PyroState::Off;}
+
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
     // functions with executables defined in ValveClasses.cpp

@@ -9,11 +9,11 @@
 
 #define NUM_ENGINECONTROLLERS 1
 
-Valve valve4_1{NormalClosed};
+/* Valve valve4_1{NormalClosed};
 Valve valve4_2{NormalClosed};
 Valve valve4_3{NormalClosed};
 Pyro pyro3_1{};
-Pyro pyro3_2{};
+Pyro pyro3_2{}; */
 
 EngineController Engine1{1, 8, &LoxMV, &FuelMV, &valve3_3, &EngineIgniter1, &EngineIgniter2, -10000, -1, -1500000, -500000};  //current valve timings are guestimates
 

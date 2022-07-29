@@ -23,16 +23,11 @@ class TankPressController
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         elapsedMicros bangtimer;                        // timer for the valve, used for changing duty cycles, in MICROS
-/*         ValveState primaryPressValveState;
-        ValveState pressLineVentState;
-        ValveState tankVentState;
-        ValveState MainValveState;      //not for controlling, but for use as an input
- */        ValveState pressLineVentStateBang1;
+        ValveState pressLineVentStateBang1;
         ValveState pressLineVentStateBang2;
-        //rework to use full Valve Objects
-        Valve primaryPressValve;
-        Valve pressLineVent;
-        Valve tankVent;
+        Valve &primaryPressValve;
+        Valve &pressLineVent;
+        Valve &tankVent;
         //Valve MainValve{};
 
         float ventFailsafePressure;
@@ -50,10 +45,23 @@ class TankPressController
         float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
         float sensorIntervalTimeStep = 0.01;
 
+        bool trustBangSensor1 = false;
+        bool trustBangSensor2 = false;
+        bool trustBangSensor3 = true;
         float bangSensor1EMA = 0;   //primary PT
         float bangSensor2EMA = 0;   //secondary PT
         float bangSensor3EMA = 0;   //simulated PT
+        float bangSensor1Integral = 0;   //primary PT
+        float bangSensor2Integral = 0;   //secondary PT
+        float bangSensor3Integral = 0;   //simulated PT
+        float bangSensor1Derivative = 0;   //primary PT
+        float bangSensor2Derivative = 0;   //secondary PT
+        float bangSensor3Derivative = 0;   //simulated PT
         
+        float proportionalValue = 0;
+        float integralValue = 0;
+        float derivativeValue = 0;
+
         //do i need to create a float array for sensors here or can I pass a reference/similar?
         float funcOutput = 0;
         float p_rollingAve = 0;
@@ -109,7 +117,10 @@ class TankPressController
         float getPIDoutput(){return bangPIDoutput;}
 
     // set functions, allows the setting of a variable
-        void setPIDSensorInputs(float proportionalValue, float integralValue, float derivativeValue);
+        void setPIDSensorInput1(float proportionalValue, float integralValue, float derivativeValue);
+        void setPIDSensorInput2(float proportionalValue, float integralValue, float derivativeValue);
+        void setPIDSensorInput3(float proportionalValue, float integralValue, float derivativeValue);
+
         void resetIntegralCalc(bool resetIntIn){resetIntegralCalcBool = resetIntIn;}
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
@@ -152,7 +163,7 @@ class TankPressController
     // and it needs to be run every loop so that once enough time has pass the 
         void stateOperations();
 
-        //float PIDmath(float inputArrayPID[], float controllerSetPoint, float timeStepPIDMath, float integrationSteps, float errorThreshold, float K_p, float K_i, float K_d);
+        void PIDinputSetting(); //logic for which input source to use for PID values
         float PIDmath();
     
     // controller set point function

@@ -1,114 +1,144 @@
 #include "fluidSystemSimulation.h"
 
+int unitConversionCosnt = 6895;
+float ATPtemp = 288.15; //K
+float PropDensity = 999;
+float N2GasConst = 296.8; //J/kg-k
+float Gamma = 1.4;
+
+
+
 bool ISTHISREAL = false;  //flag for test mode vs driving real system. False means test, True means real
 bool ISVALVEONLYREAL = false;
 bool serialStreamingLog = false;
 bool livePlotOutputOnly = false;
 elapsedMillis tankPressDelayTimer = 0;
 uint32_t tankPressDelay = 10000;
-//bool MVOpen = false;
-
 
 
 elapsedMillis bangMVtimer = 0;
-//ValveState bang1ValveState = ValveState::Closed;
-//ValveState bang2ValveState = ValveState::Closed;
-
-//float loopyboi = 0;
-//float controllerTargetValue = 150;
-//int controllerTargetValueInt = static_cast<int>(controllerTargetValue+0.5);
-//IntervalTimer pressureUpdateInterval;
-//IntervalTimer banbBangcontrollerInterval;
-//uint32_t controllerIntervalHz = 200;
-//uint32_t sensorIntervalHz = 800;
-//float controllerTimeStep = 1/controllerIntervalHz;
-//float sensorIntervalTimeStep = 1/sensorIntervalHz;
-//float controllerTimeStep = 1/static_cast<float>(controllerIntervalHz);
-//float sensorIntervalTimeStep = 1/static_cast<float>(sensorIntervalHz);
 
 ////////////
-//float TankVolume = 0.1; //m^3
-//float OptimalTankPress = controllerTargetValue* unitConversionCosnt;
+
 float orificeOutDiameter = 0.1*0.0254; //m
 float orificeOutArea = ((orificeOutDiameter*orificeOutDiameter)*M_PI)/4;
 float orificeInDiameter = 0.1*0.0254; //m
 float orificeInArea = ((orificeInDiameter*orificeInDiameter)*M_PI)/4;
-float COPVPress = 4000* unitConversionCosnt; //psi
-//float Time = 0;
-//float TimeDelta = sensorIntervalTimeStep; //artist formerly known as 0.01
-//float TankMass = 0;
-//float CurrPressure = 0;
+
 elapsedMillis valveTimer;
-//float gasDensity = 0;
-//float TankPropMass = 0;
-//float TankPressure = 0;
-float massFlow = 0;
-//float accumulatedIntegral = 0;
+
 
 ////////
 
 
-float tankObject::CurrTankPress(float TankPropMass)
+
+FluidSystemSimulation::FluidSystemSimulation(float setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank):TimeDelta{setTimeDelta}, HiPressTank{setHiPressTank}, FuelTank{setFuelTank}, LoxTank{setLoxTank} 
 {
-  gasDensity = TankPropMass/TankVolume;
-  TankPressure = gasDensity*AirGasConstant*ATPtemp;
-/*   Serial.print("Pizza TankPropMass: ");
-  Serial.println(TankPropMass);
-  Serial.print("Pizza TankVolume: ");
-  Serial.println(TankVolume);
-  Serial.print("Pizza gasDensity: ");
-  Serial.println(gasDensity);
-  Serial.print("Pizza TankPressure: ");
-  Serial.println(TankPressure); */
-  return TankPressure;
+  
 }
 
-float ChokedMassFlow(float UpstreamPressure, float chockedOrificeArea)
+tankObject::tankObject(float setOutflowCdA): OutflowCdA{setOutflowCdA}
+{ 
+    UllageMass = CurrPressure / N2GasConst / ATPtemp * UllageVolume; //placeholder, probly dumb
+}
+
+PressurantTank::PressurantTank()
 {
-  massFlow = Cd*UpstreamPressure*chockedOrificeArea*sqrt((Gamma/(AirGasConstant*ATPtemp))*pow((2/(Gamma+1)), ((Gamma+1)/(Gamma-1))));
-  return massFlow;
+  PressurantMass = CurrPressure / N2GasConst / ATPtemp * TankVolume;
+}
+
+void tankObject::IncompressibleMassFlow(float TimeDelta)
+{
+  float massFlow = OutflowCdA*sqrt(2*CurrPressure*PropDensity);
+  UllageVolume += massFlow/PropDensity*TimeDelta;
+  CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
+}
+
+float PressurantTank::ChokedMassFlow(float TimeDelta)
+{
+    float massFlow = CdA*CurrPressure*sqrt((Gamma/(N2GasConst*ATPtemp))*pow((2/(Gamma+1)), ((Gamma+1)/(Gamma-1))));
+    PressurantMass -= TimeDelta*massFlow;
+    CurrPressure = PressurantMass / TankVolume *N2GasConst*ATPtemp;
+    return massFlow;
 }
 
 //for interrupt timers, not sure how to setup to run the other stuff yet. Need to pass everything into this, then into other functions inside?
 // it should work fine, anything that needs to be updated to pass into the functions will pass through every time the interrupt runs (I think)
-void tankObject::pressureUpdateFunction(float TimeDelta)
+void tankObject::pressureUpdateFunction(float TimeDelta, PressurantTank PressTank)
 {  
 if (!(outletValveState == ValveState::Closed))
 {
-  if (inletValveState == ValveState::Open || inletValveState == ValveState::BangingOpen)
+  if (inletValveState == ValveState::Open)
   {
-  TankMass += ChokedMassFlow(COPVPress,orificeInArea)*TimeDelta;
-  }
-  if (inletValveState == ValveState::Closed || inletValveState == ValveState::BangingClosed)
-  {
-    //nothing "leaking"
+    float pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+    UllageMass += pressMassFlow*TimeDelta;
   }
 }
 else
 {
-  if (inletValveState == ValveState::Open || inletValveState == ValveState::BangingOpen)
+  if (inletValveState == ValveState::Open)
   {
-  TankMass += ChokedMassFlow(COPVPress,orificeInArea)*TimeDelta;
-  TankMass -= ChokedMassFlow(CurrPressure*unitConversionCosnt,orificeOutArea)*TimeDelta;
+    float pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+    UllageVolume += UllageMass/PropDensity*TimeDelta;
+    IncompressibleMassFlow(TimeDelta);
   }
-  if (inletValveState == ValveState::Closed || inletValveState == ValveState::BangingClosed)
+  if (inletValveState == ValveState::Closed)
   {
-  //TankMass += ChokedMassFlow(COPVPress,orificeInArea)*TimeDelta;
-  TankMass -= ChokedMassFlow(CurrPressure*unitConversionCosnt,orificeOutArea)*TimeDelta;
+    IncompressibleMassFlow(TimeDelta);
+
   }
 }
-  CurrPressure = CurrTankPress(TankMass)/unitConversionCosnt;
 }
 
-
-    //analog PT read stuff here to use real pressure value
-/*     currentRawValue1 = adc->analogRead(BANGFUELPT_ANALOGINPUT);
-    currentConvertedValue1 = fueltankPT_linConvCoef1_m*currentRawValue1 + fueltankPT_linConvCoef1_b;
-    loopyboi = currentConvertedValue1;
-    loopyboi2 = static_cast<int>(currentConvertedValue1+0.5); */
-
-  
-void FluidSystemSimulation::fluidSystemUpdate()
+ValveState valveStateFlowSimSimplify(ValveState inputValveState)
 {
-  FuelTank.CurrPressure = FuelTank.CurrTankPress(FuelTank.TankMass);
+  // this function takes a given valve object state and returns a binary flow state of open or closed
+  if (inputValveState == ValveState::BangingOpen || inputValveState == ValveState::BangOpenProcess || inputValveState == ValveState::OpenProcess || inputValveState == ValveState::Open)
+  {
+    inputValveState = ValveState::Open;
+  }
+  else
+  {
+    inputValveState = ValveState::Closed;
+  }
+  return inputValveState;
+}
+  
+void FluidSystemSimulation::fluidSystemUpdate(){
+  // PID SHIT GOES HERE
+
+  //Sets the state of the valves
+  //FuelTank.SetValveStates(ValveState::Closed,ValveState::Closed,ValveState::Closed);
+  //LoxTank.SetValveStates(ValveState::Closed,ValveState::Closed,ValveState::Closed);
+
+
+  // AFTER PID CHOOSES VALVE STATE FLOW HAPPENS AND PRESSURE CHANGES
+  FuelTank.pressureUpdateFunction(TimeDelta, HiPressTank);
+  LoxTank.pressureUpdateFunction(TimeDelta, HiPressTank);
+  Serial.println();
+  Serial.print(FuelTank.CurrPressure);
+  Serial.print(" : ");
+  Serial.print(LoxTank.CurrPressure);
+  Serial.print(" : ");
+  Serial.print(HiPressTank.CurrPressure);
+  Serial.println(" fluid sim update ran");
+}
+
+float FluidSystemSimulation::analogRead(uint8_t fakeADCpin)
+{
+  float simulatedSensorReading = 0;
+  if (fakeADCpin == 31)
+  {
+    simulatedSensorReading = FuelTank.CurrPressure;
+  }
+  else if (fakeADCpin == 21)
+  {
+    simulatedSensorReading = LoxTank.CurrPressure;
+  }
+  else if (fakeADCpin == 11)
+  {
+    simulatedSensorReading = HiPressTank.CurrPressure;
+  }
+  else
+  return simulatedSensorReading;
 }

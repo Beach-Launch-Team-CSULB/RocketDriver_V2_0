@@ -3,6 +3,7 @@
 #include <ADC.h>
 #include <array>
 #include <InternalTemperature.h>
+
 //#include <ADC_util.h>
 
 //using std::string;
@@ -44,8 +45,8 @@ EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t s
 }
 
 // Initializer 2
-EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, ADCType setSensorSource)
-                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, sensorSource{setSensorSource}
+EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource)
+                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, fluidSim{*setFluidSim}, sensorSource{setSensorSource}
 {
     // place any constructor operations here
 }
@@ -123,6 +124,26 @@ if (sensorSource == TeensyMCUADC)
                 //Serial.println("newSensorinREADafter");
                 //Serial.println(newSensorValueCheck);
                 timer = 0;
+            }
+        }
+    }
+
+if (sensorSource == simulatedInput)
+    {
+        if (currentSampleRate != 0)     //math says no divide by zero, use separate conditional for sample rate of 0
+        {
+        if (timer >= (1000000/currentSampleRate))   // Divides 1 second in microseconds by current sample rate in Hz
+            {
+                
+                    //currentRawValue = adc->analogRead(ADCinput);
+                    //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
+                    /////linear conversions here, y = m*x + b
+                    // This automatically stores converted value for the on board nodes
+                    priorConvertedValue = currentConvertedValue; //shifts previous converted value into prior variable
+                    currentConvertedValue = fluidSim.analogRead(ADCinput);
+                    writeToRollingArray(convertedValueArray, currentConvertedValue);
+                    exponentialMovingAverage();
+                    accumulatedI_float();
             }
         }
     }

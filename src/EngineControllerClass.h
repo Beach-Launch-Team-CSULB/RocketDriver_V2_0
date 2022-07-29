@@ -31,16 +31,16 @@ class EngineController
         PyroState igniter1State;
         PyroState igniter2State; */
 
-        Valve pilotMVFuelValve;
-        Valve pilotMVLoxValve;
-        Valve pneumaticVent;
-        Pyro igniter1;
-        Pyro igniter2;
+        Valve &pilotMVFuelValve;
+        Valve &pilotMVLoxValve;
+        Valve &pneumaticVent;
+        Pyro &igniter1;
+        Pyro &igniter2;
 
-        uint32_t igniter1LiveOutTime = 500000;
-        uint32_t igniter2LiveOutTime = 500000;
-        elapsedMicros igniter1timer = 0;
-        elapsedMicros igniter2timer = 0;
+        //uint32_t igniter1LiveOutTime = 500000;
+        //uint32_t igniter2LiveOutTime = 500000;
+        //elapsedMicros igniter1timer = 0;
+        //elapsedMicros igniter2timer = 0;
 
     public:
 

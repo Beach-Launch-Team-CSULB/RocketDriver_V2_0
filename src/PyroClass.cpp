@@ -46,50 +46,19 @@ void Pyro::stateOperations()
 {
     switch (state)
     {
-    // if a valve has been commanded to fire, it will start actuation after appropriate delay, normal closed actuate open, normal open actuate closed
-    // every state change should reset the timer
-/*     case PyroState::FireCommanded:
-        state = PyroState::OnCommanded;
-        timer = 0;
-        break;
- */
-    // if a pyro is commanded on, turns on 
-/*     case PyroState::OnCommanded:
-        if (priorState != PyroState::On)
-        {
-        state = PyroState::On;
-        timer = 0;
-        }
-        else {state = PyroState::On;}
-        break; */
-
+    // physical output state actions only, NO LOGIC
     case PyroState::On:
         digitalWriteExtended(firePin, 1);
         digitalWriteExtended(armPin, 1);
-/*         if(timer >= liveOutTime)
-        {
-            state = PyroState::Off;
-            timer = 0;
-            controllerUpdate = true;
-        } */
         break;
-
-    // if a pyro is commanded off, turns off immediately, not sure I need this at all the way we do on valves
-/*     case PyroState::OffCommanded:
-        if (priorState != PyroState::Off)
-        {
-        state = PyroState::Off;
-        timer = 0;
-        }
-        else {state = PyroState::Off;}
-        break; */
-        
     case PyroState::Off:
         digitalWriteExtended(firePin, 0);
         digitalWriteExtended(armPin, 0);
-        //timer = 0;
         break;        
-    
+    case PyroState::Fired:
+        digitalWriteExtended(firePin, 0);
+        digitalWriteExtended(armPin, 0);
+        break;        
     // All other states require no action
     default:
         break;
@@ -109,12 +78,16 @@ void Pyro::controllerStateOperations()
  */
     // if a pyro is commanded on, turns on 
     case PyroState::OnCommanded:
-        if (priorState != PyroState::On)
+        if (priorState != PyroState::Fired) //only allow OnCommanded to do anything if not Fired
         {
-        state = PyroState::On;
-        timer = 0;
+            if (priorState != PyroState::On)
+            {
+            state = PyroState::On;
+            timer = 0;
+            }
+            else {state = PyroState::On;}
         }
-        else {state = PyroState::On;}
+        else {state = PyroState::Fired;} //keeps us in Fired state
         break;
 
     case PyroState::On:
@@ -122,26 +95,30 @@ void Pyro::controllerStateOperations()
         //digitalWriteFast(armPin, 1);
         if(timer >= liveOutTime)
         {
-            state = PyroState::Off;
+            state = PyroState::Fired;
             timer = 0;
-            controllerUpdate = true;
         }
         break;
 
     // if a pyro is commanded off, turns off immediately, not sure I need this at all the way we do on valves
     case PyroState::OffCommanded:
-        if (priorState != PyroState::Off)
+        if (priorState != PyroState::Fired) //only allow OnCommanded to do anything if not Fired
         {
-        state = PyroState::Off;
-        timer = 0;
+            if (priorState != PyroState::Off)
+            {
+            state = PyroState::Off;
+            //timer = 0;
+            }
+            else {state = PyroState::Off;}
         }
-        else {state = PyroState::Off;}
+        else {state = PyroState::Fired;} //keeps us in Fired state
         break;
         
     case PyroState::Off:
-        //digitalWriteFast(firePin, 0);
-        //digitalWriteFast(armPin, 0);
-        timer = 0;
+        //timer = 0;
+        break;        
+    case PyroState::Fired:
+        //do I need anything for Fired?
         break;        
     
     // All other states require no action

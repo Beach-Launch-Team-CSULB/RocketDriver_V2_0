@@ -6,13 +6,14 @@
 
 enum class PyroState
 {
-    Off,              // 0
-    On,               // 1
-    FireCommanded,    // 2
-    OnCommanded,      // 3
-    OffCommanded,     // 4
-    NullReturn,       // 5
-    PyroState_SIZE,   // 6
+    Off,                // 0
+    On,                 // 1
+    FireCommanded,      // 2
+    OnCommanded,        // 3
+    OffCommanded,       // 4
+    Fired,              // 5
+    NullReturn,         // 6
+    PyroState_SIZE,     // 7
 };
 
 

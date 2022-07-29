@@ -29,6 +29,13 @@
 #define LoxTank2PT_ArrayPointer 6
 #define HiPressPT_ArrayPointer 7
 
+#define FakeChamberPT1_ArrayPointer 8
+#define FakeFuelLinePT_ArrayPointer 9
+#define FakeLoxLinePT_ArrayPointer 10
+#define FakeFuelTankPT_ArrayPointer 11
+#define FakeLoxTankPT_ArrayPointer 12
+#define FakeHiPressPT_ArrayPointer 13
+
 // actuator position defines for pointers
 #define Engine1TVC_Y_ArrayPointer 0
 #define Engine1TVC_Z_ArrayPointer 1
@@ -380,7 +387,7 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
         // Pasa Bang SF Config
         // Lox Tank
-        valveArray.at(LoxBang_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
+/*          valveArray.at(LoxBang_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
         tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang1(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPressLineVentState());
         valveArray.at(LoxVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
         // Fuel Tank
@@ -389,12 +396,12 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
         // COPV/High Press - RUN AFTER PROP TANKS (for now, not sure if necessary long term) - for bang controllers to sync vent line settings
         valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
-        // Engine 1
+         // Engine 1
         valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
         valveArray.at(LoxMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
         pyroArray.at(EngineIgniter1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
         pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
-
+ */
         sensorArray.at(FuelTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelTank2PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
@@ -426,7 +433,7 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     //cli(); // disables interrupts during controller sync to protect from partial propulsion system states
     // update the controller valves based on the valve objects before Controller stateOperations
     // Lox Tank
-    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(LoxBang_ArrayPointer)->getSyncState());
+/*     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(LoxBang_ArrayPointer)->getSyncState());
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setTankVentState(valveArray.at(LoxVent_ArrayPointer)->getSyncState());
     // Fuel Tank
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPrimaryPressValveState(valveArray.at(FuelBang_ArrayPointer)->getSyncState());
@@ -436,7 +443,7 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     engineControllerArray.at(Engine1Controller_ArrayPointer)->setIgniter2State(pyroArray.at(EngineIgniter2_ArrayPointer)->getSyncState());
     engineControllerArray.at(Engine1Controller_ArrayPointer)->setPilotMVFuelValveState(valveArray.at(FuelMV_ArrayPointer)->getSyncState());
     engineControllerArray.at(Engine1Controller_ArrayPointer)->setPilotMVLoxValveState(valveArray.at(LoxMV_ArrayPointer)->getSyncState());
-
+ */
     //integral unwinds
     sensorArray.at(LoxTank1PT_ArrayPointer)->resetIntegralCalc(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getResetIntegralCalcBool(), 0);
     sensorArray.at(FuelTank1PT_ArrayPointer)->resetIntegralCalc(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getResetIntegralCalcBool(), 0);
@@ -446,9 +453,13 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     //Fuel Tank sensor target value update
     sensorArray.at(FuelTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
     //Lox Tank Controller Sensor Data fetch
-    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(LoxTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank2PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FakeLoxTankPT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FakeLoxTankPT_ArrayPointer)->getIntegralSum(), sensorArray.at(FakeLoxTankPT_ArrayPointer)->getLinRegSlope());
     //Lox Tank Controller Sensor Data fetch
-    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInputs(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FuelTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank2PT_ArrayPointer)->getLinRegSlope());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FakeFuelTankPT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getIntegralSum(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getLinRegSlope());
    
     //sei(); // reenables interrupts after controller sync
 }

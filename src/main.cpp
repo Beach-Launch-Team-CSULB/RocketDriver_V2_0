@@ -70,6 +70,7 @@ using std::string;
 #include "CANWrite.h"
 #include "OperationFunctionTemplates.h"
 #include "ALARApinDefines.h"
+#include "fluidSystemSimulation.h"
 
 //Trying to figure out RTC stuff with these libs
 #include <TimeLib.h>
@@ -82,7 +83,10 @@ elapsedMillis mainLoopTestingTimer;
 elapsedMillis ezModeControllerTimer;
 
 //For use in doing serial inputs as CAN commands for testing
-uint8_t fakeCANmsg;
+uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
+uint8_t fakeCanIterator = 0;
+
+bool mainloopprints = true;
 
 bool localNodeResetFlag = false; //flag to trigger register reset from commanded reset over CAN
 bool abortHaltFlag; //creates halt flag that is a backup override of state machine
@@ -252,24 +256,55 @@ Serial.println(timeSubSecondsMicros); */
     Serial.print("Command Recieved: ");
     Serial.println(currentCommand);
   }
+  
+  //if (mainLoopTestingTimer >= 200)
+  //{
+  
+  while (Serial.available())
+  {
+/*   {
+    Serial.print("available");
+    Serial.print(Serial.available());
+    Serial.println();
+  for (fakeCanIterator; fakeCanIterator < Serial.available(); fakeCanIterator++)
+  {
+    fakeCANmsg[fakeCanIterator] = Serial.read();
+    Serial.print("i");
+    Serial.println(fakeCanIterator);
+  }
+  }
+  //else {fakeCanIterator = 0;}
+  
 
-  while (Serial.available()) 
-    {
+    Serial.print("fakeCANmsg");
+    Serial.println();
+  for (size_t i = 0; i < 12; i++)
+  {
+    Serial.print(fakeCANmsg[i]);
+    Serial.print(" : ");
+  }
+    Serial.println(); */
+
+    //Serial.print(Serial.read());
+    //Serial.println();
     fakeCANmsg = Serial.read();
-      if(fakeCANmsg  < command_SIZE) //enter 0 inter serial to trigger command read
-      {
+
+      //if(fakeCANmsg[0]  < command_SIZE) //enter 0 inter serial to trigger command read
+      //{
           //add in code here to prompt for command code and update current command from this
           //Serial.println("Enter Command Byte");
           //CurrentCommand = Serial.read();
               
               //if(fakeCANmsg < command_SIZE)                                           // this checks if the message at that location in the buffer could be a valid command
-              //{
+              {
                   currentCommand = static_cast<Command>(fakeCANmsg);
-              //}
+              }
           Serial.println("Command Entered");
-        }
+        //}
+    //mainLoopTestingTimer = 0;
     }
-
+  //}
+  
 
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
@@ -314,8 +349,16 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 20)
+  if (mainLoopTestingTimer >= 100 && mainloopprints)
   {
+  
+
+  waterGoesVroom.fluidSystemUpdate();
+
+  waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
+  waterGoesVroom.LoxTank.SetValveStates(LoxVent.getState(),LoxMV.getState(),LoxVent.getState());
+
+
   //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
   Serial.print("currentVehicleState :");
   Serial.println(static_cast<uint8_t>(currentVehicleState));

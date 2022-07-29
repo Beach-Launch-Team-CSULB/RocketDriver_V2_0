@@ -166,7 +166,7 @@ void analogWriteSoft(uint8_t outputPin, bool outputState, uint32_t freqIN, uint1
 
 float float_from32bits(uint32_t f)
 {
-    static_assert(sizeof(float) == sizeof f, "`float` has a weird size.");  //shouldn't be needed on platform where float is always 4 bytes
+    //static_assert(sizeof(float) == sizeof f, "`float` has a weird size.");  //shouldn't be needed on platform where float is always 4 bytes
     float ret;
     std::memcpy(&ret, &f, sizeof(float));
     return ret;

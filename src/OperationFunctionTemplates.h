@@ -111,7 +111,7 @@ void sensorTasks(const std::array<T, size>& sensorArray, uint32_t& secondsRD,uin
             //Serial.print("LoopRan");
             sensor->read();
             sensor->setSYSTimestamp(secondsRD, microsecondsRD);
-            sensor->linearConversion();
+            //sensor->linearConversion();
         }
 /*         else if (nodeIDReadIn == 6) //shitty way to make logger node only convert
         {
