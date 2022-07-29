@@ -216,6 +216,14 @@ void TankPressController::setPIDSensorInput3(float proportionalValue, float inte
     bangSensor3EMA = proportionalValue;
     bangSensor3Integral = integralValue;
     bangSensor3Derivative = derivativeValue;
+/*     Serial.print("bang3 ins: ");
+    Serial.print(bangSensor3EMA);
+    Serial.print(" : ");
+    Serial.print(bangSensor3Integral);
+    Serial.print(" : ");
+    Serial.println(bangSensor3Derivative); */
+
+
 }
 
 void TankPressController::PIDinputSetting()

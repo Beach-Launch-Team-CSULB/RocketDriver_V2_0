@@ -154,6 +154,10 @@ float FluidSystemSimulation::analogRead(uint8_t fakeADCpin)
   {
     simulatedSensorReading = HiPressTank.CurrPressure;
   }
-  else
+  
+/*   Serial.print(" simulatedSensor fake pin : ");
+  Serial.println(fakeADCpin);
+  Serial.print(" simulatedSensorReading : ");
+  Serial.println(simulatedSensorReading); */
   return simulatedSensorReading;
 }

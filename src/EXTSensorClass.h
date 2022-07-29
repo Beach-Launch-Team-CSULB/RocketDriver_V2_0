@@ -49,7 +49,7 @@ class EXT_SENSOR : public SENSORBASE
     const uint32_t sampleRateMedMode = 10;         //the sample rate this given sensor will be read at
     const uint32_t sampleRateFastMode = 100;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode = 10;        //the sample rate this given sensor will be read at
-    uint32_t currentSampleRate = 100;
+    uint32_t currentSampleRate = 10;
     elapsedMicros timer;                      // timer for sensor timing operations
     uint32_t currentRawValue{};               // holds the current value for the sensor
     bool newSensorValueCheck;                      // Is the current raw value a new read that hasn't been sent yet?
