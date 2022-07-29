@@ -132,6 +132,9 @@ VehicleState priorVehicleState;
 MissionState currentMissionState(MissionState::passive);
 MissionState priorMissionState;
 
+configMSG currentConfigMSG{};
+
+
 uint32_t vehicleStateAddressfromEEPROM_errorFlag;
 uint32_t missionStateAddressfromEEPROM_errorFlag;
 
@@ -251,10 +254,10 @@ Serial.print(" : ");
 Serial.println(timeSubSecondsMicros); */
 
   // --- Read CAN bus and update current command ---
-  if(CANread(Can0, currentCommand) && !startup) // do not execute on the first loop
+  if(CANread(Can0, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
   {
-    Serial.print("Command Recieved: ");
-    Serial.println(currentCommand);
+    Serial.print("CAN Message Recieved: ");
+    Serial.println(currentCommand); //currently only does the command not any message
   }
   
   //if (mainLoopTestingTimer >= 200)

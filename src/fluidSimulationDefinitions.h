@@ -5,10 +5,10 @@
 
 
 
-tankObject fuelTank{0.01};
-tankObject loxTank{0.01};
+tankObject fuelTank{.00000151};
+tankObject loxTank{.00000151};
 PressurantTank stupidpaintbollTank{};
 
-FluidSystemSimulation waterGoesVroom{0.01,stupidpaintbollTank,fuelTank,loxTank};
+FluidSystemSimulation waterGoesVroom{.01,stupidpaintbollTank,fuelTank,loxTank};
 
 #endif

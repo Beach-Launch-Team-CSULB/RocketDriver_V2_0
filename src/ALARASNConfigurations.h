@@ -24,6 +24,14 @@ struct ALARASN
     bool KX134_1211_present;
     bool SAM_M8Q_GPS_present;
     bool MS5607_present;
+    uint32_t NOR1_size;
+    uint32_t NOR2_size;
+    uint32_t NOR3_size;
+    uint32_t NOR4_size;
+    uint32_t NOR5_size;
+    uint32_t NOR6_size;
+    uint32_t NOR7_size;
+    uint32_t NOR8_size;
 };
 
 void lookupALARASNmap(ALARASN& thisALARA, uint8_t ALARAnodeID);

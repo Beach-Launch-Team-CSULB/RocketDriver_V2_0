@@ -8,19 +8,28 @@
 // function to be run every loop to check for a new CAN message
 
 
-bool CANread(FlexCAN& CANbus, Command& CurrentCommand)
+bool CANread(FlexCAN& CANbus, Command& CurrentCommand, configMSG& currentConfigMSG, uint8_t propNodeIDIn)
 {
     // New Message Flag
     bool NewMessage {false};
 
-    // create a buffer to hold messages (using a static array for speed)
+    // create a buffer to hold command messages (using a static array for speed)
     static std::array<Command, 64> CommandBuffer{};                                         // large enough for a back up of 8 full frames
     static uint32_t CommandBufferIndex {0};                                                 // keeps track of where we are in command buffer, works just like a stack
     static uint32_t CommandBufferPull {0};                                                  // lets us pull from oldest without shuffling the array
+    
+    // create a buffer to hold config messages (using a static array for speed)
+    static std::array<configMSG, 128> configMSGBuffer{};                                         // large enough for a back up of 8 full frames
+    static uint32_t configMSGBufferIndex {0};                                                 // keeps track of where we are in command buffer, works just like a stack
+    static uint32_t configMSGBufferPull {0};                                                  // lets us pull from oldest without shuffling the array
 
     // create a variable to hold the current message
     CAN_message_t msg {};
 
+    // create a variable to hold the current config message
+    configMSG configStruct {};
+    configMSG emptyConfigStruct {0,0,0};
+    
     // create a variable to hold serial input fake CAN command
     //uint8_t fakeCANmsg;
 
@@ -48,7 +57,16 @@ bool CANread(FlexCAN& CANbus, Command& CurrentCommand)
                 
                 }
             }
-
+            if(msg.id == propNodeIDIn && msg.len >= 3) // must be right ID and msg at least 3 bytes long to be valid config message
+            {
+                NewMessage = true;                                                              // set new message flag to true if message recieved and read
+                configStruct.TargetObjectID = msg.buf[0];
+                configStruct.ObjectSettingID = msg.buf[1];
+                configStruct.uint32Value = msg.buf[2] + (msg.buf[3] >> 8) + (msg.buf[4] >> 16) + (msg.buf[5] >> 24);    //might have endianness backwards, test
+                // CAN buffer bytes past this are meaningless in current format
+                configMSGBuffer.at(configMSGBufferIndex) = configStruct;
+                configMSGBufferIndex += sizeof(configStruct); 
+            }
 
         }
     }
@@ -65,6 +83,19 @@ bool CANread(FlexCAN& CANbus, Command& CurrentCommand)
         CommandBufferIndex = 0;
         CurrentCommand = command_NOCOMMAND;                                                 // if we caught up, set command to no command
     }
+
+    if ((configMSGBufferIndex > 0) && (configMSGBufferPull != configMSGBufferIndex))
+    {
+        currentConfigMSG = configMSGBuffer.at(configMSGBufferPull);                               // THIS IS WHERE THE WRITE TO CURRENTCOMMAND HAPPENS
+        configMSGBufferPull += sizeof(configStruct);      
+    }
+    else if (configMSGBufferPull >= configMSGBufferIndex)                                       // check if we've caught up and executed all commands, ie when CommandBufferPull == CommandBufferIndex. CommandBufferPull should NEVER exceed CommandBufferIndex, but for safety I use >=
+    {
+        configMSGBufferPull = 0;
+        configMSGBufferIndex = 0;
+        currentConfigMSG = emptyConfigStruct;                                                 // if we caught up, set command to no command
+    }
+
 
     // at this point the mailbox has been checked, any waiting messages have been moved to the buffer, and the oldest command has been moved into the global CurrentCommand variable
     // return the message read bool

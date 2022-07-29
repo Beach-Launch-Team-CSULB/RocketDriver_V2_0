@@ -76,7 +76,7 @@ class EXT_SENSOR : public SENSORBASE
     //uint32_t currentRunningSUM = 0;
     bool EMA = true;  //needs a set function still
     float priorEMAOutput = 0;
-    float alphaEMA = 0.7;
+    float alphaEMA = 1;
     float newEMAOutput = 0;
 
     bool enableIntegralCalc = false;

@@ -10,13 +10,16 @@ class PressurantTank
 {
 
     public:
-    float CurrPressure = 6000;
-    float TankVolume = 5; // m^3
-    float PressurantMass = 0;
-    float CdA = 0.01;
-
-    float ChokedMassFlow(float TimeDelta);
-
+    double CurrPressure = 6000 * 6895;
+    double TankVolume = .05; // m^3
+    double PressurantMass=85;
+    double CdA = 0.0000000645;
+    double massFlow = 0;
+    
+    double ChokedMassFlow(double TimeDelta);
+    
+    void pressureUpdateFunction(double TimeDelta, double pressMFtank1, double pressMFtank2);
+    
     PressurantTank();
 
 };
@@ -25,25 +28,25 @@ class PressurantTank
 class tankObject
 {
     public:
-    float UllageVolume = 0.005; //m^3
-    float OptimalTankPress = 150;
-    float CurrPressure = 15; //BSing an ambient start pressure?
-    float UllageMass = 0;
-    float OutflowCdA;
-
+    double UllageVolume = 0.005; //m^3
+    double CurrPressure = 15; //BSing an ambient start pressure?
+    double UllageMass;
+    double OutflowCdA;
+    double pressMassFlow = 0;
+    double massFlow = 0;
     ValveState inletValveState = ValveState::Closed;
     ValveState outletValveState = ValveState::Closed;
     ValveState ventValveState = ValveState::Closed;
 
     void SetValveStates(ValveState InState, ValveState OutState, ValveState VentState);
 
-    void IncompressibleMassFlow(float TimeDelta);
+    void IncompressibleMassFlow(double TimeDelta);
 
-    void pressureUpdateFunction(float TimeDelta, PressurantTank PressTank);
+    void pressureUpdateFunction(double TimeDelta, PressurantTank PressTank);
 
-    float getCurrPressure(){return CurrPressure;}//if currpressure stays public don't need get function
+    double getCurrPressure(){return CurrPressure;}//if currpressure stays public don't need get function
 
-    tankObject(float setOutflowCdA);
+    tankObject(double setOutflowCdA);
 };
 
 
@@ -54,8 +57,8 @@ class FluidSystemSimulation
         PressurantTank HiPressTank;
         tankObject FuelTank;
         tankObject LoxTank;
-        float TimeDelta;
-        FluidSystemSimulation(float setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
+        double TimeDelta;
+        FluidSystemSimulation(double setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
     void fluidSystemUpdate();
     float analogRead(uint8_t fakeADCpin);
 };
