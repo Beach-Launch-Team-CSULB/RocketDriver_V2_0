@@ -349,14 +349,14 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 100 && mainloopprints)
+  if (mainLoopTestingTimer >= 10 && mainloopprints)
   {
   
 
   waterGoesVroom.fluidSystemUpdate();
 
   waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
-  waterGoesVroom.LoxTank.SetValveStates(LoxVent.getState(),LoxMV.getState(),LoxVent.getState());
+  waterGoesVroom.LoxTank.SetValveStates(LoxBang.getState(),LoxMV.getState(),LoxVent.getState());
 
 
   //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT

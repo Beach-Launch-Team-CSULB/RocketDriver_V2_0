@@ -62,6 +62,21 @@ float PressurantTank::ChokedMassFlow(float TimeDelta)
     return massFlow;
 }
 
+void tankObject::SetValveStates(ValveState InState, ValveState OutState, ValveState VentState)
+{
+  ValveState inletValveState = valveStateFlowSimSimplify(InState);
+  ValveState outletValveState = valveStateFlowSimSimplify(OutState);
+  ValveState ventValveState = valveStateFlowSimSimplify(VentState);
+Serial.print("sim set valve states");
+Serial.print(static_cast<uint8_t>(inletValveState));
+Serial.print(static_cast<uint8_t>(outletValveState));
+Serial.println(static_cast<uint8_t>(ventValveState));
+
+
+};
+
+
+
 //for interrupt timers, not sure how to setup to run the other stuff yet. Need to pass everything into this, then into other functions inside?
 // it should work fine, anything that needs to be updated to pass into the functions will pass through every time the interrupt runs (I think)
 void tankObject::pressureUpdateFunction(float TimeDelta, PressurantTank PressTank)

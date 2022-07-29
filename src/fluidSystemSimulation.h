@@ -35,12 +35,7 @@ class tankObject
     ValveState outletValveState = ValveState::Closed;
     ValveState ventValveState = ValveState::Closed;
 
-    void SetValveStates(ValveState InState, ValveState OutState, ValveState VentState)
-    {
-    ValveState inletValveState = valveStateFlowSimSimplify(InState);
-    ValveState outletValveState = valveStateFlowSimSimplify(OutState);
-    ValveState ventValveState = valveStateFlowSimSimplify(VentState);
-    };
+    void SetValveStates(ValveState InState, ValveState OutState, ValveState VentState);
 
     void IncompressibleMassFlow(float TimeDelta);
 
