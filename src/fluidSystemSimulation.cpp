@@ -20,11 +20,6 @@ elapsedMillis bangMVtimer = 0;
 
 ////////////
 
-float orificeOutDiameter = 0.1*0.0254; //m
-float orificeOutArea = ((orificeOutDiameter*orificeOutDiameter)*M_PI)/4;
-float orificeInDiameter = 0.1*0.0254; //m
-float orificeInArea = ((orificeInDiameter*orificeInDiameter)*M_PI)/4;
-
 elapsedMillis valveTimer;
 
 
@@ -50,8 +45,13 @@ PressurantTank::PressurantTank()
 
 void tankObject::IncompressibleMassFlow(double TimeDelta)
 {
-  massFlow = OutflowCdA*sqrt(2*CurrPressure*PropDensity);
+  massFlow = OutflowCdA*sqrt(2*outdp*unitConversionCosnt*PropDensity);
   UllageVolume += massFlow/PropDensity*TimeDelta;
+  if (UllageVolume > tankVolume){
+    tankEmpty = true;
+  }
+  Serial.print("Ullage Volume : ");
+  Serial.print(UllageVolume,6);
   CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
 }
 
@@ -59,18 +59,14 @@ double PressurantTank::ChokedMassFlow(double TimeDelta)
 {
     massFlow = CdA*CurrPressure*sqrt((Gamma/(N2GasConst*ATPtemp))*pow((2/(Gamma+1)), ((Gamma+1)/(Gamma-1))));
     
-    //Serial.print("PressurantMass Before : ");
-    //Serial.print(PressurantMass,10);
-    //PressurantMass -= TimeDelta*massFlow;
-    //CurrPressure = PressurantMass / TankVolume *N2GasConst*ATPtemp;
-    //Serial.print("PressurantMass After : ");
-    //Serial.print(PressurantMass,10);
-    //Serial.print("PressurantMass delta : ");
-    //Serial.print(TimeDelta*massFlow,10);
-    //Serial.print("massFlow : ");
-    //Serial.println(massFlow,10);
-    
     return massFlow;
+}
+
+void tankObject::ChokedMassFlow(double TimeDelta)
+{
+  massFlow = OutflowCdA*CurrPressure*sqrt((Gamma/(N2GasConst*ATPtemp))*pow((2/(Gamma+1)), ((Gamma+1)/(Gamma-1))));
+  UllageMass -= massFlow*TimeDelta;
+  CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
 }
 
 void tankObject::SetValveStates(ValveState InState, ValveState OutState, ValveState VentState)
@@ -99,29 +95,59 @@ void tankObject::pressureUpdateFunction(double TimeDelta, PressurantTank PressTa
   Serial.print(static_cast<uint8_t>(outletValveState));
   Serial.print(" : vent : ");
   Serial.println(static_cast<uint8_t>(ventValveState)); */
-  if (outletValveState == ValveState::Closed && inletValveState == ValveState::Open)
+  if (!(tankEmpty))
   {
-      //Serial.print("supposed to be Tank Press");
-      pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
-      UllageMass += pressMassFlow*TimeDelta;
-      CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
-  }
-  else if (outletValveState == ValveState::Open && inletValveState == ValveState::Open)
-  {
-      //Serial.print("supposed to be MV open");
-      pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
-      UllageMass += pressMassFlow*TimeDelta;
-      IncompressibleMassFlow(TimeDelta);
-      
+    if (outletValveState == ValveState::Closed && inletValveState == ValveState::Open)
+    {
+        //Serial.print("supposed to be Tank Press");
+        pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+        UllageMass += pressMassFlow*TimeDelta;
+        CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
     }
-  else if (outletValveState == ValveState::Open && inletValveState == ValveState::Closed)
-  {
+    else if (outletValveState == ValveState::Open && inletValveState == ValveState::Open)
+    {
+        
+        pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+        UllageMass += pressMassFlow*TimeDelta;
+        IncompressibleMassFlow(TimeDelta);
+        
+      }
+    else if (outletValveState == ValveState::Open && inletValveState == ValveState::Closed)
+    {
+        pressMassFlow = 0;
+        IncompressibleMassFlow(TimeDelta);
+    }
+    else // both valves closed
+    {
       pressMassFlow = 0;
-      IncompressibleMassFlow(TimeDelta);
+    }
   }
-  else // both valves closed
+  else
   {
-    pressMassFlow = 0;
+    if (outletValveState == ValveState::Closed && inletValveState == ValveState::Open)
+    {
+        //Serial.print("supposed to be Tank Press");
+        pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+        UllageMass += pressMassFlow*TimeDelta;
+        CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
+    }
+    else if (outletValveState == ValveState::Open && inletValveState == ValveState::Open)
+    {
+        
+        pressMassFlow = PressTank.ChokedMassFlow(TimeDelta);
+        UllageMass += pressMassFlow*TimeDelta;
+        ChokedMassFlow(TimeDelta);
+        
+      }
+    else if (outletValveState == ValveState::Open && inletValveState == ValveState::Closed)
+    {
+        pressMassFlow = 0;
+        ChokedMassFlow(TimeDelta);
+    }
+    else // both valves closed
+    {
+      pressMassFlow = 0;
+    }
   }
 }
 
@@ -129,7 +155,7 @@ void PressurantTank::pressureUpdateFunction(double TimeDelta, double pressMFtank
 {
   PressurantMass -= TimeDelta*(pressMFtank1 + pressMFtank2);
   //Serial.print(" HiPressTank.PressurantMass: ");
-  //Serial.println(HiPressTank.PressurantMass/6895, 10);
+  //Serial.println(HiPressTank.PressurantMass/unitConversionCosnt, 10);
   CurrPressure = PressurantMass / TankVolume *N2GasConst*ATPtemp;
 
 }
@@ -161,6 +187,7 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   FuelTank.pressureUpdateFunction(TimeDelta, HiPressTank);
   LoxTank.pressureUpdateFunction(TimeDelta, HiPressTank);
   HiPressTank.pressureUpdateFunction(TimeDelta, FuelTank.pressMassFlow, LoxTank.pressMassFlow);
+  
 
 /*   HiPressTank.PressurantMass -= TimeDelta*(FuelTank.pressMassFlow + LoxTank.pressMassFlow);
   //Serial.print(" HiPressTank.PressurantMass: ");
@@ -171,11 +198,11 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   Serial.println();
   Serial.print(TimeDelta, 10);
   Serial.print(" : ");
-  Serial.print(FuelTank.CurrPressure/6895, 10);
+  Serial.print(FuelTank.CurrPressure/unitConversionCosnt, 10);
   Serial.print(" : ");
-  Serial.print(LoxTank.CurrPressure/6895, 10);
+  Serial.print(LoxTank.CurrPressure/unitConversionCosnt, 10);
   Serial.print(" : ");
-  Serial.print(HiPressTank.CurrPressure/6895, 10);
+  Serial.print(HiPressTank.CurrPressure/unitConversionCosnt, 10);
   Serial.println(" fluid sim update ran");
 }
 
@@ -199,5 +226,5 @@ float FluidSystemSimulation::analogRead(uint8_t fakeADCpin)
   Serial.println(fakeADCpin);
   Serial.print(" simulatedSensorReading : ");
   Serial.println(simulatedSensorReading); */
-  return static_cast<float>(simulatedSensorReading/6895);
+  return static_cast<float>(simulatedSensorReading/unitConversionCosnt);
 }
