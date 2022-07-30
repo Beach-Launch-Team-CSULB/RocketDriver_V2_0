@@ -13,8 +13,8 @@ class PressurantTank
     double CurrPressure = 6000 * 6895;
     double KbottleTankVolume = .05; // m^3 K bottle
     double COPVTankVolume = .001; // m^3 paintball COPV
-    double TankVolume = .05; // m^3 
-    double PressurantMass=85;
+    double TankVolume = .001; // m^3 
+    double PressurantMass;
     double CdA = 0.0000000645;
     double massFlow = 0;
     
@@ -30,12 +30,15 @@ class PressurantTank
 class tankObject
 {
     public:
-    double UllageVolume = 0.005; //m^3
+    double UllageVolume = 0.0005; //m^3
     double CurrPressure = 15; //BSing an ambient start pressure?
     double UllageMass;
     double OutflowCdA;
     double pressMassFlow = 0;
     double massFlow = 0;
+    double outdp = 60;
+    double tankVolume = 0.004;
+    bool tankEmpty = false;
     ValveState inletValveState = ValveState::Closed;
     ValveState outletValveState = ValveState::Closed;
     ValveState ventValveState = ValveState::Closed;
@@ -47,6 +50,8 @@ class tankObject
     void pressureUpdateFunction(double TimeDelta, PressurantTank PressTank);
 
     double getCurrPressure(){return CurrPressure;}//if currpressure stays public don't need get function
+
+    void ChokedMassFlow(double TimeDelta);
 
     tankObject(double setOutflowCdA);
 };

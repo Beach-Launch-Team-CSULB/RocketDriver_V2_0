@@ -35,10 +35,10 @@ void TankPressController::ventPressureCheck()
     
     if (bangSensor1EMA >= ventFailsafePressure)
     {
-/*         Serial.print(bangSensor1EMA);
-        Serial.print(" : ");
-        Serial.println(ventFailsafePressure);
- */        //tankVent.setState(ValveState::OpenCommanded);
+        //Serial.print(bangSensor1EMA);
+        //Serial.print(" : ");
+        //Serial.println(ventFailsafePressure);
+        tankVent.setState(ValveState::OpenCommanded);
     }
     }
 }
