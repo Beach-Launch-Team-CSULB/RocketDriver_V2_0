@@ -11,7 +11,8 @@ class PressurantTank
 
     public:
     double CurrPressure = 6000 * 6895;
-    double TankVolume = .05; // m^3
+    //double TankVolume = .05; // m^3 K bottle
+    double TankVolume = .001; // m^3 paintball COPV
     double PressurantMass=85;
     double CdA = 0.0000000645;
     double massFlow = 0;
@@ -57,9 +58,13 @@ class FluidSystemSimulation
         PressurantTank HiPressTank;
         tankObject FuelTank;
         tankObject LoxTank;
+        elapsedMicros simTimeEllapsed;
         double TimeDelta;
         FluidSystemSimulation(double setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
+    
+    // Top Level Fluid Simulation function, run each time step
     void fluidSystemUpdate();
+    // Fake analog sensor read function, used for feeding the propulsion controllers simulated data
     float analogRead(uint8_t fakeADCpin);
 };
 

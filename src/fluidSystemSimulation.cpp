@@ -154,7 +154,8 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   //Sets the state of the valves
   //FuelTank.SetValveStates(ValveState::Closed,ValveState::Closed,ValveState::Closed);
   //LoxTank.SetValveStates(ValveState::Closed,ValveState::Closed,ValveState::Closed);
-
+  TimeDelta = simTimeEllapsed/double(1000000);// 
+  simTimeEllapsed = 0;
 
   // AFTER PID CHOOSES VALVE STATE FLOW HAPPENS AND PRESSURE CHANGES
   FuelTank.pressureUpdateFunction(TimeDelta, HiPressTank);
@@ -168,6 +169,8 @@ void FluidSystemSimulation::fluidSystemUpdate(){
  */
 
   Serial.println();
+  Serial.print(TimeDelta, 10);
+  Serial.print(" : ");
   Serial.print(FuelTank.CurrPressure/6895, 10);
   Serial.print(" : ");
   Serial.print(LoxTank.CurrPressure/6895, 10);
