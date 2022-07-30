@@ -11,8 +11,9 @@ class PressurantTank
 
     public:
     double CurrPressure = 6000 * 6895;
-    //double TankVolume = .05; // m^3 K bottle
-    double TankVolume = .001; // m^3 paintball COPV
+    double KbottleTankVolume = .05; // m^3 K bottle
+    double COPVTankVolume = .001; // m^3 paintball COPV
+    double TankVolume = .05; // m^3 
     double PressurantMass=85;
     double CdA = 0.0000000645;
     double massFlow = 0;
