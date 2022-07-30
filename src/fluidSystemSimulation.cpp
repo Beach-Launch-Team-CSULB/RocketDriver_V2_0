@@ -2,19 +2,13 @@
 
 int unitConversionCosnt = 6895;
 float ATPtemp = 288.15; //K
-float PropDensity = 999;
 float N2GasConst = 296.8; //J/kg-k
 float Gamma = 1.4;
 
-
-
-bool ISTHISREAL = false;  //flag for test mode vs driving real system. False means test, True means real
-bool ISVALVEONLYREAL = false;
 bool serialStreamingLog = false;
 bool livePlotOutputOnly = false;
 elapsedMillis tankPressDelayTimer = 0;
 uint32_t tankPressDelay = 10000;
-
 
 elapsedMillis bangMVtimer = 0;
 
@@ -22,24 +16,42 @@ elapsedMillis bangMVtimer = 0;
 
 elapsedMillis valveTimer;
 
-
 ////////
-
-
 
 FluidSystemSimulation::FluidSystemSimulation(double setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank):TimeDelta{setTimeDelta}, HiPressTank{setHiPressTank}, FuelTank{setFuelTank}, LoxTank{setLoxTank} 
 {
   
 }
 
-tankObject::tankObject(double setOutflowCdA): OutflowCdA{setOutflowCdA}
+tankObject::tankObject(propFluid setTankFluid, double setOutflowCdA): tankFluid{setTankFluid}, OutflowCdA{setOutflowCdA}
 { 
+    UllageVolume = UllageVolumeStart;
+    
+    
+    if (tankFluid == propFluid::Water)
+    {
+      PropDensity = 999;
+    }
+    else if (tankFluid == propFluid::Lox)
+    {
+      PropDensity = 1141;
+    }
+    else if (tankFluid == propFluid::denatAlch)
+    {
+      PropDensity = 789;
+    }
+    else 
+    {
+      PropDensity = 999;
+    }
+
     UllageMass = CurrPressure / N2GasConst / ATPtemp * UllageVolume; //placeholder, probly dumb
 }
 
 PressurantTank::PressurantTank()
 {
   //CurrPressure = PressurantMass / TankVolume *N2GasConst*ATPtemp;
+  CurrPressure = startPressure * unitConversionCosnt;
   PressurantMass = CurrPressure / N2GasConst / ATPtemp * TankVolume;
 }
 
@@ -66,6 +78,7 @@ void tankObject::ChokedMassFlow(double TimeDelta)
 {
   massFlow = OutflowCdA*CurrPressure*sqrt((Gamma/(N2GasConst*ATPtemp))*pow((2/(Gamma+1)), ((Gamma+1)/(Gamma-1))));
   UllageMass -= massFlow*TimeDelta;
+  //CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
   CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
 }
 
@@ -74,12 +87,6 @@ void tankObject::SetValveStates(ValveState InState, ValveState OutState, ValveSt
   inletValveState = valveStateFlowSimSimplify(InState);
   outletValveState = valveStateFlowSimSimplify(OutState);
   ventValveState = valveStateFlowSimSimplify(VentState);
-/* Serial.print("sim set valve states");
-Serial.print(static_cast<uint8_t>(inletValveState));
-Serial.print(static_cast<uint8_t>(outletValveState));
-Serial.println(static_cast<uint8_t>(ventValveState)); */
-
-
 };
 
 
@@ -88,13 +95,6 @@ Serial.println(static_cast<uint8_t>(ventValveState)); */
 // it should work fine, anything that needs to be updated to pass into the functions will pass through every time the interrupt runs (I think)
 void tankObject::pressureUpdateFunction(double TimeDelta, PressurantTank PressTank)
 {
-  /* Serial.print("valve states inside update func");
-  Serial.print(" : inlet");
-  Serial.print(static_cast<uint8_t>(inletValveState));
-  Serial.print(" : outlet");
-  Serial.print(static_cast<uint8_t>(outletValveState));
-  Serial.print(" : vent : ");
-  Serial.println(static_cast<uint8_t>(ventValveState)); */
   if (!(tankEmpty))
   {
     if (outletValveState == ValveState::Closed && inletValveState == ValveState::Open)
@@ -154,8 +154,6 @@ void tankObject::pressureUpdateFunction(double TimeDelta, PressurantTank PressTa
 void PressurantTank::pressureUpdateFunction(double TimeDelta, double pressMFtank1, double pressMFtank2)
 {
   PressurantMass -= TimeDelta*(pressMFtank1 + pressMFtank2);
-  //Serial.print(" HiPressTank.PressurantMass: ");
-  //Serial.println(HiPressTank.PressurantMass/unitConversionCosnt, 10);
   CurrPressure = PressurantMass / TankVolume *N2GasConst*ATPtemp;
 
 }
@@ -189,12 +187,6 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   HiPressTank.pressureUpdateFunction(TimeDelta, FuelTank.pressMassFlow, LoxTank.pressMassFlow);
   
 
-/*   HiPressTank.PressurantMass -= TimeDelta*(FuelTank.pressMassFlow + LoxTank.pressMassFlow);
-  //Serial.print(" HiPressTank.PressurantMass: ");
-  //Serial.println(HiPressTank.PressurantMass/6895, 10);
-  HiPressTank.CurrPressure = HiPressTank.PressurantMass / HiPressTank.TankVolume *N2GasConst*ATPtemp;
- */
-
   Serial.println();
   Serial.print(TimeDelta, 10);
   Serial.print(" : ");
@@ -227,4 +219,25 @@ float FluidSystemSimulation::analogRead(uint8_t fakeADCpin)
   Serial.print(" simulatedSensorReading : ");
   Serial.println(simulatedSensorReading); */
   return static_cast<float>(simulatedSensorReading/unitConversionCosnt);
+}
+
+void FluidSystemSimulation::resetSim()
+{
+  FuelTank.resetTankObject();
+  LoxTank.resetTankObject();
+  HiPressTank.resetTankObject();
+
+}
+
+void PressurantTank::resetTankObject()
+{
+    CurrPressure = startPressure * unitConversionCosnt;
+    PressurantMass = CurrPressure / N2GasConst / ATPtemp * TankVolume;
+}
+
+void tankObject::resetTankObject()
+{
+    CurrPressure = 0;
+    UllageVolume = UllageVolumeStart;
+    UllageMass = CurrPressure / N2GasConst / ATPtemp * UllageVolume; //placeholder, probly dumb
 }

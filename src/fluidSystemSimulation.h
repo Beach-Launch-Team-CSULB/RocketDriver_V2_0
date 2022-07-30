@@ -10,28 +10,42 @@ class PressurantTank
 {
 
     public:
-    double CurrPressure = 6000 * 6895;
+    double startPressure = 6000; // in PSI
+    double CurrPressure;        // in Pa
     double KbottleTankVolume = .05; // m^3 K bottle
     double COPVTankVolume = .001; // m^3 paintball COPV
     double TankVolume = .001; // m^3 
     double PressurantMass;
-    double CdA = 0.0000000645;
+    double CdA = 0.000000203; //0000000645
     double massFlow = 0;
     
     double ChokedMassFlow(double TimeDelta);
     
     void pressureUpdateFunction(double TimeDelta, double pressMFtank1, double pressMFtank2);
     
+    void resetTankObject(); // for restarting sim
+
     PressurantTank();
 
 };
 
+enum class propFluid
+{
+    Lox,
+    IPA,
+    denatAlch,
+    Kero,
+    Water,
+};
 
 class tankObject
 {
     public:
-    double UllageVolume = 0.0005; //m^3
-    double CurrPressure = 15; //BSing an ambient start pressure?
+    propFluid tankFluid;
+    float PropDensity = 999; //water default value
+    double UllageVolumeStart = 0.0005; //m^3
+    double UllageVolume; //m^3
+    double CurrPressure = 0;
     double UllageMass;
     double OutflowCdA;
     double pressMassFlow = 0;
@@ -53,7 +67,9 @@ class tankObject
 
     void ChokedMassFlow(double TimeDelta);
 
-    tankObject(double setOutflowCdA);
+    void resetTankObject();
+
+    tankObject(propFluid setTankFluid, double setOutflowCdA);
 };
 
 
@@ -72,6 +88,8 @@ class FluidSystemSimulation
     void fluidSystemUpdate();
     // Fake analog sensor read function, used for feeding the propulsion controllers simulated data
     float analogRead(uint8_t fakeADCpin);
+
+    void resetSim();
 };
 
 

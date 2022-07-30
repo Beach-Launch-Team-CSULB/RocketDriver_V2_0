@@ -354,7 +354,10 @@ Serial.println(timeSubSecondsMicros); */
 
   if (mainLoopTestingTimer >= 10 && mainloopprints)
   {
-  
+  if (currentCommand == 3)
+  {
+    waterGoesVroom.resetSim();
+  }
 
   waterGoesVroom.fluidSystemUpdate();
 
