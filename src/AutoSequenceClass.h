@@ -9,6 +9,7 @@ class AutoSequence
 {
 
     private:
+        const uint32_t autoSequenceID = 99;
         int32_t countdownStart;        //must be set in Micros so it matches the timer
         int64_t currentCountdown;
         elapsedMicros timer;
@@ -19,12 +20,13 @@ class AutoSequence
     public:
 
     // constructor    
-        AutoSequence(int32_t setCountdownStart, uint32_t setHostNodeID);
+        AutoSequence(uint32_t setAutoSequenceID, int32_t setCountdownStart, uint32_t setHostNodeID);
 
     // a start up method,
         void begin();
 
     // get functions, return the current value of that variable
+        uint32_t getAutoSequenceID(){return autoSequenceID;}
         int32_t getCountdownStart(){return countdownStart;}
         int64_t getCurrentCountdown(){return currentCountdown;}
         AutoSequenceState getAutoSequenceState(){return state;}

@@ -103,6 +103,8 @@ uint8_t PropulsionSysNodeID;              //engine node = 2, prop node = 3, Pasa
 uint8_t PropulsionSysNodeIDfromEEPROM;    //PropulsionSysNodeID read out of EEPROM
 uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
 
+const uint8_t configVerificationKey = 166; //upgrade to a map later
+
 ///// WATCHDOG SYSTEM /////
 elapsedMillis propulsionControlWatchdog;                  // Watchdog timer that must be reset by ground control over bus to prevent an autovent
 uint32_t propulsionControlWatchdogVentTime = 120000;   // 120 seconds in millis gives two minutes to reestablish control before autovent, DISABLE IN FLIGHT
@@ -118,6 +120,7 @@ CAN_message_t message;
 CAN_message_t rxmsg;
 CAN_message_t extended;
 bool CANSensorReportConverted = false;
+bool NewConfigMessage{false};
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
@@ -254,11 +257,13 @@ Serial.print(" : ");
 Serial.println(timeSubSecondsMicros); */
 
   // --- Read CAN bus and update current command ---
-  if(CANread(Can0, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
+  if(CANread(Can0, configVerificationKey, NewConfigMessage, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
   {
     Serial.print("CAN Message Recieved: ");
     Serial.println(currentCommand); //currently only does the command not any message
   }
+  //function to take config MSGs and read them out
+  configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray);
   
   //if (mainLoopTestingTimer >= 200)
   //{
@@ -352,7 +357,7 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 10 && mainloopprints)
+  if (mainLoopTestingTimer >= 1000)
   {
   if (currentCommand == 3)
   {
@@ -360,16 +365,29 @@ Serial.println(timeSubSecondsMicros); */
   }
 
   waterGoesVroom.fluidSystemUpdate();
-
+  //Serial.println(waterGoesVroom.FuelTank.CurrPressure/6895);
   waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
   waterGoesVroom.LoxTank.SetValveStates(LoxBang.getState(),LoxMV.getState(),LoxVent.getState());
 
-
+  if (mainloopprints)
+  {
   //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
   Serial.print("currentVehicleState :");
   Serial.println(static_cast<uint8_t>(currentVehicleState));
   Serial.print("currentCommand :");
   Serial.println(currentCommand);
+
+  Serial.print("currentConfigMSG :");
+  Serial.print("targetID :");
+  Serial.print(currentConfigMSG.TargetObjectID);
+  Serial.print(" settingID:");
+  Serial.print(currentConfigMSG.ObjectSettingID);
+  Serial.print(" float:");
+  Serial.print(currentConfigMSG.floatValue);
+  Serial.print(" uint8:");
+  Serial.print(currentConfigMSG.uint8Value);
+
+
 
     for(auto tankPressController : tankPressControllerArray)
     {
@@ -425,6 +443,9 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
             Serial.println(": ");
+            Serial.print( ": ValveType: ");
+            Serial.print(static_cast<uint8_t>(valve->getValveType()));
+            Serial.println(": ");
         }
     }
     for(auto pyro : pyroArray)
@@ -439,7 +460,7 @@ Serial.println(timeSubSecondsMicros); */
         }
     }
 
-    
+  }
     for(auto sensor : sensorArray)
     {
         if (sensor->getSensorNodeID() == PropulsionSysNodeID)
@@ -461,6 +482,7 @@ Serial.println(timeSubSecondsMicros); */
             }
             Serial.println(": ");
  */        }
+    
     }
 
   //Serial.print("Current Autosequence Time: ");

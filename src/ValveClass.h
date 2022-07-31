@@ -19,16 +19,15 @@ class Valve
     private:
         const uint32_t valveID = 99;                          // Valve ID number 
         const uint8_t valveNodeID = 99;                      // NodeID the valve is controlled by
-        const ValveType valveType;                  // sets the valve type, either normal closed or normal open
+        ValveType valveType;                  // sets the valve type, either normal closed or normal open
         const uint8_t pinPWM = 99;                              // Valve PWM pin for actuation
         const uint8_t pinDigital = 99;                          // Valve Digital Out pin for actuation
-        const uint32_t fullDutyTime = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
+        uint32_t fullDutyTime = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
         ValveState state;
         ValveState priorState;                           // Tracks the valve state
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
-        const uint16_t fullDuty{256};                // full duty cycle for servo initial actuation
-        const uint8_t holdDuty{};                   // partial duty cycle to hold valve in actuated state
-        //bool fireCommandBool;                       // Whether this valve is on the Ignition AutoSequence for FireCommand timer check
+        uint16_t fullDuty{256};                // full duty cycle for servo initial actuation
+        uint8_t holdDuty{};                   // partial duty cycle to hold valve in actuated state
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool abortHaltDeviceBool;                    // Whether this valve is set by the abort halt flag override
         ValveState abortedState;
@@ -111,6 +110,9 @@ class Valve
 
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
+    //set functions 
+        void setValveType(uint8_t typeIn){if (typeIn == 0 || typeIn == 1) {valveType = static_cast<ValveType>(typeIn);}}
+        void setFullDutyTime(uint32_t fullDutyTimeIn){if (fullDutyTimeIn <= 10000) {fullDutyTime = fullDutyTimeIn;}}
 
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds

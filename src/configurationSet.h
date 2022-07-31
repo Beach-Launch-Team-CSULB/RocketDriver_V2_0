@@ -2,12 +2,14 @@
 #define CONFIGURATIONSET_H
 
 #include <Arduino.h>
+#pragma once
 
 //I should probably change to using typedef for my arg type
 
 struct configMSG
 {
     // CAN configuration message format
+    uint8_t verificationKey;             // verification key that must match for the message to be considered valid, protection layer from false config messages
     uint8_t TargetObjectID;             // object ID for the setting
     uint8_t ObjectSettingID;            // specific setting ID within the object to update
     union                       // union for storing bus bytes and pulling as desired value format

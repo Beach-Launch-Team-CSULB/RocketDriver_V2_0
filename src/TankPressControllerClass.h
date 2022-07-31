@@ -6,7 +6,6 @@
 //#include <array>
 //#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
 #include "SensorStates.h"
-#include "ControllerMathFunctions.h"
 #include "ValveClass.h"
 
 class TankPressController
@@ -146,10 +145,10 @@ class TankPressController
         void testSetPressLineVentState(ValveState pressLineVentStateIn) {if(testPass) {pressLineVent.setState(pressLineVentStateIn);}}
         void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVent.setState(tankVentStateIn);}}
     //setting PID parameters
-        void setK_p(float K_pin){K_p = K_pin;}
-        void setK_i(float K_iin){K_i = K_iin;}
+        void setK_p(float K_pin){if (K_pin <= 1000 && K_pin >= -1000) {K_p = K_pin;}}
+        void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;}}
         void setK_i(){K_i = K_i_run;}   //empty input args means reset K_i to K_i_run
-        void setK_d(float K_din){K_d = K_din;}
+        void setK_d(float K_din){if (K_din <= 1000 && K_din >= -1000) {K_d = K_din;}}
 
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds

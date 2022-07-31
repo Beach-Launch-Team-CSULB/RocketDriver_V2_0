@@ -5,6 +5,7 @@ float ATPtemp = 288.15; //K
 float N2GasConst = 296.8; //J/kg-k
 float Gamma = 1.4;
 
+bool simPrints = false;
 bool serialStreamingLog = false;
 bool livePlotOutputOnly = false;
 elapsedMillis tankPressDelayTimer = 0;
@@ -18,7 +19,7 @@ elapsedMillis valveTimer;
 
 ////////
 
-FluidSystemSimulation::FluidSystemSimulation(double setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank):TimeDelta{setTimeDelta}, HiPressTank{setHiPressTank}, FuelTank{setFuelTank}, LoxTank{setLoxTank} 
+FluidSystemSimulation::FluidSystemSimulation(uint8_t setSimID, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank): simID{setSimID}, HiPressTank{setHiPressTank}, FuelTank{setFuelTank}, LoxTank{setLoxTank} 
 {
   
 }
@@ -62,8 +63,8 @@ void tankObject::IncompressibleMassFlow(double TimeDelta)
   if (UllageVolume > tankVolume){
     tankEmpty = true;
   }
-  Serial.print("Ullage Volume : ");
-  Serial.print(UllageVolume,6);
+  //Serial.print("Ullage Volume : ");
+  //Serial.print(UllageVolume,6);
   CurrPressure = UllageMass / UllageVolume *N2GasConst*ATPtemp;
 }
 
@@ -186,7 +187,8 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   LoxTank.pressureUpdateFunction(TimeDelta, HiPressTank);
   HiPressTank.pressureUpdateFunction(TimeDelta, FuelTank.pressMassFlow, LoxTank.pressMassFlow);
   
-
+if (simPrints)
+  {
   Serial.println();
   Serial.print(TimeDelta, 10);
   Serial.print(" : ");
@@ -196,6 +198,7 @@ void FluidSystemSimulation::fluidSystemUpdate(){
   Serial.print(" : ");
   Serial.print(HiPressTank.CurrPressure/unitConversionCosnt, 10);
   Serial.println(" fluid sim update ran");
+  }
 }
 
 float FluidSystemSimulation::analogRead(uint8_t fakeADCpin)

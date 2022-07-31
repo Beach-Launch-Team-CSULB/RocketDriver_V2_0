@@ -9,6 +9,6 @@ tankObject fuelTank{propFluid::denatAlch, 0.00001087}; //orifice cap = 0.0000047
 tankObject loxTank{propFluid::Lox, 0.00001087};
 PressurantTank stupidpaintbollTank{};
 
-FluidSystemSimulation waterGoesVroom{.01,stupidpaintbollTank,fuelTank,loxTank};
+FluidSystemSimulation waterGoesVroom{255, stupidpaintbollTank, fuelTank, loxTank};
 
 #endif

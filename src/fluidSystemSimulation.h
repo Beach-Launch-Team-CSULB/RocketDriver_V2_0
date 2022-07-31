@@ -43,7 +43,7 @@ class tankObject
     public:
     propFluid tankFluid;
     float PropDensity = 999; //water default value
-    double UllageVolumeStart = 0.0005; //m^3
+    double UllageVolumeStart = 0.001; //m^3 0.0005
     double UllageVolume; //m^3
     double CurrPressure = 0;
     double UllageMass;
@@ -76,13 +76,15 @@ class tankObject
 
 class FluidSystemSimulation
 {
+    private:
+        uint8_t simID;
     public:
         PressurantTank HiPressTank;
         tankObject FuelTank;
         tankObject LoxTank;
         elapsedMicros simTimeEllapsed;
-        double TimeDelta;
-        FluidSystemSimulation(double setTimeDelta, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
+        double TimeDelta = 0.01; //default value for 100Hz
+        FluidSystemSimulation(uint8_t setSimID, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
     
     // Top Level Fluid Simulation function, run each time step
     void fluidSystemUpdate();
@@ -90,6 +92,8 @@ class FluidSystemSimulation
     float analogRead(uint8_t fakeADCpin);
 
     void resetSim();
+
+    uint8_t getSimID(){return simID;}
 };
 
 

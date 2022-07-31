@@ -32,6 +32,7 @@ void TeensyInternalReset (bool& localNodeResetFlagIn, uint8_t addressIn1, uint8_
 void analogWriteSoft(uint8_t outputPin, bool outputState, uint32_t freqIN, uint16_t dutyCycleIn);
 
 float float_from32bits(uint32_t f);
+float uint32_fromfloat(float u);
 
 // utility function for running a rolling array
 // float array version - !!!!! Not Protected from if you put negative signed floats for the index values !!!!!

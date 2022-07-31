@@ -463,3 +463,209 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
    
     //sei(); // reenables interrupts after controller sync
 }
+
+void configMSGread(configMSG& currentConfigMSG, bool& NewConfigMessage, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
+{
+bool idSearch = true; //for whether to continue to check the next object array (object ID has not been found yet)
+
+if (NewConfigMessage) //only run all this nonsense if there is a new config message
+    {
+
+
+
+        Serial.println("inside configMSGread: ");
+        Serial.print("Target ID: ");
+        Serial.print(currentConfigMSG.TargetObjectID);
+        Serial.print("Setting ID: ");
+        Serial.print(currentConfigMSG.ObjectSettingID);
+        Serial.print("uint32 config rcv: ");
+        Serial.print(currentConfigMSG.uint32Value,10);
+        Serial.print("float config rcv: ");
+        Serial.println(currentConfigMSG.floatValue,10);
+
+    ////// ----- Valve Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: valve:  ");
+        for (auto valve : valveArray)
+        {
+            if (currentConfigMSG.TargetObjectID == valve->getValveID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+        Serial.println("do I get past case1  ");
+                    valve->setValveType(currentConfigMSG.uint8Value);
+                    break;
+                case 2:
+                    valve->setFullDutyTime(currentConfigMSG.uint32Value);
+                    break;
+                case 3:
+                    //valve->
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    ////// ----- Pyro Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: pyro:  ");
+        for (auto pyro : pyroArray)
+        {
+            if (currentConfigMSG.TargetObjectID == pyro->getPyroID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+                    //pyro->
+                    break;
+                case 2:
+                    //pyro->
+                    break;
+                case 3:
+                    //pyro->
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    ////// ----- Sensor Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: sensor:  ");
+        for (auto sensor : sensorArray)
+        {
+            if (currentConfigMSG.TargetObjectID == sensor->getSensorID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+                    //sensor->
+                    break;
+                case 2:
+                    //sensor->
+                    break;
+                case 3:
+                    //sensor->
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    ////// ----- AutoSequence Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: autosequence:  ");
+        for (auto autosequence : autoSequenceArray)
+        {
+            if (currentConfigMSG.TargetObjectID == autosequence->getAutoSequenceID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+                    //autosequence->
+                    break;
+                case 2:
+                    //autosequence->
+                    break;
+                case 3:
+                    //autosequence->
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    ////// ----- Tank Press Controller Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: tankPressController:  ");
+        for (auto tankPressController : tankPressControllerArray)
+        {
+            if (currentConfigMSG.TargetObjectID == tankPressController->getControllerID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+                    tankPressController->setK_p(currentConfigMSG.floatValue);
+                    break;
+                case 2:
+                    tankPressController->setK_i(currentConfigMSG.floatValue);
+                    break;
+                case 3:
+                    tankPressController->setK_d(currentConfigMSG.floatValue);
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    ////// ----- Tank Press Controller Sets ----- /////
+    if (idSearch)
+    {
+        Serial.println("do I get past idSearch: engineController:  ");
+        for (auto engineController : engineControllerArray)
+        {
+            if (currentConfigMSG.TargetObjectID == engineController->getControllerID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 1:
+                    engineController->setFuelMVAutosequenceActuation(currentConfigMSG.int32Value);
+                    break;
+                case 2:
+                    engineController->setLoxMVAutosequenceActuation(currentConfigMSG.int32Value);
+                    break;
+                case 3:
+                    engineController->setIgniter1ActuationActuation(currentConfigMSG.int32Value);
+                    break;
+                case 4:
+                    engineController->setIgniter2ActuationActuation(currentConfigMSG.int32Value);
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                break;
+            }
+            
+        }
+    }
+
+    }
+}

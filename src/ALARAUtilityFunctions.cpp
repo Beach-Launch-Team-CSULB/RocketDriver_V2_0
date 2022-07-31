@@ -171,6 +171,13 @@ float float_from32bits(uint32_t f)
     std::memcpy(&ret, &f, sizeof(float));
     return ret;
 }
+float uint32_fromfloat(float u)
+{
+    //static_assert(sizeof(float) == sizeof f, "`float` has a weird size.");  //shouldn't be needed on platform where float is always 4 bytes
+    uint32_t ret;
+    std::memcpy(&ret, &u, sizeof(uint32_t));
+    return ret;
+}
 
 
 uint32_t arrayIndexFirstValue = 0;

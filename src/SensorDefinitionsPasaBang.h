@@ -26,12 +26,12 @@ EXT_SENSOR HiPressPT{85, 8, ALARA_ANALOG_IN1, 2, 10, 50, 0.0933, -638.38};      
 //EXT_SENSOR MCUtempNode8{200, 8, 70, 2, 5, 10};                                    // 18
 
 //FAKESHIT
-EXT_SENSOR FakeChamberPT1{856, 8, 41, &waterGoesVroom, simulatedInput};                 // 7
-EXT_SENSOR FakeFuelLinePT{857, 8, 32, &waterGoesVroom, simulatedInput};          // 8
-EXT_SENSOR FakeLoxLinePT{859, 8, 22, &waterGoesVroom, simulatedInput};           // 10
-EXT_SENSOR FakeFuelTankPT{881, 8, 31, &waterGoesVroom, simulatedInput};                    // 14
-EXT_SENSOR FakeLoxTankPT{882, 8, 21, &waterGoesVroom, simulatedInput};                    // 15
-EXT_SENSOR FakeHiPressPT{883, 8, 11, &waterGoesVroom, simulatedInput};                 // 16
+EXT_SENSOR FakeChamberPT1{156, 8, 41, &waterGoesVroom, simulatedInput};                 // 7
+EXT_SENSOR FakeFuelLinePT{157, 8, 32, &waterGoesVroom, simulatedInput};          // 8
+EXT_SENSOR FakeLoxLinePT{159, 8, 22, &waterGoesVroom, simulatedInput};           // 10
+EXT_SENSOR FakeFuelTankPT{181, 8, 31, &waterGoesVroom, simulatedInput};                    // 14
+EXT_SENSOR FakeLoxTankPT{182, 8, 21, &waterGoesVroom, simulatedInput};                    // 15
+EXT_SENSOR FakeHiPressPT{183, 8, 11, &waterGoesVroom, simulatedInput};                 // 16
 
 /* // Pasafire config
 EXT_SENSOR PasafireChamberPT1{189, 8, A14, 10, 100, 1000, false, 0.0125, -123.5};       // 20

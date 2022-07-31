@@ -5,7 +5,7 @@
 //int64_t maxcountdownint = 36028797018963968; //7 byte (56 bit) signed int max value, this is to stay inside 7 CAN bytes
 
 
-AutoSequence::AutoSequence(int32_t setCountdownStart, uint32_t setHostNodeID) : countdownStart{setCountdownStart}, hostNodeID{setHostNodeID}
+AutoSequence::AutoSequence(uint32_t setAutoSequenceID, int32_t setCountdownStart, uint32_t setHostNodeID) : autoSequenceID{setAutoSequenceID}, countdownStart{setCountdownStart}, hostNodeID{setHostNodeID}
 {
 
 }
