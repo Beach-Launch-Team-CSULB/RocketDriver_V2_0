@@ -62,6 +62,8 @@ class Pyro
 
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
+    // reset all configurable settings to defaults
+        void resetAll();
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds
 

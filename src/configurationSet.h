@@ -17,9 +17,14 @@ struct configMSG
         uint32_t uint32Value;             //unsigned 32 bit
         int32_t int32Value;
         uint16_t uint16Value;
+        uint16_t uint16Value2X[2];
         int16_t int16Value;
+        int16_t int16Value2X[2];
         uint8_t uint8Value;
+        uint8_t uint8Value4X[4];
         int8_t int8Value;
+        int8_t int8Value4X[4];
+
         float floatValue;
     };
     

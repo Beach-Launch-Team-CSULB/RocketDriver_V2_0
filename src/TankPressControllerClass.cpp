@@ -1,18 +1,35 @@
 #include "TankPressControllerClass.h"
 #include <Arduino.h>
 
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setVentFailsafePressure_Default, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, nodeIDCheck{setNodeIDCheck}
 {
     // Instantiation stuff?
 }
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool setIsSystemBang, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetValue{setTargetValue}, ventFailsafePressure{setVentFailsafePressure}, K_p{set_K_p}, K_i{set_K_i}, K_d{set_K_d}, controllerThreshold{setControllerThreshold}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool setIsSystemBang, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetPcValue_Default{setTargetPcValue_Default}, tankToChamberDp_Default{setTankToChamberDp_Default}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, K_p_Default{set_K_p_Default}, K_i_Default{set_K_i_Default}, K_d_Default{set_K_d_Default}, controllerThreshold_Default{setControllerThreshold_Default}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
 {
-    // force K_i = 0 at instantiation
+    // Instantiate operational values from the default values given
+    // Allows a reset to defaults after having changed settings via config messages
+    ventFailsafePressure = ventFailsafePressure_Default;
+    targetPcValue = targetPcValue_Default;
+    tankToChamberDp = tankToChamberDp_Default;
+    //targetValue = targetValue_Default;
+    targetValue = targetPcValue + tankToChamberDp;
+
+    K_p = K_p_Default;
+    K_i = K_i_Default;
+    K_d = K_d_Default;
+    controllerThreshold = controllerThreshold_Default;
+    valveMinimumDeenergizeTime = valveMinimumDeenergizeTime_Default;
+    valveMinimumEnergizeTime = valveMinimumEnergizeTime_Default;
+    
+    // force K_i = 0 at instantiation - should move this now with new defaults setup
     K_i_run = K_i;  //stashes K_i value for later
     K_i = 0;
     //TankPressController::setK_i(0);
+
+
 }
 
 void TankPressController::begin()
@@ -33,19 +50,26 @@ void TankPressController::ventPressureCheck()
     if (isSystemBang)   // lazy check to not run on high press currently, would break on dome reg system for tanks
     {
     
-    if (bangSensor1EMA >= ventFailsafePressure)
+    if (bangSensorWeightedEMA >= ventFailsafePressure)
     {
+        if (ventFailsafeFlag)
+        {
+        tankVent.setState(ValveState::OpenCommanded);
+        }
+        ventFailsafeFlag = true;
         //Serial.print(bangSensor1EMA);
         //Serial.print(" : ");
         //Serial.println(ventFailsafePressure);
-        tankVent.setState(ValveState::OpenCommanded);
     }
+    else ventFailsafeFlag = false;
     }
 }
 
 void TankPressController::stateOperations()
 {
     //run the PID calculation each time state operations runs
+    //timer use real timestep here?
+    
     if (isSystemBang)
     {
     bangPIDoutput = PIDmath();
@@ -229,18 +253,21 @@ void TankPressController::PIDinputSetting()
 {
     if (trustBangSensor1)
     {
+    bangSensorWeightedEMA = bangSensor1EMA;
     e_p = targetValue - bangSensor1EMA;
     e_i = bangSensor1Integral;
     e_d = bangSensor1Derivative;
     }
     if (!trustBangSensor1 && trustBangSensor2)
     {
+    bangSensorWeightedEMA = bangSensor2EMA;
     e_p = targetValue - bangSensor2EMA;
     e_i = bangSensor2Integral;
     e_d = bangSensor2Derivative;
     }
     if (trustBangSensor3 && !trustBangSensor1 && !trustBangSensor2)
     {
+    bangSensorWeightedEMA = bangSensor3EMA;
     e_p = targetValue - bangSensor3EMA;
     e_i = bangSensor3Integral;
     e_d = bangSensor3Derivative;
@@ -317,4 +344,37 @@ if (isnan(P_d))
     //Serial.println(",");
 
   return funcOutput;
+}
+
+void TankPressController::setPcTarget(float PcTargetIn)
+{
+    if (PcTargetIn <= 600 && PcTargetIn >= 200) 
+    {
+        targetPcValue = PcTargetIn;
+        // set target point based on dP, make the math function later
+        targetValue = targetPcValue + tankToChamberDp;
+    
+    }
+}
+
+
+void TankPressController::resetAll()
+{
+    ventFailsafePressure = ventFailsafePressure_Default;
+    targetPcValue = targetPcValue_Default;
+    tankToChamberDp = tankToChamberDp_Default;
+    //targetValue = targetValue_Default;
+    targetValue = targetPcValue + tankToChamberDp;
+
+    K_p = K_d_Default;
+    K_i = K_i_Default;
+    K_d = K_d_Default;
+    controllerThreshold = controllerThreshold_Default;
+    valveMinimumDeenergizeTime = valveMinimumDeenergizeTime_Default;
+    valveMinimumEnergizeTime = valveMinimumEnergizeTime_Default;
+    
+    // force K_i = 0 at instantiation - should move this now with new defaults setup
+    K_i_run = K_i;  //stashes K_i value for later
+    K_i = 0;
+
 }

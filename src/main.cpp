@@ -99,7 +99,7 @@ uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
 uint32_t ALARAnodeIDfromEEPROM_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromEEPROM_errorFlag;
-uint8_t PropulsionSysNodeID;              //engine node = 2, prop node = 3, Pasafire node = 8
+uint8_t PropulsionSysNodeID = 8;              //engine node = 2, prop node = 3, Pasafire node = 8
 uint8_t PropulsionSysNodeIDfromEEPROM;    //PropulsionSysNodeID read out of EEPROM
 uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
 
@@ -194,11 +194,11 @@ void setup() {
   // ----- Run the Node ID Detection Function -----
   //PropulsionSysNodeID = NodeIDDetect(nodeID, nodeIDdeterminefromEEPROM, nodeIDfromEEPROM); // - OVERHAUL WITH NEW FUNCTION AND SYSTEM
   //PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;       //For manually assigning NodeID isntead of the address read, make sure to comment out for operational use
-  PropulsionSysNodeID = thisALARA.propulsionSysNodeID;
+  //PropulsionSysNodeID = thisALARA.propulsionSysNodeID;
   // Write 0 to byte for nodeIDDetermineAddress after reading it after a reset
   //tripleEEPROMwrite(0, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
   //CHEATER OVERRIDE!!!!!
-  PropulsionSysNodeID = 8;
+  //PropulsionSysNodeID = 8;
 
   // -----Initialize ADCs-----
   MCUADCSetup();
@@ -317,11 +317,13 @@ Serial.println(timeSubSecondsMicros); */
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
-  if (ezModeControllerTimer >= 100)
+  autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
+
+  if (ezModeControllerTimer >= 500)
   {
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
-  autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
+  //autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   ezModeControllerTimer = 0;
   }
@@ -357,9 +359,10 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 1000)
+  if (mainLoopTestingTimer >= 250)
   {
-  if (currentCommand == 3)
+  //if (currentCommand == 3)
+  if (currentVehicleState == VehicleState::passive)
   {
     waterGoesVroom.resetSim();
   }
@@ -372,13 +375,15 @@ Serial.println(timeSubSecondsMicros); */
   if (mainloopprints)
   {
   //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
-  Serial.print("currentVehicleState :");
+  Serial.print("prop node ID : ");
+  Serial.print(PropulsionSysNodeID);
+  Serial.print(" currentVehicleState :");
   Serial.println(static_cast<uint8_t>(currentVehicleState));
-  Serial.print("currentCommand :");
+  Serial.print(" currentCommand :");
   Serial.println(currentCommand);
 
-  Serial.print("currentConfigMSG :");
-  Serial.print("targetID :");
+  Serial.print(" currentConfigMSG :");
+  Serial.print(" targetID :");
   Serial.print(currentConfigMSG.TargetObjectID);
   Serial.print(" settingID:");
   Serial.print(currentConfigMSG.ObjectSettingID);
@@ -401,6 +406,8 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
             if (tankPressController->getIsBang())
             {
+            Serial.print(": Target");
+            Serial.print(tankPressController->getTargetValue(),10);
             Serial.print(": K_p");
             Serial.print(tankPressController->getKp(),10);
             Serial.print(": K_i");
@@ -432,13 +439,27 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(static_cast<uint8_t>(engineController->getIgniter2State()));
             Serial.println(": ");
 
+            for (auto i = engineController->throttleProgram.begin(); i != engineController->throttleProgram.end(); ++i)
+            {
+                Serial.print(" throttle program point: ");
+                Serial.print(" time: ");
+                Serial.print(i->autoSequenceTimeValue);
+                Serial.print(" Pc: ");
+                Serial.println(i->targetPcValue);
+            }
+
     }
     
     for(auto valve : valveArray)
     {
+            //Serial.print("ValveNodeID: ");
+            //Serial.print(static_cast<uint8_t>(valve->getValveNodeID()));
+            //Serial.print("ValveID: ");
+            //Serial.print(static_cast<uint8_t>(valve->getValveID()));
+        
         if (valve->getValveNodeID() == PropulsionSysNodeID)
         {
-            Serial.print("ValveID: ");
+            Serial.print(" ValveID: ");
             Serial.print(static_cast<uint8_t>(valve->getValveID()));
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
@@ -450,9 +471,14 @@ Serial.println(timeSubSecondsMicros); */
     }
     for(auto pyro : pyroArray)
     {
+        
+            //Serial.print("PyroNodeID: ");
+            //Serial.print(static_cast<uint8_t>(pyro->getPyroNodeID()));
+            //Serial.print("PyroID: ");
+            //Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
         if (pyro->getPyroNodeID() == PropulsionSysNodeID)
         {
-            Serial.print("PyroID: ");
+            Serial.print(" PyroID: ");
             Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
             Serial.print( ": PyroState: ");
             Serial.print(static_cast<uint8_t>(pyro->getState()));
@@ -481,12 +507,13 @@ Serial.println(timeSubSecondsMicros); */
             Serial.print(sensor->getLinRegSlope(),10);
             }
             Serial.println(": ");
- */        }
+ */
+        }
     
     }
 
-  //Serial.print("Current Autosequence Time: ");
-  //Serial.println(IgnitionAutoSequence.getCurrentCountdown());
+  Serial.print("Current Autosequence Time: ");
+  Serial.println(IgnitionAutoSequence.getCurrentCountdown());
 
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   //Serial.print("EEPROM Node ID Read :");

@@ -7,8 +7,8 @@
 // Define the number of autosequences here
 #define NUM_AUTOSEQUENCES 1
 
-// ID, X seconds in micros to set the countdownStart, host node ID
-AutoSequence IgnitionAutoSequence{0,-15000000, 8}; 
+// ID, X seconds [signed value T- format!!!] in micros to set the countdownStart, host node ID
+AutoSequence IgnitionAutoSequence{0,-5000000, 8}; 
 
 std::array<AutoSequence*, NUM_AUTOSEQUENCES> autoSequenceArray{&IgnitionAutoSequence};
 

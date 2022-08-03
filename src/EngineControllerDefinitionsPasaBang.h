@@ -15,7 +15,7 @@ Valve valve4_3{NormalClosed};
 Pyro pyro3_1{};
 Pyro pyro3_2{}; */
 
-EngineController Engine1{4, 8, &LoxMV, &FuelMV, &valve3_3, &EngineIgniter1, &EngineIgniter2, -10000, -1, -1500000, -500000};  //current valve timings are guestimates
+EngineController Engine1{4, 8, 350, &LoxMV, &FuelMV, &valve3_3, &EngineIgniter1, &EngineIgniter2, -10000, -1, -1500000, -500000};  //current valve timings are guestimates
 
 //EngineController Engine1{1, 8, &valve3_1, &valve3_2, &valve3_3, &pyro3_1, &pyro3_2, -10000, -1, -1500000, -500000};  //current valve timings are guestimates
 

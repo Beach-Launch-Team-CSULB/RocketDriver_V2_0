@@ -5,7 +5,7 @@ float ATPtemp = 288.15; //K
 float N2GasConst = 296.8; //J/kg-k
 float Gamma = 1.4;
 
-bool simPrints = false;
+bool simPrints = true;
 bool serialStreamingLog = false;
 bool livePlotOutputOnly = false;
 elapsedMillis tankPressDelayTimer = 0;
@@ -229,6 +229,14 @@ void FluidSystemSimulation::resetSim()
   FuelTank.resetTankObject();
   LoxTank.resetTankObject();
   HiPressTank.resetTankObject();
+
+}
+
+void FluidSystemSimulation::resetAll()
+{
+  //FuelTank.resetTankObject();
+  //LoxTank.resetTankObject();
+  //HiPressTank.resetTankObject();
 
 }
 

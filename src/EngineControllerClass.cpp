@@ -1,10 +1,27 @@
 #include "EngineControllerClass.h"
 #include <Arduino.h>
 
-EngineController::EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPilotMVFuelValve, Valve* setPilotMVLoxValve, Valve* setPneumaticVent, Pyro* setIgniter1, Pyro* setIgniter2, int64_t setFuelMVAutosequenceActuation, int64_t setLoxMVAutosequenceActuation, int64_t setIgniter1Actuation, int64_t setIgniter2Actuation, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, pilotMVFuelValve{*setPilotMVFuelValve}, pilotMVLoxValve{*setPilotMVLoxValve}, pneumaticVent{*setPneumaticVent}, igniter1{*setIgniter1}, igniter2{*setIgniter2}, fuelMVAutosequenceActuation{setFuelMVAutosequenceActuation}, loxMVAutosequenceActuation{setLoxMVAutosequenceActuation}, igniter1Actuation{setIgniter1Actuation}, igniter2Actuation{setIgniter2Actuation}, nodeIDCheck{setNodeIDCheck}
+EngineController::EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, float setCurrentPcTarget_Default, Valve* setPilotMVFuelValve, Valve* setPilotMVLoxValve, Valve* setPneumaticVent, Pyro* setIgniter1, Pyro* setIgniter2, int64_t setFuelMVAutosequenceActuation, int64_t setLoxMVAutosequenceActuation, int64_t setIgniter1Actuation, int64_t setIgniter2Actuation, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, currentPcTarget_Default{setCurrentPcTarget_Default}, pilotMVFuelValve{*setPilotMVFuelValve}, pilotMVLoxValve{*setPilotMVLoxValve}, pneumaticVent{*setPneumaticVent}, igniter1{*setIgniter1}, igniter2{*setIgniter2}, fuelMVAutosequenceActuation{setFuelMVAutosequenceActuation}, loxMVAutosequenceActuation{setLoxMVAutosequenceActuation}, igniter1Actuation{setIgniter1Actuation}, igniter2Actuation{setIgniter2Actuation}, nodeIDCheck{setNodeIDCheck}
 {
-    // Instantiation stuff?
+    fuelMVAutosequenceActuation = fuelMVAutosequenceActuation_Default;
+    loxMVAutosequenceActuation = loxMVAutosequenceActuation_Default;
+    igniter1Actuation_Default = igniter1Actuation;
+    igniter2Actuation = igniter2Actuation_Default;
+
+    currentPcTarget = currentPcTarget_Default;
+
+    //move below into begin???
+    throttlePoint initialThrottlePoint = {0, currentPcTarget};
+    throttleProgram.push_back(initialThrottlePoint);
+    throttlePoint testSecondThrottlePoint = {1500000, 220};
+    throttleProgram.push_back(testSecondThrottlePoint);
+    throttlePoint testThirdThrottlePoint = {3500000, 440};
+    throttleProgram.push_back(testThirdThrottlePoint);
+    //throttle program iterator
+    //auto throttleProgramPos = throttleProgram.begin();
+    //std::size_t throttleProgramPos = 0;
+    throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
 }
 
 void EngineController::begin()
@@ -20,6 +37,128 @@ void EngineController::resetTimer()
     timer = 0;
 }
 
+void EngineController::resetAll()
+{
+    fuelMVAutosequenceActuation = fuelMVAutosequenceActuation_Default;
+    loxMVAutosequenceActuation = loxMVAutosequenceActuation_Default;
+    igniter1Actuation_Default = igniter1Actuation;
+    igniter2Actuation = igniter2Actuation_Default;
+
+    currentPcTarget = currentPcTarget_Default;
+}
+
+bool EngineController::throttlePointCheck(throttlePoint &pt, vector<throttlePoint> &throttleProgram)
+{
+    //function iterates through vector to find any points with same time value
+    //if time value existed it overwrites with new target Pc, deletes any duplicates
+    //return is false if time value was not present, means need to insert throrrle point at correct location still
+    
+    bool isPointAlreadyPresent = false;
+    //throttlePoint currentPosition;
+    for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
+    {
+        //currentPosition = throttleProgram.at(i).autoSequenceTimeValue;
+        if (pt.autoSequenceTimeValue == (i->autoSequenceTimeValue))
+        {
+            if (!isPointAlreadyPresent)
+            {
+            //finds first instance the element exists, overwrites the Pc for the given time point
+            i->targetPcValue = pt.targetPcValue;
+            isPointAlreadyPresent = true;
+            Serial.println(" found 1 entry and updated: ");
+            }
+            else
+            {
+                //erases any duplicated time points
+                Serial.println(" found and killed duplicate: ");
+                throttleProgram.erase(i);
+            }
+        }
+    }
+    return isPointAlreadyPresent;
+}
+
+//void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
+void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
+{
+    //split uint32 into two uint16
+    //uint16_t autoSequenceTimeMillisIn; 
+    //uint16_t currentPcTargetIn;
+
+    //autoSequenceTimeMillisIn = msgValueIn; //need to choppy
+    //currentPcTargetIn = msgValueIn >> 16;
+
+
+    throttlePoint ptIn;
+    
+    if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600)
+    {
+        //single set dumb version
+        if(autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000) //time bounds are T-0 and T+60 seconds
+        {
+            //currentPcTarget = float(currentPcTargetIn); //can add divisor if we decimal shift on other message end
+        }
+
+        //vector version
+        if (autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000)
+        {
+            ptIn.autoSequenceTimeValue = static_cast<int64_t>(autoSequenceTimeMillisIn*1000);
+            ptIn.targetPcValue = float(currentPcTargetIn);
+        
+        if (!throttlePointCheck(ptIn,throttleProgram))
+        {
+            auto itPos = throttleProgram.begin();
+            for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
+            {
+                if (ptIn.autoSequenceTimeValue > (i->autoSequenceTimeValue))
+                {
+                    Serial.print("ptIn.autoSequenceTimeValue : ");
+                    Serial.print(ptIn.autoSequenceTimeValue);
+                    Serial.print("ptIn.targetPcValue : ");
+                    Serial.print(ptIn.targetPcValue);
+                    //Serial.println(" DO i MAKE IT TO BREAK : ");
+                    ++itPos;
+                    //break;
+                }
+            }
+                    throttleProgram.insert((itPos),ptIn);
+        }
+        }
+
+    }
+}
+
+void EngineController::autoSequenceTargetPcUpdate(bool runBool)
+{
+    //attempting to make it so progressing through throttle program updates the iterator so each function call should start on the next value
+    if (runBool)
+    {
+        for (; throttleProgramPos != throttleProgram.end();)
+        //for (auto throttleProgramPos = throttleProgram.begin(); != throttleProgram.end();) //old version that doesn't pick up where we left off
+        {
+            //Serial.println(" here in for");
+            if (currentAutosequenceTime >= (throttleProgramPos->autoSequenceTimeValue))
+            {
+            //Serial.println(" here in if");
+                ++throttleProgramPos;
+                if (throttleProgramPos == throttleProgram.end())    //DIDNT work it bricked and didn't update iterator ever
+                {
+                    //if we reach the end, go back 1 intdex
+                    --throttleProgramPos;
+                }
+            }
+            //Serial.println(" here after if");
+            break;
+        }
+            currentPcTarget = (throttleProgramPos)->targetPcValue;
+            Serial.println(" currentPcTarget inside update: ");
+            Serial.println(currentPcTarget);
+    }
+    else    //if not set to run, grabs the first element in the throttle array
+    {
+        currentPcTarget = throttleProgram.begin()->targetPcValue;
+    }
+}
 void EngineController::stateOperations()
 {
     switch (state)
@@ -27,6 +166,8 @@ void EngineController::stateOperations()
     case EngineControllerState::Passive:
         testPass = false;
         //don't do shit
+        throttleProgramPos = throttleProgram.begin(); //sets/resets throttle program iterator
+        autoSequenceTargetPcUpdate(false);
         pilotMVFuelValve.setState(ValveState::CloseCommanded);
         pilotMVLoxValve.setState(ValveState::CloseCommanded);
         pneumaticVent.setState(ValveState::CloseCommanded);
@@ -39,6 +180,7 @@ void EngineController::stateOperations()
     case EngineControllerState::Armed:
         testPass = false;
         // Arming turns sensor read rates up to operational levels before opening valves
+        autoSequenceTargetPcUpdate(true);
         if (priorState != EngineControllerState::Armed)
         {
         pilotMVFuelValve.setState(ValveState::CloseCommanded);
@@ -51,6 +193,7 @@ void EngineController::stateOperations()
         break;
     case EngineControllerState::FiringAutosequence:
         testPass = false;
+        autoSequenceTargetPcUpdate(true);
         // I DO need this case to run every stateOperations cycle to check on sequence timing, or I need to move logic somewhere else
         //Fuel MV autosequence check
         if (currentAutosequenceTime >= fuelMVAutosequenceActuation) {pilotMVFuelValve.setState(ValveState::OpenCommanded);}

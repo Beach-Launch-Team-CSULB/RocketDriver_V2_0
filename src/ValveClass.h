@@ -40,7 +40,7 @@ class Valve
         Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime,  
         bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, uint8_t setHoldDuty = 64, bool setNodeIDCheck = false);
     // Default constructor with no args    
-        Valve(ValveType setValveType);
+        Valve(ValveType setValveType, ValveState setAbortedState = ValveState::CloseCommanded, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -114,6 +114,8 @@ class Valve
         void setValveType(uint8_t typeIn){if (typeIn == 0 || typeIn == 1) {valveType = static_cast<ValveType>(typeIn);}}
         void setFullDutyTime(uint32_t fullDutyTimeIn){if (fullDutyTimeIn <= 10000) {fullDutyTime = fullDutyTimeIn;}}
 
+    // reset all configurable settings to defaults
+        void resetAll();
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds
 

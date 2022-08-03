@@ -11,7 +11,7 @@ Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8
     timer = 0;
 }
 
-Pyro::Pyro(uint32_t setLiveOutTime = 250) : liveOutTime{setLiveOutTime}
+Pyro::Pyro(uint32_t setLiveOutTime) : liveOutTime{setLiveOutTime}
 {
     
 }
@@ -30,6 +30,11 @@ void Pyro::begin()
 void Pyro::resetTimer()
 {
     timer = 0;
+}
+
+void Pyro::resetAll()
+{
+    //rest all configurable settings to defaults
 }
 
 PyroState Pyro::getSyncState()

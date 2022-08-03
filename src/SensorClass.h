@@ -49,6 +49,8 @@ class SENSORBASE
     virtual void setEnableIntegralCalc(bool setEnableIn);
     virtual void resetIntegralCalc(bool resetBoolIn, float integralCalcIn = 0);
 
+    virtual void resetAll();
+
     // constructor 1,
     //MCU_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, bool internalMCUTemp, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false);
     // constructor 2, define attributes for conversions, gui updates, et cetera

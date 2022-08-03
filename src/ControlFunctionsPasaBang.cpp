@@ -205,7 +205,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
-            engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Armed);
             currentState = VehicleState::fireArmed;
             }
             break;
@@ -460,7 +460,10 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput2(sensorArray.at(FuelTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank2PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput3(sensorArray.at(FakeFuelTankPT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getIntegralSum(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getLinRegSlope());
-   
+    // Engine Controller to Tank Controller Pc Target set
+    tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPcTarget(engineControllerArray.at(Engine1Controller_ArrayPointer)->getCurrentPcTarget());
+    tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPcTarget(engineControllerArray.at(Engine1Controller_ArrayPointer)->getCurrentPcTarget());
+
     //sei(); // reenables interrupts after controller sync
 }
 
@@ -493,8 +496,11 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    valve->resetAll();
+                    break;
                 case 1:
-        Serial.println("do I get past case1  ");
+        //Serial.println("do I get past case1  ");
                     valve->setValveType(currentConfigMSG.uint8Value);
                     break;
                 case 2:
@@ -524,6 +530,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    pyro->resetAll();
+                    break;
                 case 1:
                     //pyro->
                     break;
@@ -554,6 +563,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    sensor->resetAll();
+                    break;
                 case 1:
                     //sensor->
                     break;
@@ -584,6 +596,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    autosequence->resetAll();
+                    break;
                 case 1:
                     //autosequence->
                     break;
@@ -614,6 +629,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    tankPressController->resetAll();
+                    break;
                 case 1:
                     tankPressController->setK_p(currentConfigMSG.floatValue);
                     break;
@@ -644,6 +662,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             {
                 switch (currentConfigMSG.ObjectSettingID)
                 {
+                case 0:
+                    engineController->resetAll();
+                    break;
                 case 1:
                     engineController->setFuelMVAutosequenceActuation(currentConfigMSG.int32Value);
                     break;
@@ -655,6 +676,9 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     break;
                 case 4:
                     engineController->setIgniter2ActuationActuation(currentConfigMSG.int32Value);
+                    break;
+                case 5:
+                    engineController->setThrottleProgramPoint(currentConfigMSG.uint16Value2X[0],currentConfigMSG.uint16Value2X[1]);
                     break;
                 
                 default:

@@ -25,9 +25,9 @@ Valve valve3_2{NormalClosed};
 Valve valve3_3{NormalClosed};
 
 
-TankPressController HiPressTankController{1, 8, &valve1_1, &HiPressVent, &valve1_3, 5000, 6000};
-TankPressController LoxTankController{2, 8, &LoxBang, &valve2_2, &LoxVent, 360, 600, 2.5, 1, .2, 1};
-TankPressController FuelTankController{3, 8, &FuelBang, &valve3_2, &FuelVent, 360, 600, 2.5, 1, .2, 1};
+TankPressController HiPressTankController{1, 8, &valve1_1, &HiPressVent, &valve1_3, 6000};
+TankPressController LoxTankController{2, 8, &LoxBang, &valve2_2, &LoxVent, 300, 60, 600, 2.5, 1.0, 1.5, 1};
+TankPressController FuelTankController{3, 8, &FuelBang, &valve3_2, &FuelVent, 300, 60, 600, 2.5, 1.0, 1.5, 1};
 
 //
 std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS> tankPressControllerArray{&HiPressTankController, &LoxTankController, &FuelTankController};

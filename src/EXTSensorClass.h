@@ -45,27 +45,35 @@ class EXT_SENSOR : public SENSORBASE
     //const string sens_name;           //your own name for sensor to reference it
     SensorState sensorState;
     uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
-    const uint32_t sampleRateSlowMode = 1;        //the sample rate this given sensor will be read at
-    const uint32_t sampleRateMedMode = 10;         //the sample rate this given sensor will be read at
-    const uint32_t sampleRateFastMode = 100;        //the sample rate this given sensor will be read at
-    const uint32_t sampleRateCalibrationMode = 10;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateSlowMode_Default = 1;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateMedMode_Default = 10;         //the sample rate this given sensor will be read at
+    const uint32_t sampleRateFastMode_Default = 100;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateCalibrationMode_Default = 10;        //the sample rate this given sensor will be read at
+    uint32_t sampleRateSlowMode;        //the sample rate this given sensor will be read at
+    uint32_t sampleRateMedMode;         //the sample rate this given sensor will be read at
+    uint32_t sampleRateFastMode;        //the sample rate this given sensor will be read at
+    uint32_t sampleRateCalibrationMode;        //the sample rate this given sensor will be read at
     uint32_t currentSampleRate = 10;
     elapsedMicros timer;                      // timer for sensor timing operations
     uint32_t currentRawValue{};               // holds the current value for the sensor
-    bool newSensorValueCheck;                      // Is the current raw value a new read that hasn't been sent yet?
+    bool newSensorValueCheck = false;                      // Is the current raw value a new read that hasn't been sent yet?
     uint16_t currentCANtimestamp = 0;
     uint32_t currentTimestampSeconds = 0;
     uint32_t currentTimestampMicros = 0;
     uint32_t priorTimestampSeconds = 0;
     uint32_t priorTimestampMicros = 0;
     //const uint8_t bitDepth;                   // bit depth of the sample, for output chopping?
-    bool nodeIDCheck;                           // Whether this object should operate on this node
+    bool nodeIDCheck = false;                           // Whether this object should operate on this node
     bool internalMCUTemp;                       // Is this sensor the MCU internal temp
     
     float currentConvertedValue{};
     float priorConvertedValue{};
-    bool newConversionCheck;                      // Is the current raw value a new read that hasn't been sent yet?
+    bool newConversionCheck = false;                      // Is the current raw value a new read that hasn't been sent yet?
     
+    float linConvCoef1_m_Default;                     // Base calibration coefficients
+    float linConvCoef1_b_Default;                     // Base calibration coefficients
+    float linConvCoef2_m_Default;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
+    float linConvCoef2_b_Default;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
     float linConvCoef1_m;                     // Base calibration coefficients
     float linConvCoef1_b;                     // Base calibration coefficients
     float linConvCoef2_m;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
@@ -74,19 +82,23 @@ class EXT_SENSOR : public SENSORBASE
     //uint8_t currentRollingArrayPosition = 0;
     uint32_t currentCalibrationValue{};               // holds the current value for the sensor
     //uint32_t currentRunningSUM = 0;
-    bool EMA = true;  //needs a set function still
+    bool EMA_Default = true;  //needs a set function still
+    bool EMA;  //needs a set function still
     float priorEMAOutput = 0;
-    float alphaEMA = 1;
+    float alphaEMA_Default = 0.7; //1 is no weight to old values, 0 has no weight to new value and will brick
+    float alphaEMA;
     float newEMAOutput = 0;
 
     bool enableIntegralCalc = false;
-    bool enableLinearRegressionCalc = false;
+    bool enableLinearRegressionCalc = true; //not currently using, linreg only calculates when get func requests it
     float currentIntegralSum = 0;
     float currentLinReg_a1 = 0;
-    uint32_t regressionSamples = 5;
+    const uint32_t regressionSamples_Default = 5;
+    uint32_t regressionSamples;
     float convertedValueArray[5+3] = {};  //should be the same size as regression samples +3 for rolling array index stuff
     float timeStep = 0.01; //timeStep in seconds
     float targetValue = 0;
+  
   FluidSystemSimulation &fluidSim;
 
   public:
@@ -95,7 +107,7 @@ class EXT_SENSOR : public SENSORBASE
     void stateOperations();
     
     // constructor 1 - standard MCU external ADC read
-    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, float setLinConvCoef1_m = 1, float setLinConvCoef1_b = 0, float setLinConvCoef2_m = 1, float setLinConvCoef2_b = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false, bool setNewConversionCheck = false);
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
     // constructor 2 - simulated sensor object
     EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource = simulatedInput);
 
@@ -155,6 +167,8 @@ class EXT_SENSOR : public SENSORBASE
     void setTargetValue(float targetValueIn){targetValue = targetValueIn;}
 
     void resetTimer();                // resets timer to zero
+    // reset all configurable settings to defaults
+    void resetAll();
 
     //void read(ADC* adc);              // updates currentRawValue with current reading, using an activated ADC object
 
@@ -162,7 +176,7 @@ class EXT_SENSOR : public SENSORBASE
 
     void exponentialMovingAverage();
 
-    void initializeLinReg(uint8_t arraySizeIn);
+    void initializeLinReg(uint8_t arraySizeIn); //not in use at the moment
 
     void setEnableIntegralCalc(bool setEnableIn){enableIntegralCalc = setEnableIn;}
 

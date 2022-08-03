@@ -38,19 +38,44 @@ void MCUADCSetup()
 
 
 // Initializer 1
-EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, float setLinConvCoef1_m, float setLinConvCoef1_b, float setLinConvCoef2_m = 1, float setLinConvCoef2_b = 0, uint32_t setCurrentSampleRate, SensorState setSensorState, bool setNodeIDCheck, bool setNewSensorValueCheck, bool setNewConversionCheck)
-                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, sampleRateSlowMode{setSampleRateSlowMode}, sampleRateMedMode{setSampleRateMedMode}, sampleRateFastMode{setSampleRateFastMode}, linConvCoef1_m{setLinConvCoef1_m}, linConvCoef1_b{setLinConvCoef1_b}, linConvCoef2_m{setLinConvCoef2_m}, linConvCoef2_b{setLinConvCoef2_b}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}, nodeIDCheck{setNodeIDCheck}, newSensorValueCheck{setNewSensorValueCheck}, newConversionCheck{setNewConversionCheck}
+EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off)
+                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, fluidSim{*setFluidSim}, sampleRateSlowMode_Default{setSampleRateSlowMode_Default}, sampleRateMedMode_Default{setSampleRateMedMode_Default}, sampleRateFastMode_Default{setSampleRateFastMode_Default}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
 {
-    // place any constructor operations here
+  // setting stuff to defaults at initialization
+  sampleRateSlowMode = sampleRateSlowMode_Default;
+  sampleRateMedMode = sampleRateMedMode_Default;
+  sampleRateFastMode = sampleRateFastMode_Default;
+  sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
+
+  linConvCoef1_m = linConvCoef1_m_Default;
+  linConvCoef1_b = linConvCoef1_b_Default;
+  linConvCoef2_m = linConvCoef2_m_Default;
+  linConvCoef2_b = linConvCoef2_b_Default;
+
+  EMA = EMA_Default;
+  alphaEMA = alphaEMA_Default;
+  regressionSamples = regressionSamples_Default;
 }
 
 // Initializer 2
 EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource)
                 : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, fluidSim{*setFluidSim}, sensorSource{setSensorSource}
 {
-    // place any constructor operations here
-}
+  // setting stuff to defaults at initialization
+  sampleRateSlowMode = sampleRateSlowMode_Default;
+  sampleRateMedMode = sampleRateMedMode_Default;
+  sampleRateFastMode = sampleRateFastMode_Default;
+  sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
 
+  linConvCoef1_m = linConvCoef1_m_Default;
+  linConvCoef1_b = linConvCoef1_b_Default;
+  linConvCoef2_m = linConvCoef2_m_Default;
+  linConvCoef2_b = linConvCoef2_b_Default;
+
+  EMA = EMA_Default;
+  alphaEMA = alphaEMA_Default;
+  regressionSamples = regressionSamples_Default;
+}
 
 void EXT_SENSOR::begin()
 {
@@ -72,6 +97,24 @@ void EXT_SENSOR::resetTimer()
 {
     timer = 0;
 }
+
+void EXT_SENSOR::resetAll()
+{
+  //
+  sampleRateSlowMode = sampleRateSlowMode_Default;
+  sampleRateMedMode = sampleRateMedMode_Default;
+  sampleRateFastMode = sampleRateFastMode_Default;
+  sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
+
+  linConvCoef1_m = linConvCoef1_m_Default;
+  linConvCoef1_b = linConvCoef1_b_Default;
+  linConvCoef2_m = linConvCoef2_m_Default;
+  linConvCoef2_b = linConvCoef2_b_Default;
+
+  EMA = EMA_Default;
+  alphaEMA = alphaEMA_Default;
+}
+
 void EXT_SENSOR::setState(SensorState newState) 
 {
     sensorState = newState;

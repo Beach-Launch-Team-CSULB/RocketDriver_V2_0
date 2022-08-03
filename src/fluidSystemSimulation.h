@@ -86,14 +86,19 @@ class FluidSystemSimulation
         double TimeDelta = 0.01; //default value for 100Hz
         FluidSystemSimulation(uint8_t setSimID, PressurantTank setHiPressTank, tankObject setFuelTank, tankObject setLoxTank);
     
+    //get functions
+        uint8_t getSimID(){return simID;}
+
+
     // Top Level Fluid Simulation function, run each time step
-    void fluidSystemUpdate();
+        void fluidSystemUpdate();
     // Fake analog sensor read function, used for feeding the propulsion controllers simulated data
-    float analogRead(uint8_t fakeADCpin);
+        float analogRead(uint8_t fakeADCpin);
+    // reset simulation to run again
+        void resetSim();
+    // reset all configurable settings to defaults
+        void resetAll();
 
-    void resetSim();
-
-    uint8_t getSimID(){return simID;}
 };
 
 

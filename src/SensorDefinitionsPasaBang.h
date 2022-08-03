@@ -14,15 +14,15 @@
 // PasaFire BangBang Config
 //EXT_SENSOR ThrustMountLoadCell1pos{50, 2, A3, 2, 10, 100, false};                       // 0
 //EXT_SENSOR ThrustMountLoadCell1neg{50, 5, A2, 2, 10, 100, false};                       // 1
-EXT_SENSOR ChamberPT1{56, 8, ALARA_ANALOG_IN4, 10, 100, 800, 0.0185, -128.88};                 // 7
-EXT_SENSOR FuelLinePT{57, 8, ALARA_ANALOG_IN5, 2, 10, 100, 0.0185, -125.74};          // 8
-EXT_SENSOR LoxLinePT{59, 8, ALARA_ANALOG_IN6, 2, 10, 100, 0.0186, -128.58};           // 10
+EXT_SENSOR ChamberPT1{56, 8, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 800, 0.0185, -128.88};                 // 7
+EXT_SENSOR FuelLinePT{57, 8, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, 0.0185, -125.74};          // 8
+EXT_SENSOR LoxLinePT{59, 8, ALARA_ANALOG_IN6, &waterGoesVroom, 2, 10, 100, 0.0186, -128.58};           // 10
 //EXT_SENSOR MVPneumaticsPT{78, 3, A15, 2, 10, 50, false, 0.0186, -126.56};                // 11
-EXT_SENSOR FuelTankPT1{81, 8, ALARA_ANALOG_IN7, 2, 10, 100, 0.0186, -129.3};                    // 14
-EXT_SENSOR FuelTankPT2{82, 8, ALARA_ANALOG_IN8, 2, 10, 100, 0.0123, -123.11};                    // 14
-EXT_SENSOR LoxTankPT1{83, 8, ALARA_ANALOG_IN2, 2, 10, 100, 0.0187, -125.36};                    // 15
-EXT_SENSOR LoxTankPT2{84, 8, ALARA_ANALOG_IN3, 2, 10, 100, 0.0124, -123.43};                    // 15
-EXT_SENSOR HiPressPT{85, 8, ALARA_ANALOG_IN1, 2, 10, 50, 0.0933, -638.38};                 // 16
+EXT_SENSOR FuelTankPT1{81, 8, ALARA_ANALOG_IN7, &waterGoesVroom, 2, 10, 100, 0.0186, -129.3};                    // 14
+EXT_SENSOR FuelTankPT2{82, 8, ALARA_ANALOG_IN8, &waterGoesVroom, 2, 10, 100, 0.0123, -123.11};                    // 14
+EXT_SENSOR LoxTankPT1{83, 8, ALARA_ANALOG_IN2, &waterGoesVroom, 2, 10, 100, 0.0187, -125.36};                    // 15
+EXT_SENSOR LoxTankPT2{84, 8, ALARA_ANALOG_IN3, &waterGoesVroom, 2, 10, 100, 0.0124, -123.43};                    // 15
+EXT_SENSOR HiPressPT{85, 8, ALARA_ANALOG_IN1, &waterGoesVroom, 2, 10, 50, 0.0933, -638.38};                 // 16
 //EXT_SENSOR MCUtempNode8{200, 8, 70, 2, 5, 10};                                    // 18
 
 //FAKESHIT

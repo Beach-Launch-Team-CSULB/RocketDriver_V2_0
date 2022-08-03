@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "extendedIO/extendedIO.h"
 
-Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime, bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, uint8_t setHoldDuty,  bool setNodeIDCheck)
+Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime, bool setAbortHaltDeviceBool, ValveState setAbortedState, uint8_t setHoldDuty,  bool setNodeIDCheck)
                 : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType{setValveType}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime{setFullDutyTime}, abortHaltDeviceBool{setAbortHaltDeviceBool}, abortedState{setAbortedState}, holdDuty{setHoldDuty}, nodeIDCheck{setNodeIDCheck}
 {
     switch (valveType)
@@ -24,7 +24,7 @@ Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType
     
 }
 
-Valve::Valve(ValveType setValveType) : valveType{setValveType}
+Valve::Valve(ValveType setValveType, ValveState setAbortedState, bool setNodeIDCheck) : valveType{setValveType}, abortedState{setAbortedState}, nodeIDCheck{setNodeIDCheck}
 {
     
 }
@@ -43,6 +43,11 @@ void Valve::begin()
 void Valve::resetTimer()
 {
     timer = 0;
+}
+
+void Valve::resetAll()
+{
+    //
 }
 
 ValveState Valve::getSyncState()

@@ -44,6 +44,8 @@ class AutoSequence
         void setState(AutoSequenceState newState) {state = newState;} //every time a state is set, the timer should reset
 
         void resetTimer() {timer = 0;}
+    // reset all configurable settings to defaults
+        void resetAll();
 
         void stateOperations(); //add into this the functions for managing the countdown initialization and holds
 

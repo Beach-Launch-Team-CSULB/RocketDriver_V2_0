@@ -12,14 +12,14 @@
 //the shittier version is to just make switch cases for each class based on the settingID
 //would need to map the objectIDs to the right class, and have a stupid switch function for the class manually coded
 
-std::unordered_map<uint16_t, configSet> configSetmap
+/* std::unordered_map<uint16_t, configSet> configSetmap
 {
 // map key = ALARA address
 {1, configSet {0, 0, 0}},
 {2, configSet {0, 0, 0}},
 {3, configSet {0, 0, 0}},
 {4, configSet {0, 0, 0}},
-};
+}; */
 
 
 void lookupALARASNmap(configMSG MSGin)

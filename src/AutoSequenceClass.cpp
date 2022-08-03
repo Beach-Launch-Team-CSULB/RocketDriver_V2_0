@@ -15,7 +15,10 @@ void AutoSequence::begin()
     
 }
 
-
+void AutoSequence::resetAll()
+{
+    //
+}
 
 void AutoSequence::stateOperations()
 {

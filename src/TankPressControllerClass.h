@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 #include "ControllerStates.h"
-//#include <array>
-//#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
 #include "SensorStates.h"
 #include "ValveClass.h"
 
@@ -29,8 +27,22 @@ class TankPressController
         Valve &tankVent;
         //Valve MainValve{};
 
+        bool ventFailsafeFlag = false;  //for making vent failsafe require successive controller loops to open vents
         float ventFailsafePressure;
+        float ventFailsafePressure_Default;
+        float targetPcValue;
+        float targetPcValue_Default;
+        float tankToChamberDp;
+        float tankToChamberDp_Default;
 
+        //float targetValue_Default;
+        float K_p_Default = 1;
+        float K_i_Default = 0; //initial Ki, KEEP 0 for tank press
+        float K_i_run_Default = 0; //bang run Ki
+        float K_d_Default = 0;
+        float controllerThreshold_Default = 1;
+
+        
         float targetValue;
         float K_p = 1;
         float K_i = 0; //initial Ki, KEEP 0 for tank press
@@ -39,6 +51,8 @@ class TankPressController
         float controllerThreshold = 1;
         float bangPIDoutput;
 
+        uint32_t valveMinimumEnergizeTime_Default = 75;      // in ms
+        uint32_t valveMinimumDeenergizeTime_Default = 50;    // in ms
         uint32_t valveMinimumEnergizeTime = 75;      // in ms
         uint32_t valveMinimumDeenergizeTime = 50;    // in ms
         float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
@@ -50,6 +64,7 @@ class TankPressController
         float bangSensor1EMA = 0;   //primary PT
         float bangSensor2EMA = 0;   //secondary PT
         float bangSensor3EMA = 0;   //simulated PT
+        float bangSensorWeightedEMA = 0;   //weighted ave/trusted value - currently crude use
         float bangSensor1Integral = 0;   //primary PT
         float bangSensor2Integral = 0;   //secondary PT
         float bangSensor3Integral = 0;   //simulated PT
@@ -75,14 +90,13 @@ class TankPressController
         float timeStepPIDMath = 0;
 
         bool resetIntegralCalcBool = false;
-        bool tempBoolContainer = false;
 
     public:
 
     // constructor - hipress
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetValue, float setVentFailsafePressure, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setVentFailsafePressure_Default, bool setNodeIDCheck = false);
     // constructor - tank bangers
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetValue, float setVentFailsafePressure, float set_K_p, float set_K_i, float set_K_d, float setControllerThreshold, bool isSystemBang = true, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool isSystemBang = true, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -102,6 +116,7 @@ class TankPressController
         ValveState getTankVentState(){return tankVent.getState();}
         bool getResetIntegralCalcBool()
             {
+                bool tempBoolContainer;
                 tempBoolContainer = resetIntegralCalcBool;
                 resetIntegralCalcBool = false;              //default resets it to false
                 return tempBoolContainer;
@@ -144,12 +159,18 @@ class TankPressController
         void testSetPrimaryPressValveState(ValveState primaryPressValveStateIn) {if(testPass) {primaryPressValve.setState(primaryPressValveStateIn);}}
         void testSetPressLineVentState(ValveState pressLineVentStateIn) {if(testPass) {pressLineVent.setState(pressLineVentStateIn);}}
         void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVent.setState(tankVentStateIn);}}
-    //setting PID parameters
+    //setting functions - have all inputs bounded to catch nonsense CAN config msg inputs
+        void setVentFailsafePressure(float ventFailsafePressureIn){if (ventFailsafePressureIn <= 10000 && ventFailsafePressureIn >= 0) {ventFailsafePressure = ventFailsafePressureIn;}}
+        
         void setK_p(float K_pin){if (K_pin <= 1000 && K_pin >= -1000) {K_p = K_pin;}}
         void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;}}
         void setK_i(){K_i = K_i_run;}   //empty input args means reset K_i to K_i_run
         void setK_d(float K_din){if (K_din <= 1000 && K_din >= -1000) {K_d = K_din;}}
 
+        void setPcTarget(float PcTargetIn);
+    
+    // reset all configurable settings to defaults
+        void resetAll();
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds
     // autosequence get function
