@@ -14,13 +14,11 @@ EngineController::EngineController(uint32_t setControllerID, uint8_t setControll
     //move below into begin???
     throttlePoint initialThrottlePoint = {0, currentPcTarget};
     throttleProgram.push_back(initialThrottlePoint);
-    throttlePoint testSecondThrottlePoint = {1500000, 220};
-    throttleProgram.push_back(testSecondThrottlePoint);
-    throttlePoint testThirdThrottlePoint = {3500000, 440};
-    throttleProgram.push_back(testThirdThrottlePoint);
+    //throttlePoint testSecondThrottlePoint = {1500000, 220};
+    //throttleProgram.push_back(testSecondThrottlePoint);
+    //throttlePoint testThirdThrottlePoint = {3500000, 440};
+    //throttleProgram.push_back(testThirdThrottlePoint);
     //throttle program iterator
-    //auto throttleProgramPos = throttleProgram.begin();
-    //std::size_t throttleProgramPos = 0;
     throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
 }
 
@@ -65,12 +63,12 @@ bool EngineController::throttlePointCheck(throttlePoint &pt, vector<throttlePoin
             //finds first instance the element exists, overwrites the Pc for the given time point
             i->targetPcValue = pt.targetPcValue;
             isPointAlreadyPresent = true;
-            Serial.println(" found 1 entry and updated: ");
+            //Serial.println(" found 1 entry and updated: ");
             }
             else
             {
                 //erases any duplicated time points
-                Serial.println(" found and killed duplicate: ");
+                //Serial.println(" found and killed duplicate: ");
                 throttleProgram.erase(i);
             }
         }
@@ -81,48 +79,80 @@ bool EngineController::throttlePointCheck(throttlePoint &pt, vector<throttlePoin
 //void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
 void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
 {
-    //split uint32 into two uint16
-    //uint16_t autoSequenceTimeMillisIn; 
-    //uint16_t currentPcTargetIn;
-
-    //autoSequenceTimeMillisIn = msgValueIn; //need to choppy
-    //currentPcTargetIn = msgValueIn >> 16;
-
-
     throttlePoint ptIn;
-    
-    if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600)
-    {
-        //single set dumb version
-        if(autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000) //time bounds are T-0 and T+60 seconds
+    //only can change throttle vector while controller isn't in active state
+    //function should work correctly in any state, but normally do not want to be changing the throttleprogram once running
+    if(state == EngineControllerState::Passive) 
+    {    
+        if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600)
         {
-            //currentPcTarget = float(currentPcTargetIn); //can add divisor if we decimal shift on other message end
-        }
-
-        //vector version
-        if (autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000)
-        {
-            ptIn.autoSequenceTimeValue = static_cast<int64_t>(autoSequenceTimeMillisIn*1000);
-            ptIn.targetPcValue = float(currentPcTargetIn);
-        
-        if (!throttlePointCheck(ptIn,throttleProgram))
-        {
-            auto itPos = throttleProgram.begin();
-            for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
+            //vector version
+            if (autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000)
             {
-                if (ptIn.autoSequenceTimeValue > (i->autoSequenceTimeValue))
+                ptIn.autoSequenceTimeValue = static_cast<int64_t>(autoSequenceTimeMillisIn*1000);
+                ptIn.targetPcValue = float(currentPcTargetIn);
+            
+            if (!throttlePointCheck(ptIn,throttleProgram))
+            {
+                auto itPos = throttleProgram.begin();
+                for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
                 {
-                    Serial.print("ptIn.autoSequenceTimeValue : ");
-                    Serial.print(ptIn.autoSequenceTimeValue);
-                    Serial.print("ptIn.targetPcValue : ");
-                    Serial.print(ptIn.targetPcValue);
-                    //Serial.println(" DO i MAKE IT TO BREAK : ");
-                    ++itPos;
-                    //break;
+                    if (ptIn.autoSequenceTimeValue > (i->autoSequenceTimeValue))
+                    {
+                        Serial.print("ptIn.autoSequenceTimeValue : ");
+                        Serial.print(ptIn.autoSequenceTimeValue);
+                        Serial.print("ptIn.targetPcValue : ");
+                        Serial.print(ptIn.targetPcValue);
+                        //Serial.println(" DO i MAKE IT TO BREAK : ");
+                        ++itPos;
+                        //break;
+                    }
                 }
+                        throttleProgram.insert((itPos),ptIn);
             }
-                    throttleProgram.insert((itPos),ptIn);
+            }
+
         }
+        throttleProgramPos = throttleProgram.begin(); //sets/resets throttle program iterator
+    }
+}
+
+void EngineController::throttleProgramReset()
+{
+    if(state == EngineControllerState::Passive)
+    { 
+        // no input args == reset whole program
+        throttleProgram.clear();
+        //clear wipes everything, invalidates all iterators
+        //add back default T=0 point
+        throttlePoint initialThrottlePoint = {0, currentPcTarget_Default};
+        throttleProgram.push_back(initialThrottlePoint);
+        // restarts the iterator
+        throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
+    }
+}
+
+void EngineController::throttleProgramReset(uint16_t autoSequenceTimeMillisIn)
+{
+    if(state == EngineControllerState::Passive)
+    {
+    // autosequence time input arg == remove a point at that time if it exists
+    for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
+    {
+        //checks for any matchs and erases them
+        if (static_cast<int64_t>(autoSequenceTimeMillisIn*1000) == (i->autoSequenceTimeValue))
+        {
+            throttleProgram.erase(i);
+        }
+    }
+        //checks to see if vector is now empty, and if so puts back default T=0 value to not have invalid throttle sequence
+        if (throttleProgram.empty())
+        {
+            //add back default T=0 point
+            throttlePoint initialThrottlePoint = {0, currentPcTarget_Default};
+            throttleProgram.push_back(initialThrottlePoint);
+            // restarts the iterator
+            throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
         }
 
     }

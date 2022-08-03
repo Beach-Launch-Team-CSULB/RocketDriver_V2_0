@@ -200,6 +200,11 @@ void setup() {
   //CHEATER OVERRIDE!!!!!
   //PropulsionSysNodeID = 8;
 
+  // -----Initialize CAN-----
+  vectorBufferInitialize(32); //number of vector elements memory is reserved for
+  // CAN0 - FlexCAN 2.0 bus
+  Can0.begin(CAN2busSpeed);
+
   // -----Initialize ADCs-----
   MCUADCSetup();
 
@@ -240,8 +245,6 @@ void setup() {
 
   Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
 
-///// CAN0 and CAN1 Initialize /////
-  Can0.begin(CAN2busSpeed);
 }
 
 void loop() 
@@ -263,6 +266,8 @@ Serial.println(timeSubSecondsMicros); */
     Serial.println(currentCommand); //currently only does the command not any message
   }
   //function to take config MSGs and read them out
+  
+  NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray);
   
   //if (mainLoopTestingTimer >= 200)

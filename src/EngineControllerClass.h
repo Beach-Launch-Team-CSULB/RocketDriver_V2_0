@@ -127,6 +127,8 @@ class EngineController
     // throttle program set point function
         bool throttlePointCheck(throttlePoint &pt, vector<throttlePoint> &throttleProgram);
         void setThrottleProgramPoint(uint16_t autoSequenceTimeMicrosIn, uint16_t currentPcTargetIn);
+        void throttleProgramReset();
+        void throttleProgramReset(uint16_t autoSequenceTimeMillisIn);
         void autoSequenceTargetPcUpdate(bool runBool);
     // autosequence get function
         void setCurrentAutosequenceTime(int64_t countdownIn) {currentAutosequenceTime = countdownIn;}

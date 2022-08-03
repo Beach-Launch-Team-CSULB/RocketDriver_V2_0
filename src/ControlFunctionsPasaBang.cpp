@@ -469,7 +469,9 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
 
 void configMSGread(configMSG& currentConfigMSG, bool& NewConfigMessage, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
 {
-bool idSearch = true; //for whether to continue to check the next object array (object ID has not been found yet)
+// bool for whether to continue to check the next object array (object ID has not been found yet)
+// NON UNIQUE OBJECT IDS WILL BREAK THIS SYSTEM
+bool idSearch = true; 
 
 if (NewConfigMessage) //only run all this nonsense if there is a new config message
     {
@@ -679,6 +681,12 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     break;
                 case 5:
                     engineController->setThrottleProgramPoint(currentConfigMSG.uint16Value2X[0],currentConfigMSG.uint16Value2X[1]);
+                    break;
+                case 6:
+                    engineController->throttleProgramReset();   //resets entire throttle program, wipes all points and goes back to only T=0 default
+                    break;
+                case 7:
+                    engineController->throttleProgramReset(currentConfigMSG.uint16Value2X[0]); //removes any throttle program points with matching time value
                     break;
                 
                 default:

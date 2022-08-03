@@ -160,7 +160,7 @@ void autoSequenceSetUp(const std::array<T, size>& autoSequenceArray)
 template <typename T, std::size_t size>
 void engineControllerSetup(const std::array<T, size>& engineControllerArray)
 {
-    // iterate through valve array and run the stateOperations method
+    // iterate through engine controller array and run begin
     for(auto engineController : engineControllerArray)
     {
         engineController->begin();
@@ -171,7 +171,7 @@ void engineControllerSetup(const std::array<T, size>& engineControllerArray)
 template <typename T, std::size_t size>
 void tankPressControllerSetup(const std::array<T, size>& tankPressControllerArray)
 {
-    // iterate through valve array and run the stateOperations method
+    // iterate through tank controller array and run begin
     for(auto tankPressController : tankPressControllerArray)
     {
         tankPressController->begin();
@@ -182,7 +182,7 @@ void tankPressControllerSetup(const std::array<T, size>& tankPressControllerArra
 template <typename T, std::size_t size>
 void sensorSetUp(const std::array<T, size>& sensorArray)
 {
-    // iterate through valve array and run the stateOperations method
+    // iterate through sensor array and run begin
     for(auto sensor : sensorArray)
     {
         sensor->begin();

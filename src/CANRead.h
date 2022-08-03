@@ -8,8 +8,16 @@
 //bool localNodeResetFlag = false;
 
 // header file for the function to call every loop, function returns true if a new message was read
+ //vector buffer version
+static std::vector<configMSG> configMSGvecBuffer{}; 
 
 void serialToCAN2Read();
+
+void vectorBufferInitialize(size_t bufferSize);
+
+void writeVectorBuffer(configMSG configStructIn);
+
+bool readRemoveVectorBuffer(configMSG& configMSGOut);
 
 
 

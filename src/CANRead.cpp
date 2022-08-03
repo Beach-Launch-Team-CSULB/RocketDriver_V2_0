@@ -1,35 +1,71 @@
 #include <Arduino.h>
 #include <FlexCAN.h>
 #include <array>
+#include <vector>
 #include "CANRead.h"
+using std::array;
+using std::vector;
 
 
+void vectorBufferInitialize(size_t bufferSize)
+{
+    configMSGvecBuffer.reserve(bufferSize); // should reserve by element count
+} 
+   
+
+
+void writeVectorBuffer(configMSG configStructIn)
+{
+    //writes to the vector buffer, up to the allocated size
+    if (!(configMSGvecBuffer.size() == configMSGvecBuffer.capacity()))  //only proceed if not at capacity
+    {
+        //add to back of vector
+        configMSGvecBuffer.push_back(configStructIn);
+    }
+    else 
+    {
+        Serial.println("vector buffer overrun");
+    }
+}
+
+bool readRemoveVectorBuffer(configMSG& configMSGOut)
+{
+    //reads and deletes once read vector elements out of the buffer, once per func call
+    // returns true if there are elements left in buffer
+    if(configMSGvecBuffer.empty())
+    {
+        return false;
+    }
+    else 
+    {
+    Serial.println(" here? ");
+    configMSGOut = configMSGvecBuffer.front();
+    Serial.println(" there? ");
+    configMSGvecBuffer.erase(configMSGvecBuffer.begin());
+    Serial.println(" everywhere? ");
+        return true;
+    }
+}
 
 // function to be run every loop to check for a new CAN message
-
 
 bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMessage, Command& CurrentCommand, configMSG& currentConfigMSG, uint8_t propNodeIDIn)
 {
     // New Message Flag
     bool NewMessage {false};
     NewConfigMessage = false;
-
+    //configMSGvecBuffer.reserve(32);
+    configMSG configStruct {};
     // create a buffer to hold command messages (using a static array for speed)
     static std::array<Command, 64> CommandBuffer{};                                         // large enough for a back up of 8 full frames
     static uint32_t CommandBufferIndex {0};                                                 // keeps track of where we are in command buffer, works just like a stack
     static uint32_t CommandBufferPull {0};                                                  // lets us pull from oldest without shuffling the array
-    
-    // create a buffer to hold config messages (using a static array for speed)
-    static std::array<configMSG, 128> configMSGBuffer{};                                         // large enough for a back up of 8 full frames
-    static uint32_t configMSGBufferIndex {0};                                                 // keeps track of where we are in command buffer, works just like a stack
-    static uint32_t configMSGBufferPull {0};                                                  // lets us pull from oldest without shuffling the array
 
     // create a variable to hold the current message
     CAN_message_t msg {};
 
     // create a variable to hold the current config message
-    configMSG configStruct {};
-    configMSG emptyConfigStruct {0,0,0};
+    //configMSG emptyConfigStruct {0,0,0};
     
     // create a variable to hold serial input fake CAN command
     //uint8_t fakeCANmsg;
@@ -61,7 +97,7 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
             else if(msg.id == propNodeIDIn && msg.buf[0] == configVerificationKey && msg.len > 3) // must be right node ID, matching verification key, and msg at least 4 bytes long to be valid config message
             //else // must be right ID and msg at least 3 bytes long to be valid config message
             {
-                NewConfigMessage = true;                                                              // set new message flag to true if message recieved and read
+                //NewConfigMessage = true;                                                              // set new message flag to true if message recieved and read
                 configStruct.TargetObjectID = msg.buf[1];
                 configStruct.ObjectSettingID = msg.buf[2];
                 if (msg.len == 4)
@@ -86,10 +122,16 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
                 Serial.print("Setting ID: ");
                 Serial.print(configStruct.ObjectSettingID);
                 Serial.print("uint32 config rcv: ");
-                Serial.print(configStruct.uint32Value,10);
-                Serial.print("float config rcv: ");
-                Serial.println(configStruct.floatValue,10);
+                Serial.println(configStruct.uint32Value,10);
+                //Serial.print("float config rcv: ");
+                //Serial.println(configStruct.floatValue,10);
                 
+                //write to vector buffer
+                writeVectorBuffer(configStruct);
+
+
+
+
                 // CAN buffer bytes past this are meaningless in current format
                 //configMSGBuffer.at(configMSGBufferIndex) = configStruct;
                 //configMSGBufferIndex += sizeof(configStruct); 
@@ -111,21 +153,9 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
         CurrentCommand = command_NOCOMMAND;                                                 // if we caught up, set command to no command
     }
 
-/*     if ((configMSGBufferIndex > 0) && (configMSGBufferPull != configMSGBufferIndex))
-    {
-        currentConfigMSG = configMSGBuffer.at(configMSGBufferPull);                               // THIS IS WHERE THE WRITE TO CURRENTCOMMAND HAPPENS
-        configMSGBufferPull += sizeof(configStruct);      
-    }
-    else if (configMSGBufferPull >= configMSGBufferIndex)                                       // check if we've caught up and executed all commands, ie when CommandBufferPull == CommandBufferIndex. CommandBufferPull should NEVER exceed CommandBufferIndex, but for safety I use >=
-    {
-        configMSGBufferPull = 0;
-        configMSGBufferIndex = 0;
-        currentConfigMSG = emptyConfigStruct;                                                 // if we caught up, set command to no command
-    } */
-
-currentConfigMSG.TargetObjectID = configStruct.TargetObjectID;
-currentConfigMSG.ObjectSettingID = configStruct.ObjectSettingID;
-currentConfigMSG.uint32Value = configStruct.uint32Value;
+//currentConfigMSG.TargetObjectID = configStruct.TargetObjectID;
+//currentConfigMSG.ObjectSettingID = configStruct.ObjectSettingID;
+//currentConfigMSG.uint32Value = configStruct.uint32Value;
 
 
     // at this point the mailbox has been checked, any waiting messages have been moved to the buffer, and the oldest command has been moved into the global CurrentCommand variable
