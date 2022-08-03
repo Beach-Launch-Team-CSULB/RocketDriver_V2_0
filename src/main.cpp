@@ -317,19 +317,30 @@ Serial.println(timeSubSecondsMicros); */
     //mainLoopTestingTimer = 0;
     }
   //}
-  
-
-  // -----Process Commands Here-----
+  //temporary placement to stay every loop for the current serial input setup
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+
+  if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
+  {
+  // -----Process Commands Here-----
+  //vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
-
-  if (ezModeControllerTimer >= 500)
-  {
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   //autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+  //fluid sim stuff
+  if (currentVehicleState == VehicleState::passive)
+  {
+    waterGoesVroom.resetSim();
+  }
+
+  waterGoesVroom.fluidSystemUpdate();
+  //Serial.println(waterGoesVroom.FuelTank.CurrPressure/6895);
+  waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
+  waterGoesVroom.LoxTank.SetValveStates(LoxBang.getState(),LoxMV.getState(),LoxVent.getState());
+  
   ezModeControllerTimer = 0;
   }
   ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
@@ -364,18 +375,8 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 250)
+  if (mainLoopTestingTimer >= 200)
   {
-  //if (currentCommand == 3)
-  if (currentVehicleState == VehicleState::passive)
-  {
-    waterGoesVroom.resetSim();
-  }
-
-  waterGoesVroom.fluidSystemUpdate();
-  //Serial.println(waterGoesVroom.FuelTank.CurrPressure/6895);
-  waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
-  waterGoesVroom.LoxTank.SetValveStates(LoxBang.getState(),LoxMV.getState(),LoxVent.getState());
 
   if (mainloopprints)
   {
@@ -397,7 +398,15 @@ Serial.println(timeSubSecondsMicros); */
   Serial.print(" uint8:");
   Serial.print(currentConfigMSG.uint8Value);
 
-
+  Serial.println();
+  Serial.print(waterGoesVroom.TimeDelta, 10);
+  Serial.print(" : ");
+  Serial.print(waterGoesVroom.FuelTank.CurrPressure/6895, 10);
+  Serial.print(" : ");
+  Serial.print(waterGoesVroom.LoxTank.CurrPressure/6895, 10);
+  Serial.print(" : ");
+  Serial.print(waterGoesVroom.HiPressTank.CurrPressure/6895, 10);
+  Serial.println(" fluid sim update ran");
 
     for(auto tankPressController : tankPressControllerArray)
     {

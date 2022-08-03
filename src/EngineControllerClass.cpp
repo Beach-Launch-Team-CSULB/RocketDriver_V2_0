@@ -8,16 +8,17 @@ EngineController::EngineController(uint32_t setControllerID, uint8_t setControll
     loxMVAutosequenceActuation = loxMVAutosequenceActuation_Default;
     igniter1Actuation_Default = igniter1Actuation;
     igniter2Actuation = igniter2Actuation_Default;
-
     currentPcTarget = currentPcTarget_Default;
 
     //move below into begin???
+    throttleProgram.reserve(25); // allocates memory for 25 throttle points
     throttlePoint initialThrottlePoint = {0, currentPcTarget};
     throttleProgram.push_back(initialThrottlePoint);
-    //throttlePoint testSecondThrottlePoint = {1500000, 220};
-    //throttleProgram.push_back(testSecondThrottlePoint);
-    //throttlePoint testThirdThrottlePoint = {3500000, 440};
-    //throttleProgram.push_back(testThirdThrottlePoint);
+    //temp throttle points
+    throttlePoint testSecondThrottlePoint = {2000000, 290};
+    throttleProgram.push_back(testSecondThrottlePoint);
+    throttlePoint testThirdThrottlePoint = {4000000, 330};
+    throttleProgram.push_back(testThirdThrottlePoint);
     //throttle program iterator
     throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
 }
@@ -92,16 +93,16 @@ void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn
                 ptIn.autoSequenceTimeValue = static_cast<int64_t>(autoSequenceTimeMillisIn*1000);
                 ptIn.targetPcValue = float(currentPcTargetIn);
             
-            if (!throttlePointCheck(ptIn,throttleProgram))
+            if (!throttlePointCheck(ptIn,throttleProgram) && (throttleProgram.size() != throttleProgram.capacity()))
             {
                 auto itPos = throttleProgram.begin();
                 for (auto i = throttleProgram.begin(); i != throttleProgram.end(); ++i)
                 {
                     if (ptIn.autoSequenceTimeValue > (i->autoSequenceTimeValue))
                     {
-                        Serial.print("ptIn.autoSequenceTimeValue : ");
+                        //Serial.print("ptIn.autoSequenceTimeValue : ");
                         Serial.print(ptIn.autoSequenceTimeValue);
-                        Serial.print("ptIn.targetPcValue : ");
+                        //Serial.print("ptIn.targetPcValue : ");
                         Serial.print(ptIn.targetPcValue);
                         //Serial.println(" DO i MAKE IT TO BREAK : ");
                         ++itPos;
@@ -181,8 +182,8 @@ void EngineController::autoSequenceTargetPcUpdate(bool runBool)
             break;
         }
             currentPcTarget = (throttleProgramPos)->targetPcValue;
-            Serial.println(" currentPcTarget inside update: ");
-            Serial.println(currentPcTarget);
+            //Serial.println(" currentPcTarget inside update: ");
+            //Serial.println(currentPcTarget);
     }
     else    //if not set to run, grabs the first element in the throttle array
     {

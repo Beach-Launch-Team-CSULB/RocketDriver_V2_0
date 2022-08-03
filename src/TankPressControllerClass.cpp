@@ -352,7 +352,8 @@ void TankPressController::setPcTarget(float PcTargetIn)
     {
         targetPcValue = PcTargetIn;
         // set target point based on dP, make the math function later
-        targetValue = targetPcValue + tankToChamberDp;
+        //targetValue = targetPcValue + tankToChamberDp;
+        targetValue = targetPcValue*1.25; //very crude dP approx
     
     }
 }

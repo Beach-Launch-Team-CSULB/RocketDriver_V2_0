@@ -38,11 +38,11 @@ bool readRemoveVectorBuffer(configMSG& configMSGOut)
     }
     else 
     {
-    Serial.println(" here? ");
+    //Serial.println(" here? ");
     configMSGOut = configMSGvecBuffer.front();
-    Serial.println(" there? ");
+    //Serial.println(" there? ");
     configMSGvecBuffer.erase(configMSGvecBuffer.begin());
-    Serial.println(" everywhere? ");
+    //Serial.println(" everywhere? ");
         return true;
     }
 }
@@ -117,12 +117,12 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
                     configStruct.uint32Value = msg.buf[3] + (msg.buf[4] << 8) + (msg.buf[5] << 16) + (msg.buf[6] << 24);    //might have endianness backwards, test
                 }
 
-                Serial.print("Target ID: ");
-                Serial.print(configStruct.TargetObjectID);
-                Serial.print("Setting ID: ");
-                Serial.print(configStruct.ObjectSettingID);
-                Serial.print("uint32 config rcv: ");
-                Serial.println(configStruct.uint32Value,10);
+                //Serial.print("Target ID: ");
+                //Serial.print(configStruct.TargetObjectID);
+                //Serial.print("Setting ID: ");
+                //Serial.print(configStruct.ObjectSettingID);
+                //Serial.print("uint32 config rcv: ");
+                //Serial.println(configStruct.uint32Value,10);
                 //Serial.print("float config rcv: ");
                 //Serial.println(configStruct.floatValue,10);
                 

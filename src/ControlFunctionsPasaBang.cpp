@@ -476,9 +476,7 @@ bool idSearch = true;
 if (NewConfigMessage) //only run all this nonsense if there is a new config message
     {
 
-
-
-        Serial.println("inside configMSGread: ");
+/*         Serial.println("inside configMSGread: ");
         Serial.print("Target ID: ");
         Serial.print(currentConfigMSG.TargetObjectID);
         Serial.print("Setting ID: ");
@@ -486,12 +484,12 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
         Serial.print("uint32 config rcv: ");
         Serial.print(currentConfigMSG.uint32Value,10);
         Serial.print("float config rcv: ");
-        Serial.println(currentConfigMSG.floatValue,10);
+        Serial.println(currentConfigMSG.floatValue,10); */
 
     ////// ----- Valve Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: valve:  ");
+        //Serial.println("do I get past idSearch: valve:  ");
         for (auto valve : valveArray)
         {
             if (currentConfigMSG.TargetObjectID == valve->getValveID())
@@ -525,7 +523,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
     ////// ----- Pyro Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: pyro:  ");
+        //Serial.println("do I get past idSearch: pyro:  ");
         for (auto pyro : pyroArray)
         {
             if (currentConfigMSG.TargetObjectID == pyro->getPyroID())
@@ -558,7 +556,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
     ////// ----- Sensor Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: sensor:  ");
+        //Serial.println("do I get past idSearch: sensor:  ");
         for (auto sensor : sensorArray)
         {
             if (currentConfigMSG.TargetObjectID == sensor->getSensorID())
@@ -591,7 +589,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
     ////// ----- AutoSequence Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: autosequence:  ");
+        //Serial.println("do I get past idSearch: autosequence:  ");
         for (auto autosequence : autoSequenceArray)
         {
             if (currentConfigMSG.TargetObjectID == autosequence->getAutoSequenceID())
@@ -624,7 +622,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
     ////// ----- Tank Press Controller Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: tankPressController:  ");
+        //Serial.println("do I get past idSearch: tankPressController:  ");
         for (auto tankPressController : tankPressControllerArray)
         {
             if (currentConfigMSG.TargetObjectID == tankPressController->getControllerID())
@@ -657,7 +655,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
     ////// ----- Tank Press Controller Sets ----- /////
     if (idSearch)
     {
-        Serial.println("do I get past idSearch: engineController:  ");
+        //Serial.println("do I get past idSearch: engineController:  ");
         for (auto engineController : engineControllerArray)
         {
             if (currentConfigMSG.TargetObjectID == engineController->getControllerID())
