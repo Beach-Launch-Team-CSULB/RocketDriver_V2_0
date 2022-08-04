@@ -3,9 +3,7 @@
 
 #include <Arduino.h>
 #include "ControllerStates.h"
-//#include "ValveStates.h"    // this is included also in ValveClass.h, hopefully it doesn't get me in trouble
 #include "SensorStates.h"
-//#include "PyroStates.h"
 #include "ValveClass.h"
 #include "PyroClass.h"
 #include <vector>

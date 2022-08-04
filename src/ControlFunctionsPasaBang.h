@@ -23,6 +23,8 @@
 
 // checks the state that was set at start-up and issues the appropriate command as current command
 void startupStateCheck(const VehicleState& currentState, Command& currentCommand);
+// command processing to set vehicle State
+void commandExecute(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, bool& newCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray);
 // state machine for operating all devices on the vehicle
 void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool &HaltFlag);
 // state machine for the mission state (launch, ascent, apogee, descent et cetera)

@@ -7,12 +7,29 @@ using std::array;
 using std::vector;
 
 
-void vectorBufferInitialize(size_t bufferSize)
+void vectorCommandBufferInitialize(size_t bufferSize)
+{
+    commandMSGvecBuffer.reserve(bufferSize); // should reserve by element count
+}
+
+void vectorConfigBufferInitialize(size_t bufferSize)
 {
     configMSGvecBuffer.reserve(bufferSize); // should reserve by element count
-} 
-   
+}
 
+void writeVectorBuffer(commandMSG commandStructIn)
+{
+    //writes to the vector buffer, up to the allocated size
+    if (!(commandMSGvecBuffer.size() == commandMSGvecBuffer.capacity()))  //only proceed if not at capacity
+    {
+        //add to back of vector
+        commandMSGvecBuffer.push_back(commandStructIn);
+    }
+    else 
+    {
+        Serial.println("vector buffer overrun");
+    }
+}
 
 void writeVectorBuffer(configMSG configStructIn)
 {
@@ -28,6 +45,24 @@ void writeVectorBuffer(configMSG configStructIn)
     }
 }
 
+bool readRemoveVectorBuffer(commandMSG commandStructOut)
+{
+    //reads and deletes once read vector elements out of the buffer, once per func call
+    // returns true if there are elements left in buffer
+    if(commandMSGvecBuffer.empty())
+    {
+        return false;
+    }
+    else 
+    {
+    //Serial.println(" here? ");
+    commandStructOut = commandMSGvecBuffer.front();
+    //Serial.println(" there? ");
+    commandMSGvecBuffer.erase(commandMSGvecBuffer.begin());
+    //Serial.println(" everywhere? ");
+        return true;
+    }
+}
 bool readRemoveVectorBuffer(configMSG& configMSGOut)
 {
     //reads and deletes once read vector elements out of the buffer, once per func call
@@ -53,13 +88,14 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
 {
     // New Message Flag
     bool NewMessage {false};
-    NewConfigMessage = false;
+    NewConfigMessage = false;   //not sure if I should keep in here?
     //configMSGvecBuffer.reserve(32);
+    commandMSG commandStruct {};
     configMSG configStruct {};
     // create a buffer to hold command messages (using a static array for speed)
-    static std::array<Command, 64> CommandBuffer{};                                         // large enough for a back up of 8 full frames
+/*     static std::array<Command, 64> CommandBuffer{};                                         // large enough for a back up of 8 full frames
     static uint32_t CommandBufferIndex {0};                                                 // keeps track of where we are in command buffer, works just like a stack
-    static uint32_t CommandBufferPull {0};                                                  // lets us pull from oldest without shuffling the array
+    static uint32_t CommandBufferPull {0};   */                                                // lets us pull from oldest without shuffling the array
 
     // create a variable to hold the current message
     CAN_message_t msg {};
@@ -75,12 +111,15 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
     {
         if(CANbus.read(msg))                                                                // read occurs inside if statement
         {
-            //if(msg.id == 0||1) //id = 0 is the only command frame ID to be used for state control, temporarily added ID = 1 as well because of dumb GUI versions
-            if(msg.id == 1)
+            //id = 1 is the only command frame ID to be used for state control, ignores empty messages with no data bytes
+            if(msg.id == 1 && msg.len >=1)
             {
                 NewMessage = true;                                                              // set new message flag to true if message recieved and read
+                commandStruct.commandByte  = msg.buf[0];
+                //write to vector buffer
+                writeVectorBuffer(commandStruct);
 
-                // add CAN messages to internal buffer
+/*                 // add CAN messages to internal buffer
                 for(uint8_t index{0}; index < msg.len; ++index)                                 // restrict to length of message
                 {
                 
@@ -92,7 +131,7 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
                         ++CommandBufferIndex;                                                   // increment buffer index
                     }
                 
-                }
+                } */
             }
             else if(msg.id == propNodeIDIn && msg.buf[0] == configVerificationKey && msg.len > 3) // must be right node ID, matching verification key, and msg at least 4 bytes long to be valid config message
             //else // must be right ID and msg at least 3 bytes long to be valid config message
@@ -140,7 +179,11 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
         }
     }
 
-    // check if there are commands waiting in the buffer to be executed
+// check if there are commands waiting in the buffer to be executed
+
+
+
+/*     // check if there are commands waiting in the buffer to be executed
     if ((CommandBufferIndex > 0) && (CommandBufferPull != CommandBufferIndex))
     {
         CurrentCommand = CommandBuffer.at(CommandBufferPull);                               // THIS IS WHERE THE WRITE TO CURRENTCOMMAND HAPPENS
@@ -151,7 +194,7 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
         CommandBufferPull = 0;
         CommandBufferIndex = 0;
         CurrentCommand = command_NOCOMMAND;                                                 // if we caught up, set command to no command
-    }
+    } */
 
 //currentConfigMSG.TargetObjectID = configStruct.TargetObjectID;
 //currentConfigMSG.ObjectSettingID = configStruct.ObjectSettingID;

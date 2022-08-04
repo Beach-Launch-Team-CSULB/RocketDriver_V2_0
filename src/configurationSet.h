@@ -4,8 +4,9 @@
 #include <Arduino.h>
 #pragma once
 
-//I should probably change to using typedef for my arg type
 
+
+//I should probably change to using typedef for my arg type
 struct configMSG
 {
     // CAN configuration message format

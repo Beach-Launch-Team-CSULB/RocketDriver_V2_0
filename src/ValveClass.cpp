@@ -474,8 +474,6 @@ void Valve::stateOperations()
 
 void Valve::controllerStateOperations()
 {
-
-
     switch (state)
     {
     // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero

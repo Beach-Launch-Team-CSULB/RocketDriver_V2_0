@@ -89,7 +89,7 @@ uint8_t fakeCanIterator = 0;
 bool mainloopprints = true;
 
 bool localNodeResetFlag = false; //flag to trigger register reset from commanded reset over CAN
-bool abortHaltFlag; //creates halt flag that is a backup override of state machine
+bool abortHaltFlag; //creates halt flag that is a backup override of state machine, am I currently using it?
 
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
@@ -120,6 +120,7 @@ CAN_message_t message;
 CAN_message_t rxmsg;
 CAN_message_t extended;
 bool CANSensorReportConverted = false;
+bool NewCommandMessage{false};
 bool NewConfigMessage{false};
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
@@ -135,8 +136,8 @@ VehicleState priorVehicleState;
 MissionState currentMissionState(MissionState::passive);
 MissionState priorMissionState;
 
+commandMSG currentCommandMSG{};
 configMSG currentConfigMSG{};
-
 
 uint32_t vehicleStateAddressfromEEPROM_errorFlag;
 uint32_t missionStateAddressfromEEPROM_errorFlag;
@@ -201,7 +202,8 @@ void setup() {
   //PropulsionSysNodeID = 8;
 
   // -----Initialize CAN-----
-  vectorBufferInitialize(32); //number of vector elements memory is reserved for
+  vectorCommandBufferInitialize(32);  //number of vector elements memory is reserved for
+  vectorConfigBufferInitialize(32); //number of vector elements memory is reserved for
   // CAN0 - FlexCAN 2.0 bus
   Can0.begin(CAN2busSpeed);
 
@@ -265,13 +267,8 @@ Serial.println(timeSubSecondsMicros); */
     Serial.print("CAN Message Recieved: ");
     Serial.println(currentCommand); //currently only does the command not any message
   }
-  //function to take config MSGs and read them out
-  
-  NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
-  configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray);
-  
-  //if (mainLoopTestingTimer >= 200)
-  //{
+
+
   
   while (Serial.available())
   {
@@ -311,19 +308,29 @@ Serial.println(timeSubSecondsMicros); */
               //if(fakeCANmsg < command_SIZE)                                           // this checks if the message at that location in the buffer could be a valid command
               {
                   currentCommand = static_cast<Command>(fakeCANmsg);
+                  NewCommandMessage = true;
               }
           Serial.println("Command Entered");
         //}
     //mainLoopTestingTimer = 0;
     }
-  //}
-  //temporary placement to stay every loop for the current serial input setup
-  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+
+///// ------ MESSAGE PROCESSING BLOCK ----- /////  
+  //pull next command message from buffer, if there is one
+  //NewCommandMessage = readRemoveVectorBuffer(currentCommandMSG);
+  //currentCommand = currentCommandMSG.commandEnum;
+  //process command
+  commandExecute(currentVehicleState, priorVehicleState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  //pull next config message from buffer, if there is one
+  NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
+  //process config message
+  configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray);
+///// ------------------------------------ /////  
 
   if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
   {
   // -----Process Commands Here-----
-  //vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
@@ -343,14 +350,8 @@ Serial.println(timeSubSecondsMicros); */
   
   ezModeControllerTimer = 0;
   }
-  ////// ABORT FUNCTIONALITY!!!///// This is what overrides main valve and igniter processes! /////
-  ////// DO NOT MOVE BEFORE "commandExecute" or after "valveTasks"/"pyroTasks"!!! /////
-  //haltFlagCheck(abortHaltFlag, valveArray, pyroArray);
 
   // -----Advance needed controller system tasks (tank press controllers, ignition autosequence, . ..) ----- //
-/*   autoSequenceTasks(autoSequenceArray,nodeID);
-  autoSequenceValveUpdate(valveArray, currentCountdownForMain);
-  autoSequencePyroUpdate(pyroArray, currentCountdownForMain);   */
   // -----Advance needed propulsion system tasks (valve, pyro, sensors, . ..) ----- //
   cli(); // disables interrupts to ensure complete propulsion output state is driven
   valveTasks(valveArray, PropulsionSysNodeID);
@@ -358,10 +359,6 @@ Serial.println(timeSubSecondsMicros); */
   sei(); // reenables interrupts after propulsion output state set is completed
   //sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
   sensorTasks(sensorArray, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
-  
-// For Testing to verify abort halt flag is active as intended
-/*     Serial.print("abortHaltFlag: ");
-    Serial.println(abortHaltFlag); */
 
   // -----Update States on EEPROM -----
   tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
@@ -375,7 +372,7 @@ Serial.println(timeSubSecondsMicros); */
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 200)
+  if (mainLoopTestingTimer >= 500)
   {
 
   if (mainloopprints)

@@ -15,6 +15,7 @@ class AutoSequence
         elapsedMicros timer;
         int32_t signedTimer;
         AutoSequenceState state;
+        AutoSequenceState priorState;
         uint32_t hostNodeID;      // hostNodeID is for assigning the node that is the host of the autosequence, i.e. the node starting the engine should be in charge of ignition autosequence
 
     public:
@@ -41,7 +42,19 @@ class AutoSequence
 
         void setSignedTimer(int32_t updateSignedTimer){signedTimer = updateSignedTimer;}
 
-        void setState(AutoSequenceState newState) {state = newState;} //every time a state is set, the timer should reset
+        void setState(AutoSequenceState newState)
+            {
+                // if state is already Running, ignore if told RunCommanded
+                // all other states, check if the newState is actually new, if so shift state to prior state, set state to newState
+                if (!(newState == AutoSequenceState::RunCommanded && state == AutoSequenceState::Running))
+                {
+                    if (newState != state)
+                    {
+                        priorState = state;
+                    }
+                    state = newState;
+                }
+            }
 
         void resetTimer() {timer = 0;}
     // reset all configurable settings to defaults

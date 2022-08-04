@@ -244,15 +244,7 @@ void EngineController::stateOperations()
                     igniter1.setState(PyroState::OnCommanded);
                     //igniter1timer = 0;
                 }
-/*                 else if (igniter1.getState() == PyroState::OnCommanded && igniter1timer >= igniter1LiveOutTime)
-                {
-                    igniter1.setState(PyroState::OffCommanded);
-                }
-                else if (igniter1.getState() != PyroState::OffCommanded)
-                {
-                    {igniter1.setState(PyroState::OnCommanded);}
-                }
- */            }
+            }
         else {igniter1.setState(PyroState::FireCommanded);}
         //Engine Igniter2 autosequence check
         if (currentAutosequenceTime < igniter2Actuation) 
@@ -266,15 +258,7 @@ void EngineController::stateOperations()
                     igniter2.setState(PyroState::OnCommanded);
                     //igniter2timer = 0;
                 }
-/*                 else if (igniter2.getState() == PyroState::OnCommanded && igniter2timer >= igniter2LiveOutTime)
-                {
-                    igniter2.setState(PyroState::OffCommanded);
-                }
-                else if (igniter2.getState() != PyroState::OffCommanded)
-                {
-                    {igniter2.setState(PyroState::OnCommanded);}
-                }
- */            }
+            }
         else {igniter2.setState(PyroState::FireCommanded);}
         // devices not conditional within autosequence below
         pneumaticVent.setState(ValveState::CloseCommanded);

@@ -30,16 +30,15 @@ void AutoSequence::stateOperations()
         setCurrentCountdown(countdownStart);
         //setCurrentCountdown(0);
         break;
-
     
     case AutoSequenceState::RunCommanded:
         
-        timer = 0;
+    //if (priorState != AutoSequenceState::Running)
+    //{
         state = AutoSequenceState::Running;
-        
-
+        timer = 0;
+    //}
         break;
-        
        
     case AutoSequenceState::Running:
         //if (hostNodeID = nodeID)
@@ -57,12 +56,9 @@ void AutoSequence::stateOperations()
             setCurrentCountdown(currentCountdown);
         //}
         break;
-
        
     case AutoSequenceState::Hold:
-        
-
-        
+  
         break;
     
     // All other states require no action

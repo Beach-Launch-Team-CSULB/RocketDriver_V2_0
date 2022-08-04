@@ -1,5 +1,7 @@
 #ifndef CONTROLCOMMANDS_H
 #define CONTROLCOMMANDS_H
+#pragma once
+#include <Arduino.h>
 
 // this enum hold all commands to be sent to the teensy. All commands assumed to be uint8_t type 
 
@@ -18,7 +20,7 @@ enum Command
     command_HiPressArm = 11,
     command_HiPressPressurized = 13,
     command_TankPressArm = 15,
-    commend_TankPressPressurized = 17,
+    command_TankPressPressurized = 17,
     command_fireArm = 19,
     command_fire = 21,                          //End of global states
     command_ExitOffNominal = 22,
@@ -78,6 +80,14 @@ enum Command
 };
 
 
-
+//only using a struct here for potential future command format expansion
+struct commandMSG
+{
+    union
+    {
+    uint8_t commandByte;
+    Command commandEnum;
+    };
+};
 
 #endif
