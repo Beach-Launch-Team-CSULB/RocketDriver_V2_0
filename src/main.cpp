@@ -81,6 +81,7 @@ using std::string;
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
 elapsedMillis ezModeControllerTimer;
+elapsedMillis commandExecuteTimer;
 
 //For use in doing serial inputs as CAN commands for testing
 uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
@@ -267,11 +268,13 @@ Serial.println(timeSubSecondsMicros); */
     Serial.print("CAN Message Recieved: ");
     Serial.println(currentCommand); //currently only does the command not any message
   }
-
-
-  
-  while (Serial.available())
+  if(SerialAsCANread())
   {
+    Serial.println("Command Entered");
+  }
+  
+  //while (Serial.available())
+  //{
 /*   {
     Serial.print("available");
     Serial.print(Serial.available());
@@ -297,7 +300,7 @@ Serial.println(timeSubSecondsMicros); */
 
     //Serial.print(Serial.read());
     //Serial.println();
-    fakeCANmsg = Serial.read();
+    //fakeCANmsg = Serial.read();
 
       //if(fakeCANmsg[0]  < command_SIZE) //enter 0 inter serial to trigger command read
       //{
@@ -306,21 +309,28 @@ Serial.println(timeSubSecondsMicros); */
           //CurrentCommand = Serial.read();
               
               //if(fakeCANmsg < command_SIZE)                                           // this checks if the message at that location in the buffer could be a valid command
-              {
-                  currentCommand = static_cast<Command>(fakeCANmsg);
-                  NewCommandMessage = true;
-              }
-          Serial.println("Command Entered");
+              //{
+                  //currentCommand = static_cast<Command>(fakeCANmsg);
+                  //NewCommandMessage = true;
+              //}
+          //Serial.println("Command Entered");
         //}
     //mainLoopTestingTimer = 0;
-    }
+    //}
 
 ///// ------ MESSAGE PROCESSING BLOCK ----- /////  
   //pull next command message from buffer, if there is one
-  //NewCommandMessage = readRemoveVectorBuffer(currentCommandMSG);
-  //currentCommand = currentCommandMSG.commandEnum;
+  if (!NewCommandMessage)
+  {
+  NewCommandMessage = readRemoveVectorBuffer(currentCommandMSG);
+  currentCommand = currentCommandMSG.commandEnum;
+  }
+
   //process command
+  //if (commandExecuteTimer >= 2000)
+  //{
   commandExecute(currentVehicleState, priorVehicleState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  //}
   //pull next config message from buffer, if there is one
   NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
   //process config message
@@ -384,6 +394,8 @@ Serial.println(timeSubSecondsMicros); */
   Serial.println(static_cast<uint8_t>(currentVehicleState));
   Serial.print(" currentCommand :");
   Serial.println(currentCommand);
+
+vectorBufferPrintout();
 
   Serial.print(" currentConfigMSG :");
   Serial.print(" targetID :");

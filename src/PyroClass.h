@@ -16,13 +16,14 @@ class Pyro
         PyroState state;
         PyroState priorState;
         uint32_t liveOutTime;
+        uint32_t liveOutTime_Default;
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool controllerUpdate = false;
 
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
-        Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t setLiveOutTime, bool setNodeIDCheck = false); 
+        Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t liveOutTime_Default, bool setNodeIDCheck = false); 
     // default constructor
         Pyro(uint32_t setLiveOutTime = 250);
     // Alternate constructor with future full implementation, needs the clonedpyro features still
@@ -61,7 +62,7 @@ class Pyro
         void resetPyro(){state = PyroState::Off;}
 
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
-
+        void setLiveOutTime(uint32_t liveOutTimeIn){if (liveOutTimeIn <= 2000000){liveOutTime = liveOutTimeIn;}}
     // reset all configurable settings to defaults
         void resetAll();
     // functions with executables defined in ValveClasses.cpp

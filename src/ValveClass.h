@@ -19,28 +19,33 @@ class Valve
     private:
         const uint32_t valveID = 99;                          // Valve ID number 
         const uint8_t valveNodeID = 99;                      // NodeID the valve is controlled by
+        ValveType valveType_Default;                  // sets the valve type, either normal closed or normal open
         ValveType valveType;                  // sets the valve type, either normal closed or normal open
         const uint8_t pinPWM = 99;                              // Valve PWM pin for actuation
         const uint8_t pinDigital = 99;                          // Valve Digital Out pin for actuation
-        uint32_t fullDutyTime = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
+        uint32_t fullDutyTime_Default = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
+        uint32_t fullDutyTime;                // Time PWM needs to be at full duty for actuation, in MICROS
         ValveState state;
         ValveState priorState;                           // Tracks the valve state
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
-        uint16_t fullDuty{256};                // full duty cycle for servo initial actuation
-        uint8_t holdDuty{};                   // partial duty cycle to hold valve in actuated state
+        uint16_t fullDuty_Default{256};                // full duty cycle for servo initial actuation
+        uint8_t holdDuty_Default{50};                   // partial duty cycle to hold valve in actuated state
+        uint8_t warmDuty_Default{0};                   // partial duty cycle to hold valve in actuated state
+        uint16_t fullDuty;                // full duty cycle for servo initial actuation
+        uint8_t holdDuty;                   // partial duty cycle to hold valve in actuated state
+        uint8_t warmDuty;                   // partial duty cycle to hold valve in actuated state
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool abortHaltDeviceBool;                    // Whether this valve is set by the abort halt flag override
-        ValveState abortedState;
         uint16_t controlSensor1Value;               // For use in control schemes, really a template placement pending needed number and type of samples
         bool controllerUpdate = false;              // flag for when valve stateOps does a state change to update in the controllers
 
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
-        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime,  
-        bool setAbortHaltDeviceBool = false, ValveState setAbortedState = ValveState::CloseCommanded, uint8_t setHoldDuty = 64, bool setNodeIDCheck = false);
+        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default,  
+        bool setAbortHaltDeviceBool = false, uint8_t setHoldDuty_Default = 64, bool setNodeIDCheck = false);
     // Default constructor with no args    
-        Valve(ValveType setValveType, ValveState setAbortedState = ValveState::CloseCommanded, bool setNodeIDCheck = false);
+        Valve(ValveType setValveType_Default, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -57,7 +62,6 @@ class Valve
         ValveState getState(){return state;}
         ValveState getSyncState();
         ValveState getPriorState(){return priorState;}
-        ValveState getAbortedState(){return abortedState;}
         uint32_t getTimer(){return timer;}
         bool getNodeIDCheck(){return nodeIDCheck;}
         bool getAbortHaltDeviceBool(){return abortHaltDeviceBool;}
@@ -113,6 +117,9 @@ class Valve
     //set functions 
         void setValveType(uint8_t typeIn){if (typeIn == 0 || typeIn == 1) {valveType = static_cast<ValveType>(typeIn);}}
         void setFullDutyTime(uint32_t fullDutyTimeIn){if (fullDutyTimeIn <= 10000) {fullDutyTime = fullDutyTimeIn;}}
+        void setFullDutyCyclePWM(uint16_t FullDutyCyclePWMIn){if (FullDutyCyclePWMIn >= 50 && FullDutyCyclePWMIn <= 256) {fullDuty = FullDutyCyclePWMIn;}}
+        void setHoldDutyCyclePWM(uint16_t HoldDutyCyclePWMIn){if (HoldDutyCyclePWMIn >= 25 && HoldDutyCyclePWMIn <= 256) {holdDuty = HoldDutyCyclePWMIn;}}
+        void setWarmDutyCyclePWM(uint16_t WarmDutyCyclePWMIn){if (WarmDutyCyclePWMIn >= 25 && WarmDutyCyclePWMIn <= 256) {warmDuty = WarmDutyCyclePWMIn;}}
 
     // reset all configurable settings to defaults
         void resetAll();

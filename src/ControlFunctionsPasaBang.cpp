@@ -823,14 +823,19 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     valve->resetAll();
                     break;
                 case 1:
-        //Serial.println("do I get past case1  ");
                     valve->setValveType(currentConfigMSG.uint8Value);
                     break;
                 case 2:
                     valve->setFullDutyTime(currentConfigMSG.uint32Value);
                     break;
                 case 3:
-                    //valve->
+                    valve->setFullDutyCyclePWM(currentConfigMSG.uint16Value);
+                    break;
+                case 4:
+                    valve->setHoldDutyCyclePWM(currentConfigMSG.uint8Value);
+                    break;
+                case 5:
+                    valve->setWarmDutyCyclePWM(currentConfigMSG.uint16Value);
                     break;
                 
                 default:
@@ -857,7 +862,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     pyro->resetAll();
                     break;
                 case 1:
-                    //pyro->
+                    pyro->setLiveOutTime(currentConfigMSG.uint32Value);
                     break;
                 case 2:
                     //pyro->
@@ -890,13 +895,16 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     sensor->resetAll();
                     break;
                 case 1:
-                    //sensor->
+                    sensor->setSampleRateSlowMode(currentConfigMSG.uint32Value);
                     break;
                 case 2:
-                    //sensor->
+                    sensor->setSampleRateMedMode(currentConfigMSG.uint32Value);
                     break;
                 case 3:
-                    //sensor->
+                    sensor->setSampleRateFastMode(currentConfigMSG.uint32Value);
+                    break;
+                case 4:
+                    sensor->setAlphaEMA(currentConfigMSG.floatValue);
                     break;
                 
                 default:
@@ -923,7 +931,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     autosequence->resetAll();
                     break;
                 case 1:
-                    //autosequence->
+                    autosequence->setCountdownStart(currentConfigMSG.uint32Value);
                     break;
                 case 2:
                     //autosequence->
@@ -964,7 +972,20 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                 case 3:
                     tankPressController->setK_d(currentConfigMSG.floatValue);
                     break;
-                
+                case 4:
+                    tankPressController->setControllerThreshold(currentConfigMSG.floatValue);
+                    break;
+                case 5:
+                    tankPressController->setVentFailsafePressure(currentConfigMSG.floatValue);
+                    break;
+                case 6:
+                    tankPressController->setValveMinimumEnergizeTime(currentConfigMSG.uint32Value);
+                    break;
+                case 7:
+                    tankPressController->setValveMinimumDeenergizeTime(currentConfigMSG.uint32Value);
+                    break;
+                //need to add stuff for the fluid math for the dp calc, for the sensor filtering algorithm settings, and any other math/logic still to come
+                //maybe need the valve warming/partial on/off duty cycle values here to pass to the valves? Probably just toggle for a bool? 
                 default:
                     break;
                 }

@@ -163,7 +163,13 @@ class EXT_SENSOR : public SENSORBASE
 
     //void setCurrentSampleRate(uint32_t updateCurrentSampleRate) {currentSampleRate = updateCurrentSampleRate; newSensorValueCheck = true; newConversionCheck = false;}
     void setCurrentSampleRate(uint32_t updateCurrentSampleRate) {currentSampleRate = updateCurrentSampleRate;}
-
+    
+    void setSampleRateSlowMode(uint32_t updateSampleRateSlowMode) {if(updateSampleRateSlowMode<=2000){sampleRateSlowMode = updateSampleRateSlowMode;}}
+    void setSampleRateMedMode(uint32_t updateSampleRateMedMode) {if(updateSampleRateMedMode<=2000){sampleRateMedMode = updateSampleRateMedMode;}}
+    void setSampleRateFastMode(uint32_t updateSampleRateFastMode) {if(updateSampleRateFastMode<=2000){sampleRateFastMode = updateSampleRateFastMode;}}
+    void setAlphaEMA(float alphaEMAIn){if(alphaEMAIn >0 && alphaEMAIn <=1){alphaEMA = alphaEMAIn;}}
+    //void setRegressionSamples():???
+    
     void setTargetValue(float targetValueIn){targetValue = targetValueIn;}
 
     void resetTimer();                // resets timer to zero

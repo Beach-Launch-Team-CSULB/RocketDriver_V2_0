@@ -50,6 +50,11 @@ class SENSORBASE
     virtual void resetIntegralCalc(bool resetBoolIn, float integralCalcIn = 0);
 
     virtual void resetAll();
+    virtual void setSampleRateSlowMode(uint32_t updateSampleRateSlowMode);
+    virtual void setSampleRateMedMode(uint32_t updateSampleRateMedMode);
+    virtual void setSampleRateFastMode(uint32_t updateSampleRateFastMode);
+    virtual void setAlphaEMA(float alphaEMAIn);
+
 
     // constructor 1,
     //MCU_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode, uint32_t setSampleRateMedMode, uint32_t setSampleRateFastMode, bool internalMCUTemp, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off, bool setNodeIDCheck = false, bool setNewSensorValueCheck = false);

@@ -45,7 +45,7 @@ void writeVectorBuffer(configMSG configStructIn)
     }
 }
 
-bool readRemoveVectorBuffer(commandMSG commandStructOut)
+bool readRemoveVectorBuffer(commandMSG& commandStructOut)
 {
     //reads and deletes once read vector elements out of the buffer, once per func call
     // returns true if there are elements left in buffer
@@ -82,6 +82,20 @@ bool readRemoveVectorBuffer(configMSG& configMSGOut)
     }
 }
 
+void vectorBufferPrintout()
+{
+    Serial.println("does vec buffer print happen");
+    int ii = 0; //printable iterator to track printed buffer entries
+    for (auto i = commandMSGvecBuffer.begin(); i != commandMSGvecBuffer.end(); ++i)
+    {
+        Serial.print(ii);
+        Serial.print(" :commandByte: ");
+        Serial.print(i->commandByte);
+        ++ii;
+    }
+Serial.println();
+}
+
 // function to be run every loop to check for a new CAN message
 
 bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMessage, Command& CurrentCommand, configMSG& currentConfigMSG, uint8_t propNodeIDIn)
@@ -89,7 +103,6 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
     // New Message Flag
     bool NewMessage {false};
     NewConfigMessage = false;   //not sure if I should keep in here?
-    //configMSGvecBuffer.reserve(32);
     commandMSG commandStruct {};
     configMSG configStruct {};
     // create a buffer to hold command messages (using a static array for speed)
@@ -228,10 +241,22 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
                 //return;
         }
     } */
-    
-    
-    
-    
+        
     return NewMessage;
 
+}
+
+bool SerialAsCANread()
+{
+    // New Message Flag
+    bool NewMessage {false};
+    commandMSG commandStruct {};
+    while (Serial.available())
+    {
+        NewMessage = true;                                                              // set new message flag to true if message recieved and read
+        commandStruct.commandByte  = Serial.read();
+        //write to vector buffer
+        writeVectorBuffer(commandStruct);
+    }
+    return NewMessage;
 }

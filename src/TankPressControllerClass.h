@@ -166,6 +166,9 @@ class TankPressController
         void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;}}
         void setK_i(){K_i = K_i_run;}   //empty input args means reset K_i to K_i_run
         void setK_d(float K_din){if (K_din <= 1000 && K_din >= -1000) {K_d = K_din;}}
+        void setControllerThreshold(float controllerThresholdIn){if (controllerThresholdIn <= 100 && controllerThresholdIn >= 0) {controllerThreshold = controllerThresholdIn;}}
+        void setValveMinimumEnergizeTime(uint32_t valveMinimumEnergizeTimeIn){if(valveMinimumEnergizeTimeIn >= 0 && valveMinimumEnergizeTimeIn <= 10000){valveMinimumEnergizeTime = valveMinimumEnergizeTimeIn;}}
+        void setValveMinimumDeenergizeTime(uint32_t valveMinimumDeenergizeTimeIn){if(valveMinimumDeenergizeTimeIn >= 0 && valveMinimumDeenergizeTimeIn <= 10000){valveMinimumDeenergizeTime = valveMinimumDeenergizeTimeIn;}}
 
         void setPcTarget(float PcTargetIn);
     

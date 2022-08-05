@@ -2,9 +2,16 @@
 #include <Arduino.h>
 #include "extendedIO/extendedIO.h"
 
-Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime, bool setAbortHaltDeviceBool, ValveState setAbortedState, uint8_t setHoldDuty,  bool setNodeIDCheck)
-                : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType{setValveType}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime{setFullDutyTime}, abortHaltDeviceBool{setAbortHaltDeviceBool}, abortedState{setAbortedState}, holdDuty{setHoldDuty}, nodeIDCheck{setNodeIDCheck}
+Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default, bool setAbortHaltDeviceBool, uint8_t setHoldDuty_Default,  bool setNodeIDCheck)
+                : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType_Default{setValveType_Default}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime_Default{setFullDutyTime_Default}, abortHaltDeviceBool{setAbortHaltDeviceBool}, holdDuty_Default{setHoldDuty_Default}, nodeIDCheck{setNodeIDCheck}
 {
+    //set values to default values when intstantiated
+    valveType = valveType_Default;
+    fullDutyTime = fullDutyTime_Default;
+    fullDuty = fullDuty_Default;
+    holdDuty = holdDuty_Default;
+    warmDuty = warmDuty_Default;
+
     switch (valveType)
     {
         case NormalClosed:
@@ -24,9 +31,32 @@ Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType
     
 }
 
-Valve::Valve(ValveType setValveType, ValveState setAbortedState, bool setNodeIDCheck) : valveType{setValveType}, abortedState{setAbortedState}, nodeIDCheck{setNodeIDCheck}
+Valve::Valve(ValveType setValveType_Default, bool setNodeIDCheck) : valveType_Default{setValveType_Default}, nodeIDCheck{setNodeIDCheck}
 {
+    //probably don't need anything here for the standin valve objects for unused controller valves
     
+    //set values to default values when intstantiated
+    valveType = valveType_Default;
+    fullDutyTime = fullDutyTime_Default;
+    fullDuty = fullDuty_Default;
+    holdDuty = holdDuty_Default;
+    warmDuty = warmDuty_Default;
+
+    switch (valveType)
+    {
+        case NormalClosed:
+            state = ValveState::Closed;
+            priorState = ValveState::Closed;
+            break;
+        case NormalOpen:
+            state = ValveState::Open;
+            priorState = ValveState::Open;
+            break;
+        default:
+            state = ValveState::Closed;
+            priorState = ValveState::Closed;
+            break;
+    }
 }
 
 void Valve::begin()

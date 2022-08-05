@@ -10,6 +10,7 @@ class AutoSequence
 
     private:
         const uint32_t autoSequenceID = 99;
+        int32_t countdownStart_Default;        //must be set in Micros so it matches the timer
         int32_t countdownStart;        //must be set in Micros so it matches the timer
         int64_t currentCountdown;
         elapsedMicros timer;
@@ -59,7 +60,7 @@ class AutoSequence
         void resetTimer() {timer = 0;}
     // reset all configurable settings to defaults
         void resetAll();
-
+        void setCountdownStart(uint32_t countdownStartIn){if(countdownStartIn >= 1000000 && countdownStartIn <= 60000000){countdownStart = countdownStartIn;}}
         void stateOperations(); //add into this the functions for managing the countdown initialization and holds
 
 };

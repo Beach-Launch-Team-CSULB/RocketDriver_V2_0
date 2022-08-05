@@ -7,7 +7,7 @@
 
 AutoSequence::AutoSequence(uint32_t setAutoSequenceID, int32_t setCountdownStart, uint32_t setHostNodeID) : autoSequenceID{setAutoSequenceID}, countdownStart{setCountdownStart}, hostNodeID{setHostNodeID}
 {
-
+    countdownStart = countdownStart_Default;
 }
 
 void AutoSequence::begin()
@@ -18,6 +18,7 @@ void AutoSequence::begin()
 void AutoSequence::resetAll()
 {
     //
+    countdownStart = countdownStart_Default;
 }
 
 void AutoSequence::stateOperations()

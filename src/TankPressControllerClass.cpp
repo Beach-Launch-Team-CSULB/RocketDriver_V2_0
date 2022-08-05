@@ -11,7 +11,6 @@ TankPressController::TankPressController(uint32_t setControllerID, uint8_t setCo
 {
     // Instantiate operational values from the default values given
     // Allows a reset to defaults after having changed settings via config messages
-    ventFailsafePressure = ventFailsafePressure_Default;
     targetPcValue = targetPcValue_Default;
     tankToChamberDp = tankToChamberDp_Default;
     //targetValue = targetValue_Default;
@@ -20,6 +19,7 @@ TankPressController::TankPressController(uint32_t setControllerID, uint8_t setCo
     K_p = K_p_Default;
     K_i = K_i_Default;
     K_d = K_d_Default;
+    ventFailsafePressure = ventFailsafePressure_Default;
     controllerThreshold = controllerThreshold_Default;
     valveMinimumDeenergizeTime = valveMinimumDeenergizeTime_Default;
     valveMinimumEnergizeTime = valveMinimumEnergizeTime_Default;
