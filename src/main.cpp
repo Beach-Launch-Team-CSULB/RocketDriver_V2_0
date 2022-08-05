@@ -334,7 +334,7 @@ Serial.println(timeSubSecondsMicros); */
   //pull next config message from buffer, if there is one
   NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
   //process config message
-  configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray);
+  configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
 ///// ------------------------------------ /////  
 
   if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
@@ -371,7 +371,8 @@ Serial.println(timeSubSecondsMicros); */
   sensorTasks(sensorArray, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
 
   // -----Update States on EEPROM -----
-  tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
+  //change to only write if something new to write!!! Make wrapper function that checks for new info?
+  //tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
 
 /*   // CAN State Report and Sensor data send Functions
   CAN2PropSystemStateReport(Can0, currentVehicleState, currentCommand, valveArray, pyroArray, abortHaltFlag, PropulsionSysNodeID);

@@ -790,7 +790,7 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     //sei(); // reenables interrupts after controller sync
 }
 
-void configMSGread(configMSG& currentConfigMSG, bool& NewConfigMessage, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
+void configMSGread(configMSG& currentConfigMSG, bool& NewConfigMessage, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim)
 {
 // bool for whether to continue to check the next object array (object ID has not been found yet)
 // NON UNIQUE OBJECT IDS WILL BREAK THIS SYSTEM
@@ -1040,6 +1040,38 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             
         }
     }
-
+    ////// ----- Fluid System Simulation ----- /////
+    if (idSearch)
+    {
+        //Serial.println("do I get past idSearch: engineController:  ");
+        //no for statement, only one fluid sim for whole system running passed in without the pointer array style
+        //{
+            if (currentConfigMSG.TargetObjectID == fluidSim.getSimID())
+            {
+                switch (currentConfigMSG.ObjectSettingID)
+                {
+                case 0:
+                    fluidSim.resetAll();
+                    break;
+                case 1:
+                    fluidSim.resetSim();
+                    break;
+                case 2:
+                    //fluidSim.set          //Need to build out all the possible simulation configuration set functions as we finish maturing the sim
+                    break;
+                case 3:
+                    //fluidSim.set
+                    break;
+                case 4:
+                    //fluidSim.set
+                    break;
+                
+                default:
+                    break;
+                }
+                idSearch = false;
+                //break;
+            }
+        //}
     }
 }
