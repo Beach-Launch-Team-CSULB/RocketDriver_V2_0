@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "extendedIO/extendedIO.h"
 
-Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default, bool setAbortHaltDeviceBool, uint8_t setHoldDuty_Default,  bool setNodeIDCheck)
+Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default, bool setAbortHaltDeviceBool, uint16_t setHoldDuty_Default,  bool setNodeIDCheck)
                 : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType_Default{setValveType_Default}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime_Default{setFullDutyTime_Default}, abortHaltDeviceBool{setAbortHaltDeviceBool}, holdDuty_Default{setHoldDuty_Default}, nodeIDCheck{setNodeIDCheck}
 {
     //set values to default values when intstantiated

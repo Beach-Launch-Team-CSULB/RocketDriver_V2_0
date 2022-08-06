@@ -80,6 +80,8 @@ void TankPressController::stateOperations()
     {
     case TankPressControllerState::Passive:
         testPass = false;
+        //set abortFlag false when going to passive;
+        abortFlag = false;
         //don't do shit
         primaryPressValve.setState(ValveState::CloseCommanded);
         pressLineVent.setState(ValveState::CloseCommanded);
@@ -112,6 +114,8 @@ void TankPressController::stateOperations()
         break;
     case TankPressControllerState::Vent:
         testPass = false;
+        //set abortFlag false going into Vent to be able to vent out of an Abort from abortFlag
+        abortFlag = false;
         if (priorState != TankPressControllerState::Vent)
         {
         sensorState = SensorState::Fast;
@@ -271,6 +275,11 @@ void TankPressController::PIDinputSetting()
     e_p = targetValue - bangSensor3EMA;
     e_i = bangSensor3Integral;
     e_d = bangSensor3Derivative;
+    }
+    if (!trustBangSensor1 && !trustBangSensor2 && !trustBangSensor3)
+    {
+        // if controller doesn't trust ANY tank sensor, even the sim, trigger an abort
+        abortFlag = true;
     }
 }
 

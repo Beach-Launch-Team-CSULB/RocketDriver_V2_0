@@ -319,6 +319,47 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Comman
     }
 }
 
+void controllerAbortCheck(VehicleState& currentState, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
+{
+    // creates a bool to set when checking each controller, if any controller commands abort we abort
+    bool internalAbortFlag = false;
+    // current I can't think of any reason for the autosequence to trigger an abort, don't treat as "controller" for this context
+    // include controllers on other nodes, those controllers will be where I later merge in controller state stuff via CAN
+    if (!internalAbortFlag)
+    {
+        //Serial.println("do I get past idSearch: tankPressController:  ");
+        for (auto tankPressController : tankPressControllerArray)
+        {
+            internalAbortFlag = tankPressController->getAbortFlag();
+            if (internalAbortFlag)
+            {
+                //if flag has been set true already by one controller, exit the for loop and stop checking the others
+                break;
+            }
+        }
+    }
+    //if flag is still false, keep checking engine controllers
+    if (!internalAbortFlag)
+    {
+        //Serial.println("do I get past idSearch: tankPressController:  ");
+        for (auto engineController : engineControllerArray)
+        {
+            internalAbortFlag = engineController->getAbortFlag();
+            if (internalAbortFlag)
+            {
+                //if flag has been set true already by one controller, exit the for loop and stop checking the others
+                break;
+            }
+        }
+    }
+    //after having checked all controllers, if flag turned true set vehicleState to abort
+    if (internalAbortFlag)
+    {
+        currentState = VehicleState::abort;
+    }
+    
+}
+
 void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
 {
     switch (currentState)
@@ -832,7 +873,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     valve->setFullDutyCyclePWM(currentConfigMSG.uint16Value);
                     break;
                 case 4:
-                    valve->setHoldDutyCyclePWM(currentConfigMSG.uint8Value);
+                    valve->setHoldDutyCyclePWM(currentConfigMSG.uint16Value);
                     break;
                 case 5:
                     valve->setWarmDutyCyclePWM(currentConfigMSG.uint16Value);
@@ -996,7 +1037,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
         }
     }
 
-    ////// ----- Tank Press Controller Sets ----- /////
+    ////// ----- Engine Controller Sets ----- /////
     if (idSearch)
     {
         //Serial.println("do I get past idSearch: engineController:  ");

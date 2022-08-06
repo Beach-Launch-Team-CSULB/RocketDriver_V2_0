@@ -22,4 +22,12 @@ enum class ValveState
     ValveState_SIZE,    // 14
 };
 
+// detected states based on measuring the ADC channel on ALARA HP outputs
+enum class ValveElectricalOutputState
+{
+    Off,
+    On,
+    NoContinuity,
+};
+
 #endif

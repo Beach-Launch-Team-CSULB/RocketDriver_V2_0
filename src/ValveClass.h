@@ -29,11 +29,11 @@ class Valve
         ValveState priorState;                           // Tracks the valve state
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         uint16_t fullDuty_Default{256};                // full duty cycle for servo initial actuation
-        uint8_t holdDuty_Default{50};                   // partial duty cycle to hold valve in actuated state
-        uint8_t warmDuty_Default{0};                   // partial duty cycle to hold valve in actuated state
+        uint16_t holdDuty_Default{50};                   // partial duty cycle to hold valve in actuated state
+        uint16_t warmDuty_Default{0};                   // partial duty cycle to hold valve in actuated state
         uint16_t fullDuty;                // full duty cycle for servo initial actuation
-        uint8_t holdDuty;                   // partial duty cycle to hold valve in actuated state
-        uint8_t warmDuty;                   // partial duty cycle to hold valve in actuated state
+        uint16_t holdDuty;                   // partial duty cycle to hold valve in actuated state
+        uint16_t warmDuty;                   // partial duty cycle to hold valve in actuated state
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool abortHaltDeviceBool;                    // Whether this valve is set by the abort halt flag override
         uint16_t controlSensor1Value;               // For use in control schemes, really a template placement pending needed number and type of samples
@@ -43,7 +43,7 @@ class Valve
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
         Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default,  
-        bool setAbortHaltDeviceBool = false, uint8_t setHoldDuty_Default = 64, bool setNodeIDCheck = false);
+        bool setAbortHaltDeviceBool = false, uint16_t setHoldDuty_Default = 64, bool setNodeIDCheck = false);
     // Default constructor with no args    
         Valve(ValveType setValveType_Default, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
@@ -58,7 +58,7 @@ class Valve
         uint8_t getPinPWM(){return pinPWM;}
         uint8_t getPinDigital(){return pinDigital;}
         uint32_t getFullDutyTime(){return fullDutyTime;}
-        uint8_t getHoldDuty(){return holdDuty;}
+        uint16_t getHoldDuty(){return holdDuty;}
         ValveState getState(){return state;}
         ValveState getSyncState();
         ValveState getPriorState(){return priorState;}

@@ -25,7 +25,7 @@ struct configMSG
         uint8_t uint8Value4X[4];
         int8_t int8Value;
         int8_t int8Value4X[4];
-
+        bool boolValue;
         float floatValue;
     };
     

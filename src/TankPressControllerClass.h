@@ -26,7 +26,7 @@ class TankPressController
         Valve &pressLineVent;
         Valve &tankVent;
         //Valve MainValve{};
-
+        bool abortFlag = false;         //controller can trigger an abort by flipping this flag true
         bool ventFailsafeFlag = false;  //for making vent failsafe require successive controller loops to open vents
         float ventFailsafePressure;
         float ventFailsafePressure_Default;
@@ -114,6 +114,8 @@ class TankPressController
         ValveState getPrimaryPressValveState(){return primaryPressValve.getState();}
         ValveState getPressLineVentState(){return pressLineVent.getState();}
         ValveState getTankVentState(){return tankVent.getState();}
+        bool getAbortFlag(){return abortFlag;}
+
         bool getResetIntegralCalcBool()
             {
                 bool tempBoolContainer;

@@ -28,7 +28,7 @@ class EngineController
         EngineControllerState priorState;
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
         int64_t currentAutosequenceTime;
-
+        bool abortFlag = false;         //controller can trigger an abort by flipping this flag true, sets the main vehicle state to abort
         int64_t fuelMVAutosequenceActuation_Default;
         int64_t loxMVAutosequenceActuation_Default;
         int64_t igniter1Actuation_Default;
@@ -91,6 +91,7 @@ class EngineController
         PyroState getIgniter2State(){return igniter2.getState();}
         ValveState getPneumaticVentState(){return pneumaticVent.getState();}
         float getCurrentPcTarget(){return currentPcTarget;}
+        bool getAbortFlag(){return abortFlag;}
 
     // set functions, allows the setting of a variable
     // set the Node ID Check bool function
