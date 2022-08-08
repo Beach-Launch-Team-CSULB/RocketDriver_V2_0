@@ -5,6 +5,7 @@
 //#include <bitset>
 //#include <FlexCAN.h>
 //#include <ADC.h>
+#include "ToMillisTimeTracker.h"
 
 // This contains some of the functions to be used during operations they are templates, and so defined in the header. BEWARE
 
@@ -99,7 +100,7 @@ void autoSequenceTasks(const std::array<T, size>& autoSequenceArray, uint8_t& no
 
 template <typename T, std::size_t size>
 //void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
-void sensorTasks(const std::array<T, size>& sensorArray, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
+void sensorTasks(const std::array<T, size>& sensorArray, uint8_t& nodeIDReadIn, uint32_t& rocketDriverSeconds, uint32_t&  rocketDriverMicros)
 {
     // iterate through valve array and run the stateOperations method
     for(auto sensor : sensorArray)
@@ -110,7 +111,8 @@ void sensorTasks(const std::array<T, size>& sensorArray, uint32_t& secondsRD,uin
             sensor->stateOperations();
             //Serial.print("LoopRan");
             sensor->read();
-            sensor->setSYSTimestamp(secondsRD, microsecondsRD);
+            myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+            sensor->setSYSTimestamp(rocketDriverSeconds, rocketDriverMicros);
             //sensor->linearConversion();
         }
 /*         else if (nodeIDReadIn == 6) //shitty way to make logger node only convert
@@ -181,13 +183,36 @@ void tankPressControllerSetup(const std::array<T, size>& tankPressControllerArra
 
 template <typename T, std::size_t size>
 void sensorSetUp(const std::array<T, size>& sensorArray)
+//void sensorSetUp(const std::array<T, size>& sensorArray, uint32_t& rocketDriverSeconds, uint32_t& rocketDriverMicros, void (*myTimeTrackingFunction)(uint32_t, uint32_t))
 {
     // iterate through sensor array and run begin
     for(auto sensor : sensorArray)
     {
         sensor->begin();
+        //sensor->setSYSTimestamp(secondsRD, microsecondsRD);
+/*         myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+        Serial.println("rocketDriverSeconds");
+        Serial.println(rocketDriverSeconds);
+        Serial.println("rocketDriverMicros");
+        Serial.println(rocketDriverMicros); */
         //Serial.print("LoopRan");
     }
+}
+
+void fakesensorShit(uint32_t& rocketDriverSeconds, uint32_t& rocketDriverMicros, void (*myTimeTrackingFunction)(uint32_t, uint32_t))
+{
+    // iterate through sensor array and run begin
+    //for(auto sensor : sensorArray)
+    //{
+        //sensor->begin();
+        //sensor->setSYSTimestamp(secondsRD, microsecondsRD);
+        myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+        Serial.println("rocketDriverSeconds");
+        Serial.println(rocketDriverSeconds);
+        Serial.println("rocketDriverMicros");
+        Serial.println(rocketDriverMicros);
+        //Serial.print("LoopRan");
+    //}
 }
 
 /* void MCUADCSetup()

@@ -26,15 +26,6 @@ void MCUADCSetup();
   rtd,
 }; */
 
-// enum for holding ADC input types, may not use this way
-enum ADCType
-{
-  TeensyMCUADC, //built in ADC
-  ADS1258,  //not in use yet
-  ADS1263,  //not in use yet
-  simulatedInput, //for simulated sensor inputs
-};
-
 
 class EXT_SENSOR : public SENSORBASE
 {
@@ -56,7 +47,9 @@ class EXT_SENSOR : public SENSORBASE
     uint32_t currentSampleRate = 10;
     elapsedMicros timer;                      // timer for sensor timing operations
     uint32_t currentRawValue{};               // holds the current value for the sensor
-    bool newSensorValueCheck = false;                      // Is the current raw value a new read that hasn't been sent yet?
+    bool newSensorValueCheck_CAN = false;                      // Is the current raw value a new read that hasn't been sent yet?
+    bool newSensorConvertedValueCheck_CAN = false;                      // Is the current raw value a new read that hasn't been sent yet?
+    bool newSensorValueCheck_Log = false;                      // Is the current raw value a new read that hasn't been sent yet?
     uint16_t currentCANtimestamp = 0;
     uint32_t currentTimestampSeconds = 0;
     uint32_t currentTimestampMicros = 0;
@@ -102,6 +95,7 @@ class EXT_SENSOR : public SENSORBASE
   FluidSystemSimulation &fluidSim;
 
   public:
+    bool pullTimestamp = false;
     void begin();                     // run in setup to get pins going
     void read();              // updates currentRawValue with current reading, using an activated ADC object
     void stateOperations();
@@ -117,13 +111,18 @@ class EXT_SENSOR : public SENSORBASE
     uint32_t getADCinput(){return ADCinput;}
     uint32_t getCurrentSampleRate(){return currentSampleRate;}
     uint32_t getCurrentRawValue(){return currentRawValue;}
+    uint32_t getCurrentRawValue(bool resetRawRead){if (resetRawRead) {newSensorValueCheck_CAN = false;} return currentRawValue;} //reads and clears new value bool
     float getCurrentConvertedValue(){return currentConvertedValue;}
+    //float getCurrentConvertedValue(bool resetConvertedRead){if (resetConvertedRead) {newSensorConvertedValueCheck_CAN = false;} return currentConvertedValue;} //reads and clears new value bool
+    float getCurrentConvertedValue(bool resetConvertedRead){if (resetConvertedRead) {newConversionCheck = false;} return currentConvertedValue;} //reads and clears new value bool
     uint16_t getCANTimestamp(){return currentCANtimestamp;}
     uint32_t getTimestampSeconds(){return currentTimestampSeconds;}
     uint32_t getTimestampMicros(){return currentTimestampMicros;}
     uint32_t getCurrentRollingAverage(){return currentCalibrationValue;}
+    ADCType getADCtype(){return sensorSource;}
     bool getNodeIDCheck(){return nodeIDCheck;}
-    bool getNewSensorValueCheck(){return newSensorValueCheck;}
+    bool getNewSensorValueCheckCAN(){return newSensorValueCheck_CAN;}
+    bool getNewSensorValueCheckLog(){return newSensorValueCheck_Log;}
     bool getNewSensorConversionCheck(){return newConversionCheck;}
     bool getEnableLinearRegressionCalc(){return enableLinearRegressionCalc;}
     
@@ -146,8 +145,8 @@ class EXT_SENSOR : public SENSORBASE
     void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
     void setCurrentRawValue(uint32_t updateCurrentRawValue){currentRawValue = updateCurrentRawValue;}
-
-    void setNewSensorValueCheck(bool updateNewSensorValueCheck){newSensorValueCheck = updateNewSensorValueCheck;}
+    //resets both the CAN and log bools for when new sample is read
+    void setNewSensorValueCheck(bool updateNewSensorValueCheck){newSensorValueCheck_CAN = updateNewSensorValueCheck; newSensorValueCheck_Log = updateNewSensorValueCheck;}
 
     void setNewConversionCheck(bool updateNewConversionCheck){newConversionCheck = updateNewConversionCheck;}
 
@@ -155,10 +154,14 @@ class EXT_SENSOR : public SENSORBASE
     
     void setSYSTimestamp(uint32_t timestampSeconds, uint32_t timestampMicros)
       {
+        if (pullTimestamp)
+        {
         priorTimestampSeconds = currentTimestampSeconds;  //shifts the previous current into prior variables
         priorTimestampMicros = currentTimestampMicros;
         currentTimestampSeconds = timestampSeconds;       //sets the new current timestamps from input arguments
         currentTimestampMicros = timestampMicros;
+        pullTimestamp = false;
+        }
       }
 
     //void setCurrentSampleRate(uint32_t updateCurrentSampleRate) {currentSampleRate = updateCurrentSampleRate; newSensorValueCheck = true; newConversionCheck = false;}

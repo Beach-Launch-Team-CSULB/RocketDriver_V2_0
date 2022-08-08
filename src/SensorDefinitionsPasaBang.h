@@ -15,23 +15,23 @@
 //EXT_SENSOR ThrustMountLoadCell1pos{50, 2, A3, 2, 10, 100, false};                       // 0
 //EXT_SENSOR ThrustMountLoadCell1neg{50, 5, A2, 2, 10, 100, false};                       // 1
 EXT_SENSOR ChamberPT1{56, 8, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 800, 0.0185, -128.88};                 // 7
-EXT_SENSOR FuelLinePT{57, 8, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, 0.0185, -125.74};          // 8
-EXT_SENSOR LoxLinePT{59, 8, ALARA_ANALOG_IN6, &waterGoesVroom, 2, 10, 100, 0.0186, -128.58};           // 10
+EXT_SENSOR FuelLinePT{58, 8, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, 0.0185, -125.74};          // 8
+EXT_SENSOR LoxLinePT{60, 8, ALARA_ANALOG_IN6, &waterGoesVroom, 2, 10, 100, 0.0186, -128.58};           // 10
 //EXT_SENSOR MVPneumaticsPT{78, 3, A15, 2, 10, 50, false, 0.0186, -126.56};                // 11
-EXT_SENSOR FuelTankPT1{81, 8, ALARA_ANALOG_IN7, &waterGoesVroom, 2, 10, 100, 0.0186, -129.3};                    // 14
-EXT_SENSOR FuelTankPT2{82, 8, ALARA_ANALOG_IN8, &waterGoesVroom, 2, 10, 100, 0.0123, -123.11};                    // 14
-EXT_SENSOR LoxTankPT1{83, 8, ALARA_ANALOG_IN2, &waterGoesVroom, 2, 10, 100, 0.0187, -125.36};                    // 15
-EXT_SENSOR LoxTankPT2{84, 8, ALARA_ANALOG_IN3, &waterGoesVroom, 2, 10, 100, 0.0124, -123.43};                    // 15
-EXT_SENSOR HiPressPT{85, 8, ALARA_ANALOG_IN1, &waterGoesVroom, 2, 10, 50, 0.0933, -638.38};                 // 16
+EXT_SENSOR FuelTankPT1{62, 8, ALARA_ANALOG_IN7, &waterGoesVroom, 2, 10, 600, 0.0186, -129.3};                    // 14
+EXT_SENSOR FuelTankPT2{64, 8, ALARA_ANALOG_IN8, &waterGoesVroom, 2, 10, 600, 0.0123, -123.11};                    // 14
+EXT_SENSOR LoxTankPT1{66, 8, ALARA_ANALOG_IN2, &waterGoesVroom, 2, 10, 600, 0.0187, -125.36};                    // 15
+EXT_SENSOR LoxTankPT2{68, 8, ALARA_ANALOG_IN3, &waterGoesVroom, 2, 10, 600, 0.0124, -123.43};                    // 15
+EXT_SENSOR HiPressPT{70, 8, ALARA_ANALOG_IN1, &waterGoesVroom, 2, 10, 50, 0.0933, -638.38};                 // 16
 //EXT_SENSOR MCUtempNode8{200, 8, 70, 2, 5, 10};                                    // 18
 
 //FAKESHIT
 EXT_SENSOR FakeChamberPT1{156, 8, 41, &waterGoesVroom, simulatedInput};                 // 7
-EXT_SENSOR FakeFuelLinePT{157, 8, 32, &waterGoesVroom, simulatedInput};          // 8
-EXT_SENSOR FakeLoxLinePT{159, 8, 22, &waterGoesVroom, simulatedInput};           // 10
-EXT_SENSOR FakeFuelTankPT{181, 8, 31, &waterGoesVroom, simulatedInput};                    // 14
-EXT_SENSOR FakeLoxTankPT{182, 8, 21, &waterGoesVroom, simulatedInput};                    // 15
-EXT_SENSOR FakeHiPressPT{183, 8, 11, &waterGoesVroom, simulatedInput};                 // 16
+EXT_SENSOR FakeFuelLinePT{158, 8, 32, &waterGoesVroom, simulatedInput};          // 8
+EXT_SENSOR FakeLoxLinePT{160, 8, 22, &waterGoesVroom, simulatedInput};           // 10
+EXT_SENSOR FakeFuelTankPT{162, 8, 31, &waterGoesVroom, simulatedInput};                    // 14
+EXT_SENSOR FakeLoxTankPT{166, 8, 21, &waterGoesVroom, simulatedInput};                    // 15
+EXT_SENSOR FakeHiPressPT{170, 8, 11, &waterGoesVroom, simulatedInput};                 // 16
 
 /* // Pasafire config
 EXT_SENSOR PasafireChamberPT1{189, 8, A14, 10, 100, 1000, false, 0.0125, -123.5};       // 20

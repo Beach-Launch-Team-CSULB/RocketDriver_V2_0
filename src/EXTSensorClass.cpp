@@ -20,18 +20,18 @@ void MCUADCSetup()
   //adc->setReference(ADC_REFERENCE::REF_1V2, ADC_0); // change all 3.3 to 1.2 if you change the reference to 1V2
 
   adc->adc0->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc0->setAveraging(8);                                    // set number of averages
+  adc->adc0->setAveraging(4);                                    // set number of averages
   adc->adc0->setResolution(16);                                   // set bits of resolution
   adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);     // change the sampling speed
+  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
   adc->adc0->recalibrate();
 
 ///// ADC1 /////
   adc->adc1->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc1->setAveraging(8);                                    // set number of averages
+  adc->adc1->setAveraging(4);                                    // set number of averages
   adc->adc1->setResolution(16);                                   // set bits of resolution
   adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);     // change the sampling speed
+  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
   adc->adc1->recalibrate();
 
 }
@@ -133,7 +133,7 @@ if (sensorSource == TeensyMCUADC)
             {
                 
                     currentRawValue = adc->analogRead(ADCinput);
-                    
+                    pullTimestamp = true;
                     //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
                     /////linear conversions here, y = m*x + b
                     // This automatically stores converted value for the on board nodes
@@ -161,9 +161,11 @@ if (sensorSource == TeensyMCUADC)
                 Serial.println(getCurrentRollingAverage()); */
                 //Serial.println("newSensorREADbefore");
                 //Serial.println(newSensorValueCheck);
-                newSensorValueCheck = true;
+                newSensorValueCheck_CAN = true;
+                newSensorValueCheck_Log = true;
+                newSensorConvertedValueCheck_CAN = true;
                 //newSensorValueCheck = false;
-                newConversionCheck = false;
+                newConversionCheck = true;
                 //Serial.println("newSensorinREADafter");
                 //Serial.println(newSensorValueCheck);
                 timer = 0;
@@ -182,6 +184,7 @@ if (sensorSource == simulatedInput)
                     //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
                     /////linear conversions here, y = m*x + b
                     // This automatically stores converted value for the on board nodes
+                    pullTimestamp = true;
                     priorConvertedValue = currentConvertedValue; //shifts previous converted value into prior variable
                     currentConvertedValue = fluidSim.analogRead(ADCinput);
                     writeToRollingArray(convertedValueArray, currentConvertedValue);
@@ -222,7 +225,8 @@ void EXT_SENSOR::stateOperations()
 void EXT_SENSOR::linearConversion()
 {
     /////linear conversions here, y = m*x + b
-    if (newSensorValueCheck && newConversionCheck == false)
+    //if (newSensorValueCheck && newConversionCheck == false)
+    if (newConversionCheck == false)
     {
     //priorConvertedValue = currentConvertedValue; //shifts previous converted value into prior variable
     currentConvertedValue = linConvCoef1_m*currentRawValue + linConvCoef1_b;    //Initial Calibration

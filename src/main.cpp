@@ -65,18 +65,23 @@ using std::string;
 
 
 #include "ALARAUtilityFunctions.h"
-#include "ToMillisTimeTracker.h"
+//#include "ToMillisTimeTracker.h"
 #include "CANRead.h"
 #include "CANWrite.h"
 #include "OperationFunctionTemplates.h"
 #include "ALARApinDefines.h"
 #include "fluidSystemSimulation.h"
+#include "FlexCAN3Controller.h"
 
 //Trying to figure out RTC stuff with these libs
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
 #define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
+
+uint32_t rocketDriverSeconds;
+uint32_t rocketDriverMicros;
+
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
@@ -87,7 +92,7 @@ elapsedMillis commandExecuteTimer;
 uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
 uint8_t fakeCanIterator = 0;
 
-bool mainloopprints = true;
+bool mainloopprints = false;
 
 bool localNodeResetFlag = false; //flag to trigger register reset from commanded reset over CAN
 bool abortHaltFlag; //creates halt flag that is a backup override of state machine, am I currently using it?
@@ -123,6 +128,8 @@ CAN_message_t extended;
 bool CANSensorReportConverted = false;
 bool NewCommandMessage{false};
 bool NewConfigMessage{false};
+
+FlexCan3Controller Can2msgController;
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
@@ -237,6 +244,7 @@ void setup() {
   
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
+  //sensorSetUp(sensorArray, rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
   // ----- Set Controller Dependent Sensor Settings -----
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
 
@@ -252,15 +260,15 @@ void setup() {
 
 void loop() 
 {
+//fakesensorShit(rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
+
   //Display the node number with serial print statement start of each loop
   //Serial.print("PropulsionSysNodeID: ");
   //Serial.println(PropulsionSysNodeID);
 
 ///// Custom function for tracking miliseconds and seconds level system time for timestamping /////
-myTimeTrackingFunction();
-/* Serial.print(second());
-Serial.print(" : ");
-Serial.println(timeSubSecondsMicros); */
+// let it run each loop in addition to when called to keep it synced up
+myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
   // --- Read CAN bus and update current command ---
   if(CANread(Can0, configVerificationKey, NewConfigMessage, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
@@ -368,7 +376,7 @@ Serial.println(timeSubSecondsMicros); */
   pyroTasks(pyroArray, PropulsionSysNodeID);
   sei(); // reenables interrupts after propulsion output state set is completed
   //sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
-  sensorTasks(sensorArray, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
+  sensorTasks(sensorArray, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
 
   // -----Update States on EEPROM -----
   //change to only write if something new to write!!! Make wrapper function that checks for new info?
@@ -515,11 +523,22 @@ vectorBufferPrintout();
     {
         if (sensor->getSensorNodeID() == PropulsionSysNodeID)
         {
-        sensor->setState(SensorState::Slow);
-        
-/*             Serial.print("SensorID: ");
+        //sensor->setState(SensorState::Slow);
+         
+            Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
-            Serial.print( ": converted: ");
+            Serial.print( ": new converted bool: ");
+            //Serial.print( ": new raw bool: ");
+            //Serial.print(sensor->getNewSensorValueCheckCAN());
+            Serial.print(sensor->getNewSensorConversionCheck());
+            Serial.print( ": raw value: ");
+            Serial.print(sensor->getCurrentRawValue());
+            Serial.print( ": timestamp S: ");
+            Serial.print(sensor->getTimestampSeconds());
+            Serial.print( ": timestamp uS: ");
+            Serial.print(sensor->getTimestampMicros());
+
+/*             Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
@@ -529,9 +548,9 @@ vectorBufferPrintout();
             {
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
-            }
+            } */
             Serial.println(": ");
- */
+
         }
     
     }
@@ -555,5 +574,6 @@ startup = false;
     Serial.print("board rev: ");
     Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
 
-
+Can2msgController.generateRawSensormsgs(Can0 , sensorArray, PropulsionSysNodeID);
+Can2msgController.generateConvertedSensormsgs(Can0 , sensorArray, PropulsionSysNodeID,5);
 }

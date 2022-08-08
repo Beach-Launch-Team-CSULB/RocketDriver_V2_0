@@ -7,9 +7,17 @@
 #include <ADC.h>
 #include "SensorStates.h"
 
+// enum for holding ADC input types, may not use this way
+enum ADCType
+{
+  TeensyMCUADC, //built in ADC
+  ADS1258,  //not in use yet
+  ADS1263,  //not in use yet
+  simulatedInput, //for simulated sensor inputs
+};
+
+
 // Base sensor class to hold the various derived classes, should be purely virtual functions
-
-
 class SENSORBASE
 {
   public:
@@ -23,14 +31,18 @@ class SENSORBASE
     virtual uint32_t getADCinput();
     virtual uint32_t getCurrentSampleRate();
     virtual uint32_t getCurrentRawValue();
+    virtual uint32_t getCurrentRawValue(bool resetRawRead);
     virtual float getCurrentConvertedValue();
+    virtual float getCurrentConvertedValue(bool resetConvertedRead);
     virtual uint16_t getCANTimestamp();
     virtual uint32_t getTimestampSeconds();
     virtual uint32_t getTimestampMicros();
     //virtual uint8_t getCurrentRollingArrayPosition(){return currentRollingArrayPosition;}
     virtual uint32_t getCurrentRollingAverage();
+    virtual ADCType getADCtype();
     virtual bool getNodeIDCheck();
-    virtual bool getNewSensorValueCheck();
+    virtual bool getNewSensorValueCheckCAN();
+    virtual bool getNewSensorValueCheckLog();
     virtual bool getNewSensorConversionCheck();
     virtual bool getEnableLinearRegressionCalc();
 

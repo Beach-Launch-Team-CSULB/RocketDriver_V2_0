@@ -1116,3 +1116,4 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
         //}
     }
 }
+}
