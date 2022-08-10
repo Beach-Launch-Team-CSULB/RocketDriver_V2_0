@@ -5,31 +5,71 @@
 uint8_t standardIDCAN2TotalBits[3][9] = {{0,1,2,3,4,5,6,7,8},{52,62,72,82,92,102,112,122,132},{77,87,97,107,117,127,137,147,157}};
 const uint32_t max18bitvalue = 262143;  //preset as constant to not calculate it
 
-void FlexCan3Controller::generateObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn)
+void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message_t& msgIn, uint16_t IDA)
 {
-    //for loop covers max 10 ALARA HP devices
-    for (size_t i = 0; i < 10; i++)
+    msgIn.len = 8; //always a full frame this format
+    msgIn.id = IDA + (byteArray[0] << 13) + (byteArray[1] << 21);   //standard ID plus pack first two bytes into back of extendedID field
+    for (size_t i = 0; i < 8; i++)
     {
-        // split ALARA HP devices across possibly 2 CAN2 frames
-        for (size_t j = 0; j < 8; j++)
-        {
-            for (auto valve : valveArray)
-            {
-                    if (valve->getValveNodeID() == propulsionNodeIDIn)
-                    {
-                        nodeReportStruct.objectIDmsg1.buf[j] = valve->getValveID();
-                    }
-            }
-
-            for (auto pyro : pyroArray)
-            {
-                    if (pyro->getPyroNodeID() == propulsionNodeIDIn)
-                    {
-                        nodeReportStruct.objectIDmsg1.buf[j] = pyro->getPyroID();
-                    }
-            }
-        }
+        msgIn.buf[i] = byteArray[i+2];  //pack the back 8 elements of byte array into normal CAN2 bytes
     }
+    //return msgIn;
+}
+
+void FlexCan3Controller::generateHPObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn)
+{
+    u_int16_t msgID;
+    msgID = propulsionNodeIDIn+512+16;
+    //for loop covers max 10 ALARA HP devices
+    //Can skip limiting the size with a for loop when doing this by ALARA HP channels that are fixed at 10 max size on a given node
+    //for (size_t i = 0; i < 10; i++)
+    //{
+        for (auto valve : valveArray)
+        {
+                if (valve->getValveNodeID() == propulsionNodeIDIn)
+                {
+                    nodeObjectIDReportStruct.objectIDByteArray[valve->getHPChannel()-1] = valve->getValveID();
+                }
+        }
+
+        for (auto pyro : pyroArray)
+        {
+                if (pyro->getPyroNodeID() == propulsionNodeIDIn)
+                {
+                    nodeObjectIDReportStruct.objectIDByteArray[pyro->getHPChannel()-1] = pyro->getPyroID();
+                }
+        }
+    //}
+    writeObjectByteArray(nodeObjectIDReportStruct.objectIDByteArray, nodeObjectIDReportStruct.objectIDmsg, msgID);
+}
+
+void FlexCan3Controller::generateHPObjectStateReportmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn)
+{
+    u_int16_t msgID;
+    msgID = propulsionNodeIDIn+512+32;
+    //for loop covers max 10 ALARA HP devices
+    //Can skip limiting the size with a for loop when doing this by ALARA HP channels that are fixed at 10 max size on a given node
+    //for (size_t i = 0; i < 10; i++)
+    //{
+        for (auto valve : valveArray)
+        {
+                if (valve->getValveNodeID() == propulsionNodeIDIn)
+                {
+                    // add bit shifted electrical state later
+                    nodeObjectStateReportStruct.objectIDByteArray[valve->getHPChannel()-1] = static_cast<uint8_t>(valve->getState());
+                }
+        }
+
+        for (auto pyro : pyroArray)
+        {
+                if (pyro->getPyroNodeID() == propulsionNodeIDIn)
+                {
+                    // add bit shifted electrical state later
+                    nodeObjectStateReportStruct.objectIDByteArray[pyro->getHPChannel()-1] = static_cast<uint8_t>(pyro->getState());
+                }
+        }
+    //}
+    writeObjectByteArray(nodeObjectStateReportStruct.objectIDByteArray, nodeObjectStateReportStruct.objectIDmsg, msgID);
 }
 
 void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
@@ -131,7 +171,7 @@ sensorReadStruct.frameTotalBits = standardIDCAN2TotalBits[sensorReadStruct.packe
 // long term I think it's better for this to return the struct and have parent function use it to run through all the sensors ready to read each loop
 if (sensorReadStruct.numberSensors >= 1)
 {
-Serial.println(" do I get to send raw CAN msg ");
+/* Serial.println(" do I get to send raw CAN msg ");
         Serial.print(sensorReadStruct.numberSensors);
         Serial.print(" id: ");
         Serial.print(sensorReadStruct.packedSensorCAN2.id);
@@ -144,7 +184,7 @@ Serial.println(" do I get to send raw CAN msg ");
         Serial.print(sensorReadStruct.packedSensorCAN2.buf[i]);
         Serial.print(" : ");
       }
-      Serial.println();
+      Serial.println(); */
     
 
 //CANbus.write(sensorReadStruct.packedSensorCAN2);
@@ -159,11 +199,11 @@ CANbus.write(sensorReadStruct.packedSensorCAN2);
 
 //NOT CHANGED YET FROM RAW VERSION!!!! Needs to pull converted values at a given rate (if new available) and set the new converted false when reading just like with raw
 //Use a one decimal place shifted version of the float as Int, will give up to ~6500.0 PSI max value on all the pressures.
-void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn, uint32_t convertedSendRateHz)
+void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
 {
     //if (convertedValueUpdateTimer >= 0)
-    if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
-    {
+    //if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
+    //{
         convertedValueUpdateTimer = 0;
         bool isFirstSample = true;
         ALARA_ConvertedSensorReadmsg sensorReadStruct;
@@ -219,7 +259,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
             //Serial.print("do I get past i loop");
             //Serial.println(sensorReadStruct.numberSensors);
-    //sensorReadStruct.packedSensorCAN2.flags.extended = 1;
+    sensorReadStruct.packedSensorCAN2.;
     sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
 
     //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
@@ -258,7 +298,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
     // long term I think it's better for this to return the struct and have parent function use it to run through all the sensors ready to read each loop
     if (sensorReadStruct.numberSensors >= 1)
     {
-    Serial.println(" do I get to send Converted CAN msg ");
+/*     Serial.println(" do I get to send Converted CAN msg ");
             Serial.print(sensorReadStruct.numberSensors);
             Serial.print(" id: ");
             Serial.print(sensorReadStruct.packedSensorCAN2.id);
@@ -271,7 +311,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
             Serial.print(sensorReadStruct.packedSensorCAN2.buf[i]);
             Serial.print(" : ");
         }
-        Serial.println();
+        Serial.println(); */
         
 
     //CANbus.write(sensorReadStruct.packedSensorCAN2);
@@ -281,5 +321,69 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
     {
     CANbus.write(sensorReadStruct.packedSensorCAN2);
     }
+    //}
+}
+
+
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+{
+    //call this every loop of main program
+    //call all the types of messages inside this function and execute as needed
+    if (!objectIDmsgs)  //generate the message once
+    {
+    generateHPObjectIDmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
+    objectIDmsgs = true;
     }
+    if (highPowerObjectIDmsgTimer >= (1000/(highPowerObjectIDRateHz/highPowerObjectIDRateHzDenominator))) //send low rate ping of what objects are on this node HP channels
+    {
+    CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
+    highPowerObjectIDmsgTimer = 0;
+    
+/*     Serial.println(" do I get to send ObjectID CAN msg ");
+            Serial.print(" id: ");
+            Serial.print(nodeObjectIDReportStruct.objectIDmsg.id);
+            //Serial.print(" timestamp: ");
+            //Serial.print(sensorReadStruct.sensorTimestampMicros[0]);
+            
+        for (size_t i = 0; i < nodeObjectIDReportStruct.objectIDmsg.len; i++)
+        {
+            Serial.print(" : ");
+            Serial.print(nodeObjectIDReportStruct.objectIDmsg.buf[i]);
+            Serial.print(" : ");
+        }
+        Serial.println();   */  
+    }
+    
+    if (highPowerStatemsgTimer >= (1000/highPowerStateReportRateHz))
+    {
+        // make and send high power state report
+    generateHPObjectStateReportmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
+    CANbus.write(nodeObjectStateReportStruct.objectIDmsg);    
+        highPowerStatemsgTimer = 0;
+
+    Serial.println(" do I get to send Object State CAN msg ");
+            Serial.print(" id: ");
+            Serial.print(nodeObjectStateReportStruct.objectIDmsg.id);
+            //Serial.print(" timestamp: ");
+            //Serial.print(sensorReadStruct.sensorTimestampMicros[0]);
+            
+        for (size_t i = 0; i < nodeObjectStateReportStruct.objectIDmsg.len; i++)
+        {
+            Serial.print(" : ");
+            Serial.print(nodeObjectStateReportStruct.objectIDmsg.buf[i]);
+            Serial.print(" : ");
+        }
+        Serial.println();    
+    }
+    
+    if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
+    {
+        //generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+        convertedValueUpdateTimer = 0;
+    
+    
+    }
+
+    //set this up to run until raw messages all cleared each loop
+    //generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
 }
