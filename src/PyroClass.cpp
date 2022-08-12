@@ -4,8 +4,8 @@
 
 
 
-Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t setLiveOutTime,  bool setNodeIDCheck)
-                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, firePin{setFirePin}, armPin{setArmPin}, liveOutTime{setLiveOutTime}, nodeIDCheck{setNodeIDCheck}
+Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setALARA_HP_Channel, uint32_t setLiveOutTime,  bool setNodeIDCheck)
+                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, ALARA_HP_Channel{setALARA_HP_Channel}, liveOutTime{setLiveOutTime}, nodeIDCheck{setNodeIDCheck}
 {
     liveOutTime = liveOutTime_Default;
     state = PyroState::Off;
@@ -17,14 +17,18 @@ Pyro::Pyro(uint32_t setLiveOutTime) : liveOutTime{setLiveOutTime}
     
 }
 
-void Pyro::begin()
+void Pyro::begin(uint8_t pinArrayIn[][11])
 {
     if (nodeIDCheck)
     {
-        pinModeExtended(firePin, OUTPUT);
-        pinModeExtended(armPin, OUTPUT);
-        digitalWriteExtended(firePin, 0);
-        digitalWriteExtended(armPin, 0);
+        pinDigital = pinArrayIn[0][ALARA_HP_Channel];
+        pinPWM = pinArrayIn[1][ALARA_HP_Channel];
+        pinADC = pinArrayIn[2][ALARA_HP_Channel];
+        
+        pinModeExtended(pinDigital, OUTPUT);
+        pinModeExtended(pinPWM, OUTPUT);
+        digitalWriteExtended(pinDigital, 0);
+        digitalWriteExtended(pinPWM, 0);
     }
 }
 
@@ -55,16 +59,16 @@ void Pyro::stateOperations()
     {
     // physical output state actions only, NO LOGIC
     case PyroState::On:
-        digitalWriteExtended(firePin, 1);
-        digitalWriteExtended(armPin, 1);
+        digitalWriteExtended(pinDigital, 1);
+        digitalWriteExtended(pinPWM, 1);
         break;
     case PyroState::Off:
-        digitalWriteExtended(firePin, 0);
-        digitalWriteExtended(armPin, 0);
+        digitalWriteExtended(pinDigital, 0);
+        digitalWriteExtended(pinPWM, 0);
         break;        
     case PyroState::Fired:
-        digitalWriteExtended(firePin, 0);
-        digitalWriteExtended(armPin, 0);
+        digitalWriteExtended(pinDigital, 0);
+        digitalWriteExtended(pinPWM, 0);
         break;        
     // All other states require no action
     default:

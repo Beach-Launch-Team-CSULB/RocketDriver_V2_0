@@ -89,7 +89,7 @@ void startupStateCheck(const VehicleState& currentState, Command& currentCommand
     }
 }
 
-void commandExecute(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, bool& newCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
+void commandExecute(VehicleState& currentState, VehicleState& priorState, MissionState& currentMissionState, MissionState prionMissionState, Command& currentCommand, bool& newCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
 {
     if (newCommand)
     {
@@ -101,6 +101,7 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Comman
             case command_passive:
                 //Serial.println(" Is command Passive case happening");
                 currentState = VehicleState::passive;
+                currentMissionState = MissionState::passive;
                 break;
             case command_test:
                 if(currentState == VehicleState::passive)
@@ -129,18 +130,21 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Comman
                 if(currentState == VehicleState::passive)
                 {
                 currentState = VehicleState::HiPressArm;
+                currentMissionState = MissionState::staticTestArmed;
                 }
                 break;
             case command_HiPressPressurized:
                 if(currentState == VehicleState::HiPressArm || currentState == VehicleState::TankPressArm) //added second conditional to allow entry backwards in a "disarm" state change
                 {
                 currentState = VehicleState::HiPressPressurized;
+                currentMissionState = MissionState::staticTestArmed;
                 }
                 break;
             case command_TankPressArm:
                 if(currentState == VehicleState::HiPressPressurized)
                 {
                 currentState = VehicleState::TankPressArm;
+                currentMissionState = MissionState::staticTestArmed;
                 }
                 break;
             case command_TankPressPressurized:
@@ -148,18 +152,21 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Comman
                 if(currentState == VehicleState::TankPressArm)
                 {
                 currentState = VehicleState::TankPressPressurized;
+                currentMissionState = MissionState::staticTestArmed;
                 }
                 break;
             case command_fireArm:
                 if(currentState == VehicleState::TankPressPressurized)
                 {
                 currentState = VehicleState::fireArmed;
+                currentMissionState = MissionState::staticTestArmed;
                 }
                 break;
             case command_fire:
                 if(currentState == VehicleState::fireArmed)
                 {
                 currentState = VehicleState::fire;
+                currentMissionState = MissionState::staticTestActive;
                 // one time actions when the state is commanded
                 tankPressControllerArray.at(LoxTankController_ArrayPointer)->setK_i();  //turms K_i back on
                 tankPressControllerArray.at(FuelTankController_ArrayPointer)->setK_i(); //turms K_i back on
@@ -352,6 +359,11 @@ void controllerAbortCheck(VehicleState& currentState, const std::array<AutoSeque
             }
         }
     }
+    // if flag is still false, check ALARA controller
+    if (!internalAbortFlag)
+    {
+        //once it exists ayyy lmao. Let ALARA call an abort if it sees itself is fucked up like the power levels on battery drop too low
+    }
     //after having checked all controllers, if flag turned true set vehicleState to abort
     if (internalAbortFlag)
     {
@@ -360,7 +372,7 @@ void controllerAbortCheck(VehicleState& currentState, const std::array<AutoSeque
     
 }
 
-void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
+void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag)
 {
     switch (currentState)
     {
@@ -376,6 +388,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            fluidSim.resetSim();
             haltFlag = false;
             break;
         case VehicleState::test:
@@ -741,12 +754,39 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
 ///// ----- NEW FUNCTIONS, WORK IN PROGRESS ----- /////
 
 // state machine for the mission state (launch, ascent, apogee, descent et cetera)
-void missionStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, bool &HaltFlag)
+void missionStateMachine(VehicleState& currentState, VehicleState& priorState, MissionState& currentMissionState, MissionState prionMissionState, ALARABoardController& boardController, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, bool& staticTestIn, bool &HaltFlag)
 {
     //eventually give a shit to do stuff for flight
+    if (!staticTestIn)  //only do flight stuff if this is NOT a ground test
+    {
+        
+    }
+    else    // do static mission state stuff
+    {
+        // Can include some basic static test mission control stuff here, like using to manage data logging, board tone alarms, et cetera
+        switch (currentMissionState)
+        {
+        case MissionState::passive:
+            /* code */
+            break;
+        case MissionState::staticTestArmed:
+            /* code */
+            break;
+        case MissionState::staticTestActive:
+            /* code */
+            break;
+        case MissionState::postTest:
+            /* code */
+            break;
+            
+        
+        default:
+            break;
+        }
+    }
 }
 
-void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, bool & haltFlag)
+void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag)
 {
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
         // Pasa Bang SF Config
@@ -774,6 +814,15 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         sensorArray.at(ChamberPT1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelLinePT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxLinePT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
+  
+        fluidSim.FuelTank.SetValveStates(
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState(),
+            engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState(),
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
+        fluidSim.LoxTank.SetValveStates(
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState(),
+            engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState(),
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
 
     sei(); // reenables interrupts after controller sync
  

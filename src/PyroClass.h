@@ -10,8 +10,10 @@ class Pyro
     private:
         const uint32_t pyroID = 99;
         const uint32_t pyroNodeID = 99;
-        const uint8_t firePin = 99;
-        const uint8_t armPin = 99;
+        const u_int8_t ALARA_HP_Channel = 0;
+        uint8_t pinDigital = 99;
+        uint8_t pinPWM = 99;
+        uint8_t pinADC = 99;                              // Valve ADC read pin
         elapsedMicros timer;
         PyroState state;
         PyroState priorState;
@@ -23,22 +25,26 @@ class Pyro
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
-        Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setFirePin, uint8_t setArmPin, uint32_t liveOutTime_Default, bool setNodeIDCheck = false); 
+        Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setALARA_HP_Channel, uint32_t liveOutTime_Default, bool setNodeIDCheck = false); 
     // default constructor
         Pyro(uint32_t setLiveOutTime = 250);
     // Alternate constructor with future full implementation, needs the clonedpyro features still
     //    Pyro(int setPyroID, int setPyroNodeID, int setFirePin, int setShuntPin, int setContPin, uint32_t setFireDelay = 0);
 
     // a start up method, to set pins from within setup()
-        void begin();
+        void begin(uint8_t pinArrayIn[][11]);
 
     // access functions defined in place
 
     // get functions, return the current value of that variable
         uint32_t getPyroID(){return pyroID;}
         uint32_t getPyroNodeID(){return pyroNodeID;}
-        uint32_t getFirePin(){return firePin;}
-        uint32_t getArmPin(){return armPin;}
+        //uint32_t getFirePin(){return pinDigital;}
+        //uint32_t getArmPin(){return pinPWM;}
+        uint8_t getHPChannel(){return ALARA_HP_Channel;}
+        uint8_t getPinPWM(){return pinPWM;}
+        uint8_t getPinDigital(){return pinDigital;}
+        uint8_t getPinADC(){return pinADC;}
         //uint32_t getshuntPin(){return shuntPin;}
         //uint32_t getContPin(){return contCheckPin;}        
         uint32_t getLiveOutTime(){return liveOutTime;}

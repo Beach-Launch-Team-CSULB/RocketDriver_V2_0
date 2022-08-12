@@ -2,8 +2,8 @@
 #include <Arduino.h>
 #include "extendedIO/extendedIO.h"
 
-Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default, bool setAbortHaltDeviceBool, uint16_t setHoldDuty_Default,  bool setNodeIDCheck)
-                : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType_Default{setValveType_Default}, pinPWM{setPinPWM}, pinDigital{setPinDigital}, fullDutyTime_Default{setFullDutyTime_Default}, abortHaltDeviceBool{setAbortHaltDeviceBool}, holdDuty_Default{setHoldDuty_Default}, nodeIDCheck{setNodeIDCheck}
+Valve::Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setALARA_HP_Channel, uint32_t setFullDutyTime_Default, bool setAbortHaltDeviceBool, uint16_t setHoldDuty_Default,  bool setNodeIDCheck)
+                : valveID{setValveID}, valveNodeID{setValveNodeID}, valveType_Default{setValveType_Default}, ALARA_HP_Channel{setALARA_HP_Channel}, fullDutyTime_Default{setFullDutyTime_Default}, abortHaltDeviceBool{setAbortHaltDeviceBool}, holdDuty_Default{setHoldDuty_Default}, nodeIDCheck{setNodeIDCheck}
 {
     //set values to default values when intstantiated
     valveType = valveType_Default;
@@ -59,10 +59,14 @@ Valve::Valve(ValveType setValveType_Default, bool setNodeIDCheck) : valveType_De
     }
 }
 
-void Valve::begin()
+void Valve::begin(uint8_t pinArrayIn[][11])
 {
     if (nodeIDCheck)
     {       
+        pinDigital = pinArrayIn[0][ALARA_HP_Channel];
+        pinPWM = pinArrayIn[1][ALARA_HP_Channel];
+        pinADC = pinArrayIn[2][ALARA_HP_Channel];
+
         pinModeExtended(pinPWM, OUTPUT);
         pinModeExtended(pinDigital, OUTPUT);
         analogWrite(pinPWM, 0);

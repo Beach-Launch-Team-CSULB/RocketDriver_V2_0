@@ -127,23 +127,23 @@ void sensorTasks(const std::array<T, size>& sensorArray, uint8_t& nodeIDReadIn, 
 // CALL THIS FUNCTION ONCE IN SETUP, THIS SETS THE VALVE PINMODES
     // make sure to pass this function valveArray, as defined in ValveDefinitions.h
 template <typename T, std::size_t size>
-void valveSetUp(const std::array<T, size>& valveArray)
+void valveSetUp(const std::array<T, size>& valveArray, uint8_t pinArrayIn[][11])
 {
     // iterate through valve array and run the stateOperations method
     for(auto valve : valveArray)
     {
-        valve->begin();
+        valve->begin(pinArrayIn);
         //Serial.print("LoopRan");
     }
 }
 
 template <typename T, std::size_t size>
-void pyroSetUp(const std::array<T, size>& pyroArray)
+void pyroSetUp(const std::array<T, size>& pyroArray, uint8_t pinArrayIn[][11])
 {
     // iterate through valve array and run the stateOperations method
     for(auto pyro : pyroArray)
     {
-        pyro->begin();
+        pyro->begin(pinArrayIn);
         //Serial.print("LoopRan");
     }
 }

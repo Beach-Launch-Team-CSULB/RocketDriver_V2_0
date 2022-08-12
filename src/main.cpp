@@ -65,6 +65,7 @@ using std::string;
 
 
 #include "ALARAUtilityFunctions.h"
+#include "ALARABoardControllerClass.h"
 //#include "ToMillisTimeTracker.h"
 #include "CANRead.h"
 #include "CANWrite.h"
@@ -82,6 +83,8 @@ using std::string;
 uint32_t rocketDriverSeconds;
 uint32_t rocketDriverMicros;
 
+ALARABoardController boardController;
+ALARAbuzzer buzzerr(ALARA_BUZZ);
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
@@ -92,7 +95,7 @@ elapsedMillis commandExecuteTimer;
 uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
 uint8_t fakeCanIterator = 0;
 
-bool mainloopprints = false;
+bool mainloopprints = true;
 
 bool localNodeResetFlag = false; //flag to trigger register reset from commanded reset over CAN
 bool abortHaltFlag; //creates halt flag that is a backup override of state machine, am I currently using it?
@@ -129,6 +132,8 @@ bool CANSensorReportConverted = false;
 bool NewCommandMessage{false};
 bool NewConfigMessage{false};
 
+CAN_filter_t wtf;
+
 FlexCan3Controller Can2msgController;
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
@@ -143,6 +148,9 @@ VehicleState currentVehicleState{VehicleState::passive};
 VehicleState priorVehicleState;
 MissionState currentMissionState(MissionState::passive);
 MissionState priorMissionState;
+// SET "staticTest = true" FOR GROUND TESTING, "false" FOR FLIGHT!!!!!
+bool staticTest = true;
+
 
 commandMSG currentCommandMSG{};
 configMSG currentConfigMSG{};
@@ -228,10 +236,10 @@ void setup() {
   SensorNodeIDCheck(sensorArray, PropulsionSysNodeID);
 
   // -----Run Valve Setup-----
-  valveSetUp(valveArray);
+  valveSetUp(valveArray, ALARA_HP_Array);
 
   // -----Run Valve Setup-----
-  pyroSetUp(pyroArray);
+  pyroSetUp(pyroArray, ALARA_HP_Array);
 
   // -----Run Valve Setup-----
   engineControllerSetup(engineControllerArray);
@@ -337,7 +345,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //process command
   //if (commandExecuteTimer >= 2000)
   //{
-  commandExecute(currentVehicleState, priorVehicleState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  commandExecute(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   //}
   //pull next config message from buffer, if there is one
   NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
@@ -348,23 +356,17 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
   {
   // -----Process Commands Here-----
-  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
+  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
+  missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
   //autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
-  controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, abortHaltFlag);
-  //fluid sim stuff
-  if (currentVehicleState == VehicleState::passive)
-  {
-    waterGoesVroom.resetSim();
-  }
-
+  controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
+  //fluid sim run
   waterGoesVroom.fluidSystemUpdate();
   //Serial.println(waterGoesVroom.FuelTank.CurrPressure/6895);
-  waterGoesVroom.FuelTank.SetValveStates(FuelBang.getState(),FuelMV.getState(),FuelVent.getState());
-  waterGoesVroom.LoxTank.SetValveStates(LoxBang.getState(),LoxMV.getState(),LoxVent.getState());
   
   ezModeControllerTimer = 0;
   }
@@ -495,9 +497,17 @@ vectorBufferPrintout();
             Serial.print(static_cast<uint8_t>(valve->getValveID()));
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
-            Serial.println(": ");
+            Serial.print(": ");
             Serial.print( ": ValveType: ");
             Serial.print(static_cast<uint8_t>(valve->getValveType()));
+            Serial.print( ": HP Channel: ");
+            Serial.print(valve->getHPChannel());
+            Serial.print( ": PinDigital: ");
+            Serial.print(valve->getPinDigital());
+            Serial.print( ": PinPWM: ");
+            Serial.print(valve->getPinPWM());
+            Serial.print( ": PinADC: ");
+            Serial.print(valve->getPinADC());
             Serial.println(": ");
         }
     }
@@ -514,12 +524,20 @@ vectorBufferPrintout();
             Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
             Serial.print( ": PyroState: ");
             Serial.print(static_cast<uint8_t>(pyro->getState()));
+            Serial.print( ": HP Channel: ");
+            Serial.print(pyro->getHPChannel());
+            Serial.print( ": PinDigital: ");
+            Serial.print(pyro->getPinDigital());
+            Serial.print( ": PinPWM: ");
+            Serial.print(pyro->getPinPWM());
+            Serial.print( ": PinADC: ");
+            Serial.print(pyro->getPinADC());
             Serial.println(": ");
         }
     }
 
   }
-    for(auto sensor : sensorArray)
+/*     for(auto sensor : sensorArray)
     {
         if (sensor->getSensorNodeID() == PropulsionSysNodeID)
         {
@@ -537,7 +555,7 @@ vectorBufferPrintout();
             Serial.print(sensor->getTimestampSeconds());
             Serial.print( ": timestamp uS: ");
             Serial.print(sensor->getTimestampMicros());
-
+ */
 /*             Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
             Serial.print( ": EMA: ");
@@ -549,11 +567,12 @@ vectorBufferPrintout();
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
             } */
-            Serial.println(": ");
+            
+            //Serial.println(": ");
 
-        }
+        //}
     
-    }
+    //}
 
   Serial.print("Current Autosequence Time: ");
   Serial.println(IgnitionAutoSequence.getCurrentCountdown());
@@ -574,6 +593,8 @@ startup = false;
     Serial.print("board rev: ");
     Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
 
-Can2msgController.generateRawSensormsgs(Can0 , sensorArray, PropulsionSysNodeID);
-Can2msgController.generateConvertedSensormsgs(Can0 , sensorArray, PropulsionSysNodeID,5);
+///// ----- All outgoing CAN2 messages managed here ----- /////
+// Run every loop
+Can2msgController.controllerTasks(Can0, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
+
 }

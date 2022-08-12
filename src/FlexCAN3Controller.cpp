@@ -8,6 +8,7 @@ const uint32_t max18bitvalue = 262143;  //preset as constant to not calculate it
 void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message_t& msgIn, uint16_t IDA)
 {
     msgIn.len = 8; //always a full frame this format
+    msgIn.ext = 1;
     msgIn.id = IDA + (byteArray[0] << 13) + (byteArray[1] << 21);   //standard ID plus pack first two bytes into back of extendedID field
     for (size_t i = 0; i < 8; i++)
     {
@@ -129,10 +130,11 @@ void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array
 
         //Serial.print("do I get past i loop");
         //Serial.println(sensorReadStruct.numberSensors);
-//sensorReadStruct.packedSensorCAN2.flags.extended = 1;
+sensorReadStruct.packedSensorCAN2.flags.extended = 1;
 //sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0];
 //sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + (sensorReadStruct.sensorTimestampMicros[0] << 11);
 sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
+//sensorReadStruct.packedSensorCAN2.id = (sensorReadStruct.sensorID[0], ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000)));
 //sensorReadStruct.packedSensorCAN2.id = ((sensorReadStruct.sensorTimestampMicros[0]*0.0262143));
 
 //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
@@ -259,7 +261,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
             //Serial.print("do I get past i loop");
             //Serial.println(sensorReadStruct.numberSensors);
-    sensorReadStruct.packedSensorCAN2.;
+    sensorReadStruct.packedSensorCAN2.ext = 1;
     sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
 
     //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
@@ -336,7 +338,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<Valve
     }
     if (highPowerObjectIDmsgTimer >= (1000/(highPowerObjectIDRateHz/highPowerObjectIDRateHzDenominator))) //send low rate ping of what objects are on this node HP channels
     {
-    CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
+    //CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
     highPowerObjectIDmsgTimer = 0;
     
 /*     Serial.println(" do I get to send ObjectID CAN msg ");
@@ -358,6 +360,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<Valve
     {
         // make and send high power state report
     generateHPObjectStateReportmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
+    //nodeObjectStateReportStruct.objectIDmsg.flags.extended = 1;
     CANbus.write(nodeObjectStateReportStruct.objectIDmsg);    
         highPowerStatemsgTimer = 0;
 

@@ -30,13 +30,17 @@ enum class MissionState
 {
     // These are the God States, they can be reached from any position
     passive,                // 0
-    prelaunch,              // 1   the outputs disabled for testing state?
-    ascentRail,             // 2
-    ascentFreeThrust,       // 3
-    ascentFreeCoast,        // 4
-    descentFree,            // 5
-    descentPilot,           // 6
-    descentDrogue,          // 7
-    descentMain,            // 8
+    staticTestArmed,        // 1
+    staticTestActive,       // 2
+    postTest,               // 3
+    prelaunch,              // 4
+    ascentRail,             // 5
+    ascentFreeThrust,       // 6
+    ascentFreeCoast,        // 7
+    descentFree,            // 8
+    descentPilot,           // 9
+    descentDrogue,          // 10
+    descentMain,            // 11
+    landed,                 // 12
 };
 #endif

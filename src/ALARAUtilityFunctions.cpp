@@ -5,6 +5,12 @@
 #include <cstring>
 #include "extendedIO/extendedIO.h"
 
+// ----- Teensy Internal Reset -----
+// Teensy 3.5/3.6 MCU restart register definitions
+#define RESTART_ADDR       0xE000ED0C
+#define READ_RESTART()     (*(volatile uint32_t *)RESTART_ADDR)
+#define WRITE_RESTART(val) ((*(volatile uint32_t *)RESTART_ADDR) = (val))
+
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3)
 {
     // -----Update State on EEPROM -----
@@ -266,4 +272,14 @@ void writeToRollingArray(uint8_t rollingArray[], uint8_t newInputArrayValue, uin
     rollingArray[1] = arrayMostRecentPositionInsert + 1;
     rollingArray[arrayMostRecentPositionInsert + 1] = newInputArrayValue;
   }
+}
+
+void toneBuzzer() //single tone
+{
+
+}
+
+void toneBuzzer() //tone program
+{
+
 }

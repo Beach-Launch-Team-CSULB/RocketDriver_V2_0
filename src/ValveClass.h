@@ -21,8 +21,10 @@ class Valve
         const uint8_t valveNodeID = 99;                      // NodeID the valve is controlled by
         ValveType valveType_Default;                  // sets the valve type, either normal closed or normal open
         ValveType valveType;                  // sets the valve type, either normal closed or normal open
-        const uint8_t pinPWM = 99;                              // Valve PWM pin for actuation
-        const uint8_t pinDigital = 99;                          // Valve Digital Out pin for actuation
+        const u_int8_t ALARA_HP_Channel = 0;
+        uint8_t pinPWM = 99;                              // Valve PWM pin for actuation
+        uint8_t pinDigital = 99;                          // Valve Digital Out pin for actuation
+        uint8_t pinADC = 99;                              // Valve ADC read pin
         uint32_t fullDutyTime_Default = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
         uint32_t fullDutyTime;                // Time PWM needs to be at full duty for actuation, in MICROS
         ValveState state;
@@ -42,12 +44,12 @@ class Valve
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
-        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setPinPWM, uint8_t setPinDigital, uint32_t setFullDutyTime_Default,  
+        Valve(uint32_t setValveID, uint8_t setValveNodeID, ValveType setValveType_Default, uint8_t setALARA_HP_Channel, uint32_t setFullDutyTime_Default,  
         bool setAbortHaltDeviceBool = false, uint16_t setHoldDuty_Default = 64, bool setNodeIDCheck = false);
     // Default constructor with no args    
         Valve(ValveType setValveType_Default, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
-        void begin();
+        void begin(uint8_t pinArrayIn[][11]);
 
     // access functions defined in place
 
@@ -55,8 +57,10 @@ class Valve
         uint32_t getValveID(){return valveID;}
         uint8_t getValveNodeID(){return valveNodeID;}
         ValveType getValveType(){return valveType;}
+        uint8_t getHPChannel(){return ALARA_HP_Channel;}
         uint8_t getPinPWM(){return pinPWM;}
         uint8_t getPinDigital(){return pinDigital;}
+        uint8_t getPinADC(){return pinADC;}
         uint32_t getFullDutyTime(){return fullDutyTime;}
         uint16_t getHoldDuty(){return holdDuty;}
         ValveState getState(){return state;}

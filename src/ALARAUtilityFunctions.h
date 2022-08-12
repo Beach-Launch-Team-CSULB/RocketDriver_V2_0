@@ -21,11 +21,7 @@ void MUXSetup(bool MUX_Input, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinM
 uint8_t NodeIDDetect(uint8_t pinToReadMUXNodeID, uint8_t pinMUX_S0NodeID, uint8_t pinMUX_S1NodeID, uint8_t pinMUX_S2NodeID, uint8_t pinMUX_ANodeID,
                     uint16_t nodeIDDetermineAddress1, uint16_t nodeIDDetermineAddress2, uint16_t nodeIDDetermineAddress3, uint16_t NodeIDAddress1, uint16_t NodeIDAddress2, uint16_t NodeIDAddress3, uint8_t nodeID, bool nodeIDdetermine, uint8_t nodeIDfromEEPROM1, uint8_t nodeIDfromEEPROM2, uint8_t nodeIDfromEEPROM3);
 
-// ----- Teensy Internal Reset -----
-// Teensy 3.5/3.6 MCU restart register definitions
-#define RESTART_ADDR       0xE000ED0C
-#define READ_RESTART()     (*(volatile uint32_t *)RESTART_ADDR)
-#define WRITE_RESTART(val) ((*(volatile uint32_t *)RESTART_ADDR) = (val))
+
 
 void TeensyInternalReset (bool& localNodeResetFlagIn, uint8_t addressIn1, uint8_t addressIn2, uint8_t addressIn3);
 
@@ -44,5 +40,28 @@ void writeToRollingArray(uint16_t rollingArray[], uint16_t newInputArrayValue, u
 
 void writeToRollingArray(uint8_t rollingArray[], uint8_t newInputArrayValue, uint8_t numberSizeIndex = 1);
 
+struct buzzerTone
+{
+    float toneLoudness;             // Loudness as a % of the buzzer range minimum audible = 0%, max volume = 100%
+    uint32_t toneFrequency;         // Tone Frequency in Hz
+    uint32_t toneDuration;          // Length in micros of tone before rest or next tone
+    uint32_t toneRestDuration;      // Length in micros of time for buzzer to rest off before next tone, if any.
+};
+
+class ALARAbuzzer
+{
+    private:
+        const uint8_t buzzerPin;
+        const uint32_t maxToneFrequency;
+        const uint32_t minToneFrequency;
+        const uint8_t minPWM;
+        const uint8_t maxPWM;
+
+    public:
+        // Constructor
+        ALARAbuzzer (uint8_t setBuzzerPin, uint32_t setMaxToneFrequency = 20000, uint32_t setMinToneFrequency = 25, uint8_t setMinPWM = 0, uint8_t setMaxPWM = 50);
+};
+
+void toneBuzzer();
 
 #endif

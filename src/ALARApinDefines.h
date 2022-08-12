@@ -24,7 +24,7 @@
 #define ALARA_DIGITAL_ADDRESS_2 27
 #define ALARA_DIGITAL_ADDRESS_3 28
 #define ALARA_DIGITAL_ADDRESS_4 29
-#define ALARA_DIGITAL_ADDRESS_OE 30
+#define ALARA_DIGITAL_ADDRESS_OE 99 //fake pin assign
 
 // Digital Outputs
 /* #define ALARA_DIGITAL_EXTERNAL_1 63
@@ -91,22 +91,22 @@
 #define ALARA_IMU2_CSBA 51
 #define ALARA_ACC_CSN 47
 #define ALARA_ACC_TRIG 48
-#define ALARA_BPS_CSN 53
+#define ALARA_BPS_CSN 53 */
 
 // On board indicators - LEDs and Buzzer
-#define ALARA_PWM_EXPANDER_OE 65
+//#define ALARA_PWM_EXPANDER_OE 
 #define ALARA_BUZZ 30
 
-// NRF and LORA external jumper connectors
+/* // NRF and LORA external jumper connectors
 #define ALARA_NRF_CSN 55
 #define ALARA_NRF_CE 54
-#define ALARA_NRF_IRQ 26
+#define ALARA_NRF_IRQ 26 */
 
-#define ALARA_LORA_CS 42
+/* #define ALARA_LORA_CS 42
 #define ALARA_LORA_INT 40
-#define ALARA_LORA_RST 41
+#define ALARA_LORA_RST 41 */
 
-// GPS
+/* // GPS
 #define ALARA_GPS_INT 56
 #define ALARA_GPS_RST 57 */
 
