@@ -231,7 +231,7 @@ void Valve::stateOperations()
     case ValveState::OpenProcess:
         //if(timer >= fullDutyTime)
         //{
-            analogWrite(pinPWM, holdDuty);
+            analogWrite(pinPWM, fullDuty);
             digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::Open;
@@ -241,7 +241,7 @@ void Valve::stateOperations()
     case ValveState::BangOpenProcess:
         //if(timer >= fullDutyTime)
         //{
-            analogWrite(pinPWM, holdDuty);
+            analogWrite(pinPWM, fullDuty);
             digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::BangingOpen;
@@ -253,7 +253,7 @@ void Valve::stateOperations()
     case ValveState::CloseProcess:
         //if(timer >= fullDutyTime)
         //{
-            analogWrite(pinPWM, holdDuty);
+            analogWrite(pinPWM, fullDuty);
             digitalWriteExtended(pinDigital, HIGH);
             //timer = 0;
             //state = ValveState::Closed;
@@ -275,11 +275,11 @@ void Valve::stateOperations()
         }
         break;
     case ValveState::BangingOpen:
-        digitalWriteExtended(pinPWM, HIGH);
+        analogWrite(pinPWM, HIGH);
         digitalWriteExtended(pinDigital, HIGH);
         break;
     case ValveState::BangingClosed:
-        digitalWriteExtended(pinPWM, LOW);
+        analogWrite(pinPWM, LOW);
         digitalWriteExtended(pinDigital, LOW);
         break;
     
@@ -541,6 +541,7 @@ void Valve::controllerStateOperations()
         break;
     case ValveState::BangOpenCommanded:
         if (priorState != ValveState::Open)
+        //if (priorState == ValveState::Closed)
         {
             switch (valveType)
             {
@@ -596,6 +597,7 @@ void Valve::controllerStateOperations()
         break;
     case ValveState::BangCloseCommanded:
         if (priorState != ValveState::Closed)
+        //if (priorState == ValveState::Open)
         {
             switch (valveType)
             {

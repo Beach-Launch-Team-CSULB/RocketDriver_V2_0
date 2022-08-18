@@ -5,6 +5,8 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <cstring>
+#include "piezoSongs.h"
+
 
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3);
 
@@ -28,7 +30,7 @@ void TeensyInternalReset (bool& localNodeResetFlagIn, uint8_t addressIn1, uint8_
 void analogWriteSoft(uint8_t outputPin, bool outputState, uint32_t freqIN, uint16_t dutyCycleIn);
 
 float float_from32bits(uint32_t f);
-float uint32_fromfloat(float u);
+uint32_t uint32_fromfloat(float u);
 
 // utility function for running a rolling array
 // float array version - !!!!! Not Protected from if you put negative signed floats for the index values !!!!!
@@ -40,26 +42,39 @@ void writeToRollingArray(uint16_t rollingArray[], uint16_t newInputArrayValue, u
 
 void writeToRollingArray(uint8_t rollingArray[], uint8_t newInputArrayValue, uint8_t numberSizeIndex = 1);
 
-struct buzzerTone
+/* struct buzzerTone
 {
-    float toneLoudness;             // Loudness as a % of the buzzer range minimum audible = 0%, max volume = 100%
-    uint32_t toneFrequency;         // Tone Frequency in Hz
+    float toneLoudness = 100;       // Loudness as a % of the buzzer range minimum audible = 0%, max volume = 100%
+    float toneFrequency;            // Tone Frequency in Hz
     uint32_t toneDuration;          // Length in micros of tone before rest or next tone
-    uint32_t toneRestDuration;      // Length in micros of time for buzzer to rest off before next tone, if any.
 };
+ */
 
 class ALARAbuzzer
 {
     private:
         const uint8_t buzzerPin;
-        const uint32_t maxToneFrequency;
-        const uint32_t minToneFrequency;
+        const float maxToneFrequency;
+        const float minToneFrequency;
         const uint8_t minPWM;
         const uint8_t maxPWM;
+        elapsedMicros songTimer;
+        uint32_t currentNoteTime;   // Time of start of note, in micros since song start
+        bool songStart = true;
+        bool songEnd = false;
+        bool songRepeat = false; //default to not looping songs
+        bool notePlaying = false;
+        bool songPlaying = false;   //To block a second song from mixing with one already playing
+        bool otherSongPlaying = false;   //To block a second song from mixing with one already playing
+        std::vector<buzzerTone>::iterator songNoteIt;
 
     public:
         // Constructor
-        ALARAbuzzer (uint8_t setBuzzerPin, uint32_t setMaxToneFrequency = 20000, uint32_t setMinToneFrequency = 25, uint8_t setMinPWM = 0, uint8_t setMaxPWM = 50);
+        ALARAbuzzer (uint8_t setBuzzerPin, float setMaxToneFrequency = 20000, float setMinToneFrequency = 25, uint8_t setMinPWM = 0, uint8_t setMaxPWM = 50);
+        // Play tone function
+        void playTone(buzzerTone toneInput);
+        void playSongVector(std::vector<buzzerTone> songIn, uint16_t BPMset = 120);
+
 };
 
 void toneBuzzer();

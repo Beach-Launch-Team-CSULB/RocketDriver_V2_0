@@ -19,7 +19,7 @@ class TankPressController
         int64_t currentAutosequenceTime;
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
-        elapsedMicros bangtimer;                        // timer for the valve, used for changing duty cycles, in MICROS
+        //elapsedMicros bangtimer;                        // timer for the valve, used for changing duty cycles, in MICROS
         ValveState pressLineVentStateBang1;
         ValveState pressLineVentStateBang2;
         Valve &primaryPressValve;
@@ -51,10 +51,6 @@ class TankPressController
         float controllerThreshold = 1;
         float bangPIDoutput;
 
-        uint32_t valveMinimumEnergizeTime_Default = 75;      // in ms
-        uint32_t valveMinimumDeenergizeTime_Default = 50;    // in ms
-        uint32_t valveMinimumEnergizeTime = 75;      // in ms
-        uint32_t valveMinimumDeenergizeTime = 50;    // in ms
         float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
         float sensorIntervalTimeStep = 0.01;
 
@@ -91,7 +87,15 @@ class TankPressController
 
         bool resetIntegralCalcBool = false;
 
+        bool controllerUpdate = false;
+        bool isWaterFlowSetup = true;
+
     public:
+        elapsedMicros bangtimer;                        // timer for the valve, used for changing duty cycles, in MICROS
+        uint32_t valveMinimumEnergizeTime_Default = 75000;      // in MICROS
+        uint32_t valveMinimumDeenergizeTime_Default = 50000;    // in MICROS
+        uint32_t valveMinimumEnergizeTime;      // in MICROS
+        uint32_t valveMinimumDeenergizeTime;    // in MICROS
 
     // constructor - hipress
         TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setVentFailsafePressure_Default, bool setNodeIDCheck = false);
@@ -108,12 +112,17 @@ class TankPressController
         bool getNodeIDCheck(){return nodeIDCheck;}
         bool getIsBang(){return isSystemBang;}
         float getTargetValue(){return targetValue;}
+        float getControllerThreshold(){return controllerThreshold;}
         TankPressControllerState getState(){return state;}
         TankPressControllerState getPriorState(){return priorState;}
         SensorState getControllerSensorState(){return sensorState;}
         ValveState getPrimaryPressValveState(){return primaryPressValve.getState();}
         ValveState getPressLineVentState(){return pressLineVent.getState();}
         ValveState getTankVentState(){return tankVent.getState();}
+        uint32_t getValveMinEnergizeTime(){return valveMinimumEnergizeTime;}
+        uint32_t getValveMinDeEnergizeTime(){return valveMinimumDeenergizeTime;}
+        
+        bool getControllerUpdate(){return controllerUpdate;}
         bool getAbortFlag(){return abortFlag;}
 
         bool getResetIntegralCalcBool()
@@ -127,6 +136,9 @@ class TankPressController
         float getPfunc(){return e_p;}
         float getIfunc(){return e_i;}
         float getDfunc(){return e_d;}
+        float getP_p(){return P_p;}
+        float getP_i(){return P_i;}
+        float getP_d(){return P_d;}
         float getKp(){return K_p;}
         float getKi(){return K_i;}
         float getKd(){return K_d;}
@@ -193,7 +205,8 @@ class TankPressController
     
     // controller set point function
         void setControllerTargetValue(float controllerSetPointIn){targetValue = controllerSetPointIn;}
-
+    // set function for controllerUpdateBool that indicates if a new controller calc has been run
+        void setControllerUpdate(bool controllerUpdateIn){controllerUpdate = controllerUpdateIn;}
         void ventPressureCheck();
 };
 

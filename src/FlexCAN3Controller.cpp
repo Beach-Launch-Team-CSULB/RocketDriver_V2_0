@@ -17,6 +17,57 @@ void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message
     //return msgIn;
 }
 
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, float float2In)
+{
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t func_uint32Value;             //unsigned 32 bit
+        uint8_t func_uint8Value4X[4];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.id = msgIDIn;
+    func_floatValue = float1In;
+    frameToPackage.buf[0] = func_uint8Value4X[0];
+    frameToPackage.buf[1] = func_uint8Value4X[1];
+    frameToPackage.buf[2] = func_uint8Value4X[2];
+    frameToPackage.buf[3] = func_uint8Value4X[3];
+    func_floatValue = float2In;
+    frameToPackage.buf[4] = func_uint8Value4X[0];
+    frameToPackage.buf[5] = func_uint8Value4X[1];
+    frameToPackage.buf[6] = func_uint8Value4X[2];
+    frameToPackage.buf[7] = func_uint8Value4X[3];
+    
+    return frameToPackage;
+}
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1In, uint32_t uint32_t2In)
+{
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t func_uint32Value;             //unsigned 32 bit
+        uint8_t func_uint8Value4X[4];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.id = msgIDIn;
+    func_uint32Value = uint32_t1In;
+    frameToPackage.buf[0] = func_uint8Value4X[0];
+    frameToPackage.buf[1] = func_uint8Value4X[1];
+    frameToPackage.buf[2] = func_uint8Value4X[2];
+    frameToPackage.buf[3] = func_uint8Value4X[3];
+    func_uint32Value = uint32_t2In;
+    frameToPackage.buf[4] = func_uint8Value4X[0];
+    frameToPackage.buf[5] = func_uint8Value4X[1];
+    frameToPackage.buf[6] = func_uint8Value4X[2];
+    frameToPackage.buf[7] = func_uint8Value4X[3];
+    
+    return frameToPackage;
+}
+
+
+
 void FlexCan3Controller::generateHPObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn)
 {
     u_int16_t msgID;
@@ -326,8 +377,105 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
     //}
 }
 
+void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn)
+{
+    uint16_t controllerStateReportID;
+    for (auto tankPressController : tankPressControllerArray)
+    {
+        if (tankPressController->getIsBang())
+        {
+            if (tankPressController->getControllerUpdate())
+            {
+                if (tankPressController->getControllerID() == 3) // Lox tank controller
+                {
+                controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
+                // Controller State Report
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[0].id = controllerStateReportID;
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[1].buf[0] = static_cast<uint8_t>(tankPressController->getState());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[1] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[2] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[3] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 6,tankPressController->getPfunc(),tankPressController->getP_p());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[4] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 8,tankPressController->getIfunc(),tankPressController->getP_i());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[5] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 10,tankPressController->getDfunc(),tankPressController->getP_d());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[6] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 12,tankPressController->getTargetValue(),tankPressController->getPIDoutput());
+                //
+                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[7] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime());
+                //reset controller update bool after grabbing all the data
+                tankPressController->setControllerUpdate(false);
+                }
 
-void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+                if (tankPressController->getControllerID() == 4) // Fuel tank controller
+                {
+                controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
+                // Controller State Report
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[0].id = controllerStateReportID;
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[1].buf[0] = static_cast<uint8_t>(tankPressController->getState());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[1] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[2] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[3] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 6,tankPressController->getPfunc(),tankPressController->getP_p());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[4] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 8,tankPressController->getIfunc(),tankPressController->getP_i());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[5] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 10,tankPressController->getDfunc(),tankPressController->getP_d());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[6] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 12,tankPressController->getTargetValue(),tankPressController->getPIDoutput());
+                //
+                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[7] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime());
+                //reset controller update bool after grabbing all the data
+                tankPressController->setControllerUpdate(false);
+                }
+            }
+            
+        }
+        
+    }
+    for (size_t i = 0; i < 8; i++)
+    {
+        // messages 3 through 6 send every update
+        if (i >= 3 && i <= 7)
+        {
+            CANbus.write(loxTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
+        }
+        // messages 1, 2, 7 send only at low rate timer frequency
+        else if (loxTankPressControllerReportsStruct.quasistaticUpdateTimer >= loxTankPressControllerReportsStruct.quasistaticSendTime)
+        {
+            CANbus.write(loxTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
+            //reset send timer
+            loxTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
+        }
+
+    }
+    for (size_t i = 0; i < 8; i++)
+    {
+        // messages 3 through 6 send every update
+        if (i >= 3 && i <= 7)
+        {
+            CANbus.write(fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
+        }
+        // messages 1, 2, 7 send only at low rate timer frequency
+        else if (fuelTankPressControllerReportsStruct.quasistaticUpdateTimer >= fuelTankPressControllerReportsStruct.quasistaticSendTime)
+        {
+            CANbus.write(fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
+            //reset send timer
+            fuelTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
+        }
+
+    }
+    
+}
+
+
+
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
 {
     //call this every loop of main program
     //call all the types of messages inside this function and execute as needed
@@ -388,5 +536,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<Valve
     }
 
     //set this up to run until raw messages all cleared each loop
-    //generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+
+    generateTankControllermsgs(Can0,tankPressControllerArray,propulsionNodeIDIn);
 }

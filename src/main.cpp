@@ -73,10 +73,13 @@ using std::string;
 #include "ALARApinDefines.h"
 #include "fluidSystemSimulation.h"
 #include "FlexCAN3Controller.h"
+#include "extendedIO/extendedIO.h"
 
 //Trying to figure out RTC stuff with these libs
 #include <TimeLib.h>
 #include <DS1307RTC.h>
+
+#include "PCA9685.h"
 
 #define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
 
@@ -85,6 +88,8 @@ uint32_t rocketDriverMicros;
 
 ALARABoardController boardController;
 ALARAbuzzer buzzerr(ALARA_BUZZ);
+
+PCA9685 ALARALEDController;     // Library using default B000000 (A5-A0) i2c address, and default Wire @400kHz
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
@@ -259,15 +264,142 @@ void setup() {
 
   // pin setup
   // NEEDS LOTS OF UPDATES FOR ALARA V2
-  pinMode(LED_BUILTIN, OUTPUT);
+  //pinMode(LED_BUILTIN, OUTPUT);
   
 
   Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
 
+  Wire.begin();
+  ALARALEDController.resetDevices();
+  ALARALEDController.init();
+  ALARALEDController.setPWMFrequency(2000);
+  //ALARALEDController.setAllChannelsPWM(4096);
+  //ALARALEDController.setAllChannelsPWM(1);
+  pinMode(ALARA_PWM_EXPANDER_OE,OUTPUT);
+  // Startup with LED channels off via setting to "On", all unused channels "Off"
+  ALARALEDController.setChannelOn(0);
+  ALARALEDController.setChannelOn(1);
+  ALARALEDController.setChannelOn(2);
+  ALARALEDController.setChannelOn(3);
+  ALARALEDController.setChannelOn(4);
+  ALARALEDController.setChannelOn(5);
+  ALARALEDController.setChannelOff(6);
+  ALARALEDController.setChannelOff(7);
+  ALARALEDController.setChannelOff(8);
+  ALARALEDController.setChannelOff(9);
+  ALARALEDController.setChannelOff(10);
+  ALARALEDController.setChannelOff(11);
+  ALARALEDController.setChannelOff(12);
+  ALARALEDController.setChannelOff(13);
+  ALARALEDController.setChannelOff(14);
+  ALARALEDController.setChannelOff(15);
+  digitalWriteExtended(ALARA_PWM_EXPANDER_OE,HIGH);
 }
 
 void loop() 
 {
+/*   ALARALEDController.setChannelOn(0);
+  ALARALEDController.setChannelOn(1);
+  ALARALEDController.setChannelOn(2);
+  ALARALEDController.setChannelOn(3);
+  ALARALEDController.setChannelOn(4);
+  ALARALEDController.setChannelOn(5); */
+
+/*   ALARALEDController.setChannelOff(0);
+  ALARALEDController.setChannelOff(1);
+  ALARALEDController.setChannelOff(2);
+  ALARALEDController.setChannelOff(3);
+  ALARALEDController.setChannelOff(4);
+  ALARALEDController.setChannelOff(5); */
+
+if (currentVehicleState == VehicleState::passive)
+{
+// Nearly Off
+ALARALEDController.setChannelPWM(0, 4093);
+ALARALEDController.setChannelPWM(1, 4093);
+ALARALEDController.setChannelPWM(2, 4093);
+}
+if (currentVehicleState == VehicleState::HiPressArm)
+{
+// Teal
+ALARALEDController.setChannelPWM(0, 4096);
+ALARALEDController.setChannelPWM(1, 50);
+ALARALEDController.setChannelPWM(2, 500);
+}
+if (currentVehicleState == VehicleState::HiPressPressurized)
+{
+// Blue
+ALARALEDController.setChannelPWM(0, 4096);
+ALARALEDController.setChannelPWM(1, 4096);
+ALARALEDController.setChannelPWM(2, 0);
+}
+if (currentVehicleState == VehicleState::TankPressArm)
+{
+// Yellow/Green
+ALARALEDController.setChannelPWM(0, 50);
+ALARALEDController.setChannelPWM(1, 500);
+ALARALEDController.setChannelPWM(2, 4096);
+}
+if (currentVehicleState == VehicleState::TankPressPressurized)
+{
+// Green
+ALARALEDController.setChannelPWM(0, 4096);
+ALARALEDController.setChannelPWM(1, 0);
+ALARALEDController.setChannelPWM(2, 4096);
+}
+if (currentVehicleState == VehicleState::fireArmed)
+{
+// Orange  
+ALARALEDController.setChannelPWM(0, 0);
+ALARALEDController.setChannelPWM(1, 3700);
+ALARALEDController.setChannelPWM(2, 4096);
+}
+if (currentVehicleState == VehicleState::fire)
+{
+// Red
+ALARALEDController.setChannelPWM(0, 0);
+ALARALEDController.setChannelPWM(1, 4096);
+ALARALEDController.setChannelPWM(2, 4096);
+}
+if (currentVehicleState == VehicleState::vent)
+{
+// Purple
+ALARALEDController.setChannelPWM(0, 30);
+ALARALEDController.setChannelPWM(1, 4096);
+ALARALEDController.setChannelPWM(2, 3500);
+}
+if (currentVehicleState == VehicleState::abort)
+{
+// Yellow
+ALARALEDController.setChannelPWM(0, 750);
+ALARALEDController.setChannelPWM(1, 2800);
+ALARALEDController.setChannelPWM(2, 4096);
+}
+
+if (currentMissionState == MissionState::passive)
+{
+// Nearly Off
+ALARALEDController.setChannelPWM(3, 4093);
+ALARALEDController.setChannelPWM(4, 4093);
+ALARALEDController.setChannelPWM(5, 4093);
+}
+if (currentMissionState == MissionState::staticTestArmed)
+{
+// Orange
+ALARALEDController.setChannelPWM(3, 0);
+ALARALEDController.setChannelPWM(4, 3700);
+ALARALEDController.setChannelPWM(5, 4096);
+}
+if (currentMissionState == MissionState::staticTestActive)
+{
+// Red
+ALARALEDController.setChannelPWM(3, 0);
+ALARALEDController.setChannelPWM(4, 4096);
+ALARALEDController.setChannelPWM(5, 4096);
+}
+
+
+
 //fakesensorShit(rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
 
   //Display the node number with serial print statement start of each loop
@@ -352,9 +484,15 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //process config message
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
 ///// ------------------------------------ /////  
+/* if (VehicleState == stat)
+{
+  waterGoesVroom.resetSim();
+} */
 
   if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
   {
+  //waterGoesVroom.fluidSystemUpdate();
+  
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
@@ -393,7 +531,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 500)
+  if (mainLoopTestingTimer >= 250)
   {
 
   if (mainloopprints)
@@ -438,6 +576,13 @@ vectorBufferPrintout();
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
             Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
+/*             Serial.print(": bangTimer: ");
+            Serial.print(tankPressController->bangtimer);
+            Serial.print(": minDeEnergizeTime: ");
+            Serial.print(tankPressController->valveMinimumDeenergizeTime);
+            Serial.print(": minEnergizeTime: ");
+            Serial.print(tankPressController->valveMinimumEnergizeTime);
+            Serial.println(": "); */
             if (tankPressController->getIsBang())
             {
             Serial.print(": Target");
@@ -498,7 +643,7 @@ vectorBufferPrintout();
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
             Serial.print(": ");
-            Serial.print( ": ValveType: ");
+/*             Serial.print( ": ValveType: ");
             Serial.print(static_cast<uint8_t>(valve->getValveType()));
             Serial.print( ": HP Channel: ");
             Serial.print(valve->getHPChannel());
@@ -507,7 +652,7 @@ vectorBufferPrintout();
             Serial.print( ": PinPWM: ");
             Serial.print(valve->getPinPWM());
             Serial.print( ": PinADC: ");
-            Serial.print(valve->getPinADC());
+            Serial.print(valve->getPinADC()); */
             Serial.println(": ");
         }
     }
@@ -518,30 +663,30 @@ vectorBufferPrintout();
             //Serial.print(static_cast<uint8_t>(pyro->getPyroNodeID()));
             //Serial.print("PyroID: ");
             //Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
-        if (pyro->getPyroNodeID() == PropulsionSysNodeID)
-        {
-            Serial.print(" PyroID: ");
+       if (pyro->getPyroNodeID() == PropulsionSysNodeID)
+         {
+            Serial.print(" PyroID:  ");
             Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
-            Serial.print( ": PyroState: ");
+            Serial.print( ": PyroState:  ");
             Serial.print(static_cast<uint8_t>(pyro->getState()));
-            Serial.print( ": HP Channel: ");
+/*             Serial.print( ": HP Channel: ");
             Serial.print(pyro->getHPChannel());
             Serial.print( ": PinDigital: ");
             Serial.print(pyro->getPinDigital());
             Serial.print( ": PinPWM: ");
             Serial.print(pyro->getPinPWM());
             Serial.print( ": PinADC: ");
-            Serial.print(pyro->getPinADC());
+            Serial.print(pyro->getPinADC()); */
             Serial.println(": ");
         }
     }
 
   }
-/*     for(auto sensor : sensorArray)
+    for(auto sensor : sensorArray)
     {
         if (sensor->getSensorNodeID() == PropulsionSysNodeID)
         {
-        //sensor->setState(SensorState::Slow);
+        sensor->setState(SensorState::Slow);
          
             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
@@ -551,11 +696,11 @@ vectorBufferPrintout();
             Serial.print(sensor->getNewSensorConversionCheck());
             Serial.print( ": raw value: ");
             Serial.print(sensor->getCurrentRawValue());
-            Serial.print( ": timestamp S: ");
-            Serial.print(sensor->getTimestampSeconds());
-            Serial.print( ": timestamp uS: ");
-            Serial.print(sensor->getTimestampMicros());
- */
+            //Serial.print( ": timestamp S: ");
+            //Serial.print(sensor->getTimestampSeconds());
+            //Serial.print( ": timestamp uS: ");
+            //Serial.print(sensor->getTimestampMicros());
+
 /*             Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
             Serial.print( ": EMA: ");
@@ -568,11 +713,11 @@ vectorBufferPrintout();
             Serial.print(sensor->getLinRegSlope(),10);
             } */
             
-            //Serial.println(": ");
+            Serial.println(": ");
 
-        //}
+        }
     
-    //}
+    }
 
   Serial.print("Current Autosequence Time: ");
   Serial.println(IgnitionAutoSequence.getCurrentCountdown());
@@ -595,6 +740,6 @@ startup = false;
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
-Can2msgController.controllerTasks(Can0, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
+Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
 
 }

@@ -3,7 +3,7 @@
 #pragma once
 
 // currently no quick way to automate this, need to choose the appropriate define for the board in use
-#define TEENSY3_X
+#define ALARAV2_1
 
 #ifdef TEENSY3_X
 // ALARA pin mapping definitions

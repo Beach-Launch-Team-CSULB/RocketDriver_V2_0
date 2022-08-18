@@ -38,7 +38,7 @@ struct ALARA_RawSensorReadmsg
 struct ALARA_ConvertedSensorReadmsg
 {
     //elapsedMillis convertedValueUpdateTimer;
-    CAN_message_t packedSensorCAN2; //CAN2 frame format for up to 3 raw ADC reads
+    CAN_message_t packedSensorCAN2; //CAN2 frame format for up to 3 converted ADC reads
 
     uint8_t numberSensors = 0;      //tracks how many sensor reads are going into the frame
 
@@ -52,6 +52,24 @@ struct ALARA_ConvertedSensorReadmsg
 
 };
 
+struct ALARA_TankControllermsgs
+{
+    elapsedMillis quasistaticUpdateTimer;
+    uint32_t quasistaticSendTime = 2000;
+    CAN_message_t tankControllerCAN2Frames[8]; //CAN2 frame format 
+    uint8_t controllerID;
+    //float controllerFloatValuesArray[12];
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t uint32Value;             //unsigned 32 bit
+        uint8_t uint8Value4X[4];
+        float floatValue = 0;
+    };
+
+    uint32_t frameTotalBits;     //calculated bits for estimating bus load
+
+};
+
 class FlexCan3Controller
 {
     private:
@@ -59,6 +77,8 @@ class FlexCan3Controller
         ALARA_HP_CAN2report nodeObjectStateReportStruct;
         ALARA_RawSensorReadmsg sensorRawReadStruct_current;
         ALARA_ConvertedSensorReadmsg sensorConvertedReadStruct_current;
+        ALARA_TankControllermsgs fuelTankPressControllerReportsStruct;
+        ALARA_TankControllermsgs loxTankPressControllerReportsStruct;
         
         elapsedMillis convertedValueUpdateTimer;
         elapsedMillis highPowerObjectIDmsgTimer;
@@ -78,11 +98,13 @@ class FlexCan3Controller
         void generateHPObjectStateReportmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn);
         void generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
         void generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
+        void generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn);
+        
         void writeObjectByteArray(uint8_t byteArray[10], CAN_message_t& msgIn, uint16_t IDA);
         void nodeSystemTimemsg(FlexCAN& CANbus);
 
         //Controller loop function
-        void controllerTasks(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
+        void controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
 };
 
 #endif

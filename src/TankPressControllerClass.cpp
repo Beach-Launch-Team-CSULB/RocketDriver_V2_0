@@ -54,7 +54,7 @@ void TankPressController::ventPressureCheck()
     {
         if (ventFailsafeFlag)
         {
-        tankVent.setState(ValveState::OpenCommanded);
+        //tankVent.setState(ValveState::OpenCommanded);
         }
         ventFailsafeFlag = true;
         //Serial.print(bangSensor1EMA);
@@ -69,7 +69,9 @@ void TankPressController::stateOperations()
 {
     //run the PID calculation each time state operations runs
     //timer use real timestep here?
-    
+    // Each time this is run, set controllerUpdate to true
+    controllerUpdate = true;
+
     if (isSystemBang)
     {
     bangPIDoutput = PIDmath();
@@ -362,7 +364,14 @@ void TankPressController::setPcTarget(float PcTargetIn)
         targetPcValue = PcTargetIn;
         // set target point based on dP, make the math function later
         //targetValue = targetPcValue + tankToChamberDp;
+        if (!isWaterFlowSetup)
+        {
         targetValue = targetPcValue*1.25; //very crude dP approx
+        }
+        else 
+        {
+        targetValue = targetPcValue*0.25; //very crude dP approx
+        }
     
     }
 }
