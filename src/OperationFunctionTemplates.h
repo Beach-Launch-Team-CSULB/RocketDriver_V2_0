@@ -13,38 +13,33 @@
     // This function takes the array of pointers that point to the valve objects, and then calls the .stateOperations() method for each valve
     // Make sure valveArray is an array of pointers, as defined in ValveDefinitions.h
 template <typename T, std::size_t size>
-void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn)
+void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn, bool& outputOverride)
 {
-    // iterate through valve array and run the stateOperations method
-    for(auto valve : valveArray)
+    if (!outputOverride)    //bool will block all stateOps
     {
-    
-        if (valve->getValveNodeID() == nodeIDReadIn)
+        // iterate through valve array and run the stateOperations method
+        for(auto valve : valveArray)
         {
-            valve->stateOperations();
-            //Serial.print("LoopRan");
-/*             Serial.print("ValveID: ");
-            Serial.print(static_cast<uint8_t>(valve->getValveID()));
-            Serial.print( ": ValveState: ");
-            Serial.print(static_cast<uint8_t>(valve->getState()));
-            Serial.println(": "); */
-
+            if (valve->getValveNodeID() == nodeIDReadIn)
+            {
+                valve->stateOperations();
+            }
         }
-
     }
 }
 
 template <typename T, std::size_t size>
-void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn)
+void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn, bool& outputOverride)
 {
-    // iterate through valve array and run the stateOperations method
-    for(auto pyro : pyroArray)
+    if (!outputOverride)    //bool will block all stateOps
     {
-        
-    if (pyro->getPyroNodeID() == nodeIDReadIn)
+        // iterate through valve array and run the stateOperations method
+        for(auto pyro : pyroArray)
         {
-            pyro->stateOperations();
-            //Serial.print("LoopRan");
+        if (pyro->getPyroNodeID() == nodeIDReadIn)
+            {
+                pyro->stateOperations();
+            }
         }
     }
 }
@@ -60,8 +55,6 @@ void tankPressControllerTasks(const std::array<T, size>& tankPressControllerArra
         {
             tankPressController->setCurrentAutosequenceTime(ignitionAutoSequenceRef.getCurrentCountdown());
             tankPressController->stateOperations();
-            //tankPressController->deviceSetOperations();
-            //Serial.print("LoopRan");
         }
     }
 }
@@ -77,8 +70,6 @@ void engineControllerTasks(const std::array<T, size>& engineControllerArray, uin
         {
             engineController->setCurrentAutosequenceTime(ignitionAutoSequenceRef.getCurrentCountdown());
             engineController->stateOperations();
-            //tankPressController->deviceSetOperations();
-            //Serial.print("LoopRan");
         }
     }
 }
@@ -93,7 +84,6 @@ void autoSequenceTasks(const std::array<T, size>& autoSequenceArray, uint8_t& no
     if (autoSequence->getHostNodeID() == nodeIDReadIn)
         {
             autoSequence->stateOperations();
-            //Serial.print("LoopRan");
         }
     }
 }
@@ -133,7 +123,6 @@ void valveSetUp(const std::array<T, size>& valveArray, uint8_t pinArrayIn[][11])
     for(auto valve : valveArray)
     {
         valve->begin(pinArrayIn);
-        //Serial.print("LoopRan");
     }
 }
 
@@ -144,7 +133,6 @@ void pyroSetUp(const std::array<T, size>& pyroArray, uint8_t pinArrayIn[][11])
     for(auto pyro : pyroArray)
     {
         pyro->begin(pinArrayIn);
-        //Serial.print("LoopRan");
     }
 }
 
@@ -155,7 +143,6 @@ void autoSequenceSetUp(const std::array<T, size>& autoSequenceArray)
     for(auto autoSequence : autoSequenceArray)
     {
         autoSequence->begin();
-        //Serial.print("LoopRan");
     }
 }
 
@@ -166,7 +153,6 @@ void engineControllerSetup(const std::array<T, size>& engineControllerArray)
     for(auto engineController : engineControllerArray)
     {
         engineController->begin();
-        //Serial.print("LoopRan");
     }
 }
 
@@ -177,7 +163,6 @@ void tankPressControllerSetup(const std::array<T, size>& tankPressControllerArra
     for(auto tankPressController : tankPressControllerArray)
     {
         tankPressController->begin();
-        //Serial.print("LoopRan");
     }
 }
 

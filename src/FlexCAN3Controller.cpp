@@ -17,6 +17,7 @@ void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message
     //return msgIn;
 }
 
+
 CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, float float2In)
 {
     CAN_message_t frameToPackage;
@@ -27,18 +28,56 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, fl
         float func_floatValue = 0;
     };
 
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
     frameToPackage.id = msgIDIn;
     func_floatValue = float1In;
+/*     Serial.print("msgIDIn: ");
+    Serial.print(msgIDIn);
+    Serial.print(" : float1In: ");
+    Serial.print(float1In);
+    Serial.print(" : float union: ");
+    Serial.print(func_floatValue);
+    Serial.print(" : byte 0: ");
+    Serial.print(func_uint8Value4X[0]);
+    Serial.print(" : byte 1: ");
+    Serial.print(func_uint8Value4X[1]);
+    Serial.print(" : byte 2: ");
+    Serial.print(func_uint8Value4X[2]);
+    Serial.print(" : byte 3: ");
+    Serial.print(func_uint8Value4X[3]); */
     frameToPackage.buf[0] = func_uint8Value4X[0];
     frameToPackage.buf[1] = func_uint8Value4X[1];
     frameToPackage.buf[2] = func_uint8Value4X[2];
     frameToPackage.buf[3] = func_uint8Value4X[3];
     func_floatValue = float2In;
+/*     Serial.print(" : float2In: ");
+    Serial.print(float2In);
+    Serial.print(" : float union: ");
+    Serial.print(func_floatValue);
+    Serial.print(" : byte 0: ");
+    Serial.print(func_uint8Value4X[0]);
+    Serial.print(" : byte 1: ");
+    Serial.print(func_uint8Value4X[1]);
+    Serial.print(" : byte 2: ");
+    Serial.print(func_uint8Value4X[2]);
+    Serial.print(" : byte 3: ");
+    Serial.print(func_uint8Value4X[3]);
+    Serial.println(" : "); */
+
     frameToPackage.buf[4] = func_uint8Value4X[0];
     frameToPackage.buf[5] = func_uint8Value4X[1];
     frameToPackage.buf[6] = func_uint8Value4X[2];
     frameToPackage.buf[7] = func_uint8Value4X[3];
     
+/*     for (size_t i = 0; i < 8; i++)
+    {
+    Serial.print(" : buf[i]: ");
+    Serial.print(frameToPackage.buf[i]);
+    Serial.print(" : ");
+    }
+    Serial.println(" : "); */
+
     return frameToPackage;
 }
 CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1In, uint32_t uint32_t2In)
@@ -51,7 +90,9 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1
         float func_floatValue = 0;
     };
 
-    frameToPackage.id = msgIDIn;
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
+    frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
     func_uint32Value = uint32_t1In;
     frameToPackage.buf[0] = func_uint8Value4X[0];
     frameToPackage.buf[1] = func_uint8Value4X[1];
@@ -312,7 +353,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
             //Serial.print("do I get past i loop");
             //Serial.println(sensorReadStruct.numberSensors);
-    sensorReadStruct.packedSensorCAN2.ext = 1;
+    //sensorReadStruct.packedSensorCAN2.ext = 1;
     sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
 
     //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
@@ -379,100 +420,53 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
 void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn)
 {
-    uint16_t controllerStateReportID;
+/*     fuelTankPressControllerReportsStruct.tankControllerCAN2Frames.reserve(8);
+    loxTankPressControllerReportsStruct.tankControllerCAN2Frames.reserve(8);
+    fuelTankPressControllerReportsStruct.tankControllerCAN2Frames.resize(8);
+    loxTankPressControllerReportsStruct.tankControllerCAN2Frames.resize(8);
+ */    
     for (auto tankPressController : tankPressControllerArray)
     {
         if (tankPressController->getIsBang())
         {
+            tankPressControllerReportsStruct.controllerID = tankPressController->getControllerID();
+            tankPressControllerReportsStruct.controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
+            
+            // Controller State Report and other quasistatic info to send low rate
+            if (tankPressControllerReportsStruct.quasistaticSendBool)
+            {
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.id = tankPressControllerReportsStruct.controllerStateReportID;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.extended = 0;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.remote = 0;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.buf[0] = static_cast<uint8_t>(tankPressController->getState());
+            CANbus.write(tankPressControllerReportsStruct.controllerStateReportCanFrame);
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime()));
+            tankPressControllerReportsStruct.quasistaticSendBool = false;
+            }
+
             if (tankPressController->getControllerUpdate())
             {
-                if (tankPressController->getControllerID() == 3) // Lox tank controller
-                {
-                controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
-                // Controller State Report
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[0].id = controllerStateReportID;
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[1].buf[0] = static_cast<uint8_t>(tankPressController->getState());
+                // Messages to send every controller update
                 //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[1] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi());
+                CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 6,tankPressController->getPfunc(),tankPressController->getP_p()));
                 //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[2] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold());
+                CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 8,tankPressController->getIfunc(),tankPressController->getP_i()));
                 //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[3] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 6,tankPressController->getPfunc(),tankPressController->getP_p());
+                CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 10,tankPressController->getDfunc(),tankPressController->getP_d()));
                 //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[4] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 8,tankPressController->getIfunc(),tankPressController->getP_i());
-                //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[5] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 10,tankPressController->getDfunc(),tankPressController->getP_d());
-                //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[6] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 12,tankPressController->getTargetValue(),tankPressController->getPIDoutput());
-                //
-                loxTankPressControllerReportsStruct.tankControllerCAN2Frames[7] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime());
+                CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 12,tankPressController->getTargetValue(),tankPressController->getPIDoutput()));
                 //reset controller update bool after grabbing all the data
                 tankPressController->setControllerUpdate(false);
-                }
+            
 
-                if (tankPressController->getControllerID() == 4) // Fuel tank controller
-                {
-                controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
-                // Controller State Report
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[0].id = controllerStateReportID;
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[1].buf[0] = static_cast<uint8_t>(tankPressController->getState());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[1] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[2] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[3] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 6,tankPressController->getPfunc(),tankPressController->getP_p());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[4] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 8,tankPressController->getIfunc(),tankPressController->getP_i());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[5] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 10,tankPressController->getDfunc(),tankPressController->getP_d());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[6] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 12,tankPressController->getTargetValue(),tankPressController->getPIDoutput());
-                //
-                fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[7] = writeDouble4ByteDataCAN2Frame(controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime());
-                //reset controller update bool after grabbing all the data
-                tankPressController->setControllerUpdate(false);
-                }
             }
             
         }
         
     }
-    for (size_t i = 0; i < 8; i++)
-    {
-        // messages 3 through 6 send every update
-        if (i >= 3 && i <= 7)
-        {
-            CANbus.write(loxTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
-        }
-        // messages 1, 2, 7 send only at low rate timer frequency
-        else if (loxTankPressControllerReportsStruct.quasistaticUpdateTimer >= loxTankPressControllerReportsStruct.quasistaticSendTime)
-        {
-            CANbus.write(loxTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
-            //reset send timer
-            loxTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
-        }
-
-    }
-    for (size_t i = 0; i < 8; i++)
-    {
-        // messages 3 through 6 send every update
-        if (i >= 3 && i <= 7)
-        {
-            CANbus.write(fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
-        }
-        // messages 1, 2, 7 send only at low rate timer frequency
-        else if (fuelTankPressControllerReportsStruct.quasistaticUpdateTimer >= fuelTankPressControllerReportsStruct.quasistaticSendTime)
-        {
-            CANbus.write(fuelTankPressControllerReportsStruct.tankControllerCAN2Frames[i]);
-            //reset send timer
-            fuelTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
-        }
-
-    }
-    
 }
-
 
 
 void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
@@ -512,7 +506,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     CANbus.write(nodeObjectStateReportStruct.objectIDmsg);    
         highPowerStatemsgTimer = 0;
 
-    Serial.println(" do I get to send Object State CAN msg ");
+/*     Serial.println(" do I get to send Object State CAN msg ");
             Serial.print(" id: ");
             Serial.print(nodeObjectStateReportStruct.objectIDmsg.id);
             //Serial.print(" timestamp: ");
@@ -525,7 +519,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
             Serial.print(" : ");
         }
         Serial.println();    
-    }
+ */    }
     
     if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
     {
@@ -536,7 +530,25 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     }
 
     //set this up to run until raw messages all cleared each loop
-    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+    //generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+
+/*         if (loxTankPressControllerReportsStruct.quasistaticUpdateTimer >= loxTankPressControllerReportsStruct.quasistaticSendTime)
+        {
+            //set the quasistatic message bool to true when timer checks true
+            loxTankPressControllerReportsStruct.quasistaticSendBool = true;
+            //reset send timer
+            loxTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
+        }
+        if (fuelTankPressControllerReportsStruct.quasistaticUpdateTimer >= fuelTankPressControllerReportsStruct.quasistaticSendTime)
+        {
+            //set the quasistatic message bool to true when timer checks true
+            fuelTankPressControllerReportsStruct.quasistaticSendBool = true;
+            //reset send timer
+            fuelTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
+        } */
+
+    
+
 
     generateTankControllermsgs(Can0,tankPressControllerArray,propulsionNodeIDIn);
 }

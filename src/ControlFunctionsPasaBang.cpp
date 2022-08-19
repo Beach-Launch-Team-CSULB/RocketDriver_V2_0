@@ -95,16 +95,19 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Missio
     {
         switch (currentCommand)
         {
-            case command_debug:
-                currentState = VehicleState::debug;
-                break;
             case command_passive:
-                //Serial.println(" Is command Passive case happening");
+                if(currentState == VehicleState::standby)
+                {
                 currentState = VehicleState::passive;
                 currentMissionState = MissionState::passive;
+                }
+                break;
+            case command_standby:
+                currentState = VehicleState::standby;
+                currentMissionState = MissionState::standby;
                 break;
             case command_test:
-                if(currentState == VehicleState::passive)
+                if(currentState == VehicleState::standby || currentState == VehicleState::passive)
                 {
                 currentState = VehicleState::test;
                 }
@@ -127,7 +130,7 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Missio
                 break;
     // Fire Sequence commands will only be executed from the proper state
             case command_HiPressArm:
-                if(currentState == VehicleState::passive)
+                if(currentState == VehicleState::standby || currentState == VehicleState::passive)
                 {
                 currentState = VehicleState::HiPressArm;
                 currentMissionState = MissionState::staticTestArmed;
@@ -372,15 +375,15 @@ void controllerAbortCheck(VehicleState& currentState, const std::array<AutoSeque
     
 }
 
-void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag)
+void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag, bool& outputOverride)
 {
     switch (currentState)
     {
-        case VehicleState::debug:
-            //doesn't do anything for now
-            //plan was to make this disable all real outputs for code only testing
-            break;
         case VehicleState::passive:
+            // Disable all HP outputs
+            outputOverride = true;
+            break;
+        case VehicleState::standby:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setK_i(0);  //turms K_i back off
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setK_i(0); //turms K_i back off
@@ -390,12 +393,14 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
             fluidSim.resetSim();
             haltFlag = false;
+            outputOverride = false;
             break;
         case VehicleState::test:
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::TestPassthrough);
+            outputOverride = false;
             break;
         case VehicleState::offNominal:
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::OffNominalPassthrough);
@@ -410,6 +415,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Abort);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Shutdown);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Hold);
+            outputOverride = false;
             break;
         case VehicleState::vent:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Hold);
@@ -417,6 +423,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Vent);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Vent);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            outputOverride = false;
             break;
         case VehicleState::HiPressArm:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -424,6 +431,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            outputOverride = false;
             break;
         case VehicleState::HiPressPressurized:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -431,6 +439,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            outputOverride = false;
             break;
         case VehicleState::TankPressArm:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -438,6 +447,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Armed);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Armed);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            outputOverride = false;
             break;
         case VehicleState::TankPressPressurized:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -445,6 +455,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
+            outputOverride = false;
             break;
         case VehicleState::fireArmed:
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -452,6 +463,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Armed);
+            outputOverride = false;
             break;
         case VehicleState::fire:
             autoSequenceArray.at(0)->setState(AutoSequenceState::RunCommanded);            
@@ -459,6 +471,7 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::FiringAutosequence);
+            outputOverride = false;
             break;
 
         default:

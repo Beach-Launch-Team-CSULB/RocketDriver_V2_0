@@ -274,6 +274,20 @@ void Valve::stateOperations()
                 break;
         }
         break;
+    case ValveState::Open:
+        switch (valveType)
+        {
+            case NormalClosed:
+                analogWrite(pinPWM, holdDuty);
+                digitalWriteExtended(pinDigital, HIGH);
+                break;
+            case NormalOpen:
+                analogWrite(pinPWM, 0);
+                digitalWriteExtended(pinDigital, LOW);
+            default:
+                break;
+        }
+        break;
     case ValveState::BangingOpen:
         analogWrite(pinPWM, HIGH);
         digitalWriteExtended(pinDigital, HIGH);

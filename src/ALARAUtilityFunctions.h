@@ -7,6 +7,7 @@
 #include <cstring>
 #include "piezoSongs.h"
 
+void ALARAHPOverride(uint8_t pinArrayIn[][11], bool& outputOverride);
 
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3);
 

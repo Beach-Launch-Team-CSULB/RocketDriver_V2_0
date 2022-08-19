@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include <FlexCAN.h>
 #include "ControlFunctionsPasaBang.h" //need to shift the include tree into generic control function includes probably but for now leave it just PasaBang
-
+#include <array>
+using std::array;
+#include <vector>
+using std::vector;
 
 
 struct ALARA_HP_CAN2report
@@ -54,18 +57,22 @@ struct ALARA_ConvertedSensorReadmsg
 
 struct ALARA_TankControllermsgs
 {
+    CAN_message_t controllerStateReportCanFrame;
+    
     elapsedMillis quasistaticUpdateTimer;
     uint32_t quasistaticSendTime = 2000;
-    CAN_message_t tankControllerCAN2Frames[8]; //CAN2 frame format 
+    bool quasistaticSendBool;
+    //std::vector<CAN_message_t> tankControllerCAN2Frames; //CAN2 frame format 
     uint8_t controllerID;
+    uint16_t controllerStateReportID;
     //float controllerFloatValuesArray[12];
-    union                       // union for storing bus bytes and pulling as desired value format
+/*     union                       // union for storing bus bytes and pulling as desired value format
     {
         uint32_t uint32Value;             //unsigned 32 bit
         uint8_t uint8Value4X[4];
         float floatValue = 0;
     };
-
+ */
     uint32_t frameTotalBits;     //calculated bits for estimating bus load
 
 };
@@ -77,8 +84,10 @@ class FlexCan3Controller
         ALARA_HP_CAN2report nodeObjectStateReportStruct;
         ALARA_RawSensorReadmsg sensorRawReadStruct_current;
         ALARA_ConvertedSensorReadmsg sensorConvertedReadStruct_current;
-        ALARA_TankControllermsgs fuelTankPressControllerReportsStruct;
+/*         ALARA_TankControllermsgs fuelTankPressControllerReportsStruct;
         ALARA_TankControllermsgs loxTankPressControllerReportsStruct;
+ */        
+        ALARA_TankControllermsgs tankPressControllerReportsStruct;
         
         elapsedMillis convertedValueUpdateTimer;
         elapsedMillis highPowerObjectIDmsgTimer;

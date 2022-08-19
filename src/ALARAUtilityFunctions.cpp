@@ -11,6 +11,19 @@
 #define READ_RESTART()     (*(volatile uint32_t *)RESTART_ADDR)
 #define WRITE_RESTART(val) ((*(volatile uint32_t *)RESTART_ADDR) = (val))
 
+void ALARAHPOverride(uint8_t pinArrayIn[][11], bool& outputOverride)
+{
+  // Writes all ALARA High Power Ouput digital and PWM pins off if bool is true
+  if (outputOverride)
+  {
+    for (size_t i = 1; i < 11; i++)
+    {
+      digitalWriteExtended(pinArrayIn[0][i],LOW); // Digital pins
+      digitalWriteExtended(pinArrayIn[1][i],LOW); // PWM pins
+    }
+  }
+}
+
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3)
 {
     // -----Update State on EEPROM -----

@@ -25,14 +25,14 @@ class Valve
         uint8_t pinPWM = 99;                              // Valve PWM pin for actuation
         uint8_t pinDigital = 99;                          // Valve Digital Out pin for actuation
         uint8_t pinADC = 99;                              // Valve ADC read pin
-        uint32_t fullDutyTime_Default = 100;                // Time PWM needs to be at full duty for actuation, in MICROS
+        uint32_t fullDutyTime_Default = 2000;                // Time PWM needs to be at full duty for actuation, in MICROS
         uint32_t fullDutyTime;                // Time PWM needs to be at full duty for actuation, in MICROS
         ValveState state;
         ValveState priorState;                           // Tracks the valve state
         elapsedMicros timer;                        // timer for the valve, used for changing duty cycles, in MICROS
         uint16_t fullDuty_Default{256};                // full duty cycle for servo initial actuation
         uint16_t holdDuty_Default{50};                   // partial duty cycle to hold valve in actuated state
-        uint16_t warmDuty_Default{0};                   // partial duty cycle to hold valve in actuated state
+        uint16_t warmDuty_Default{5};                   // partial duty cycle to hold valve in actuated state
         uint16_t fullDuty;                // full duty cycle for servo initial actuation
         uint16_t holdDuty;                   // partial duty cycle to hold valve in actuated state
         uint16_t warmDuty;                   // partial duty cycle to hold valve in actuated state

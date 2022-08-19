@@ -3,6 +3,8 @@
 #pragma once
 #include <Arduino.h>
 
+// Parts of this are obsolete, or will be. reset and config messages will go elsewhere/change, need to add more commands for new features possibly
+
 // this enum hold all commands to be sent to the teensy. All commands assumed to be uint8_t type 
 
 // in main file as global declare: Command CurrentCommand{command_NOCOMMAND} to hold the current command
@@ -11,8 +13,8 @@ enum Command
 {
     // we reserve 0 to be a no command state
     command_NOCOMMAND = 0,
-    command_debug = 1,                          //Start of global states
-    command_passive = 3,
+    command_passive = 1,                          //Start of global states
+    command_standby = 3,
     command_test_exit = 4,                      //not implemented yet into state machine
     command_test = 5,
     command_abort = 7,

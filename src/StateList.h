@@ -7,8 +7,8 @@ enum class VehicleState
 {
     // These are the God States, they can be reached from any position
     setup,      // 0
-    debug,      // 1   the outputs disabled for testing state?
-    passive,    // 2
+    passive,    // 1   // All physical outputs disabled
+    standby,    // 2
     test,       // 3
     abort,      // 4
     vent,       // 5
@@ -30,17 +30,18 @@ enum class MissionState
 {
     // These are the God States, they can be reached from any position
     passive,                // 0
-    staticTestArmed,        // 1
-    staticTestActive,       // 2
-    postTest,               // 3
-    prelaunch,              // 4
-    ascentRail,             // 5
-    ascentFreeThrust,       // 6
-    ascentFreeCoast,        // 7
-    descentFree,            // 8
-    descentPilot,           // 9
-    descentDrogue,          // 10
-    descentMain,            // 11
-    landed,                 // 12
+    standby,                // 1
+    staticTestArmed,        // 2
+    staticTestActive,       // 3
+    postTest,               // 4
+    prelaunch,              // 5
+    ascentRail,             // 6
+    ascentFreeThrust,       // 7
+    ascentFreeCoast,        // 8
+    descentFree,            // 9
+    descentPilot,           // 10
+    descentDrogue,          // 11
+    descentMain,            // 12
+    landed,                 // 13
 };
 #endif

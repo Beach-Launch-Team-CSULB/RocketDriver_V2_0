@@ -73,6 +73,7 @@ using std::string;
 #include "ALARApinDefines.h"
 #include "fluidSystemSimulation.h"
 #include "FlexCAN3Controller.h"
+#include "SerialUSBController.h"
 #include "extendedIO/extendedIO.h"
 
 //Trying to figure out RTC stuff with these libs
@@ -95,15 +96,15 @@ PCA9685 ALARALEDController;     // Library using default B000000 (A5-A0) i2c add
 elapsedMillis mainLoopTestingTimer;
 elapsedMillis ezModeControllerTimer;
 elapsedMillis commandExecuteTimer;
+elapsedMillis shittyCANTimer;
 
 //For use in doing serial inputs as CAN commands for testing
 uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
 uint8_t fakeCanIterator = 0;
 
-bool mainloopprints = true;
-
 bool localNodeResetFlag = false; //flag to trigger register reset from commanded reset over CAN
 bool abortHaltFlag; //creates halt flag that is a backup override of state machine, am I currently using it?
+bool outputOverride = true; // initializes as true to block outputs until changed
 
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
@@ -140,6 +141,7 @@ bool NewConfigMessage{false};
 CAN_filter_t wtf;
 
 FlexCan3Controller Can2msgController;
+SerialUSBController SerialUSBdataController;
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
@@ -294,6 +296,9 @@ void setup() {
   ALARALEDController.setChannelOff(14);
   ALARALEDController.setChannelOff(15);
   digitalWriteExtended(ALARA_PWM_EXPANDER_OE,HIGH);
+
+SerialUSBdataController.setPropStatusPrints(true);
+SerialUSBdataController.setPropCSVStreamPrints(true);
 }
 
 void loop() 
@@ -494,7 +499,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //waterGoesVroom.fluidSystemUpdate();
   
   // -----Process Commands Here-----
-  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
+  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
@@ -512,8 +517,9 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   // -----Advance needed controller system tasks (tank press controllers, ignition autosequence, . ..) ----- //
   // -----Advance needed propulsion system tasks (valve, pyro, sensors, . ..) ----- //
   cli(); // disables interrupts to ensure complete propulsion output state is driven
-  valveTasks(valveArray, PropulsionSysNodeID);
-  pyroTasks(pyroArray, PropulsionSysNodeID);
+  valveTasks(valveArray, PropulsionSysNodeID, outputOverride);
+  pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride);
+  ALARAHPOverride(ALARA_HP_Array, outputOverride);
   sei(); // reenables interrupts after propulsion output state set is completed
   //sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
   sensorTasks(sensorArray, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
@@ -531,207 +537,9 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-  if (mainLoopTestingTimer >= 250)
-  {
-
-  if (mainloopprints)
-  {
-  //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
-  Serial.print("prop node ID : ");
-  Serial.print(PropulsionSysNodeID);
-  Serial.print(" currentVehicleState :");
-  Serial.println(static_cast<uint8_t>(currentVehicleState));
-  Serial.print(" currentCommand :");
-  Serial.println(currentCommand);
-
-vectorBufferPrintout();
-
-  Serial.print(" currentConfigMSG :");
-  Serial.print(" targetID :");
-  Serial.print(currentConfigMSG.TargetObjectID);
-  Serial.print(" settingID:");
-  Serial.print(currentConfigMSG.ObjectSettingID);
-  Serial.print(" float:");
-  Serial.print(currentConfigMSG.floatValue);
-  Serial.print(" uint8:");
-  Serial.print(currentConfigMSG.uint8Value);
-
-  Serial.println();
-  Serial.print(waterGoesVroom.TimeDelta, 10);
-  Serial.print(" : ");
-  Serial.print(waterGoesVroom.FuelTank.CurrPressure/6895, 10);
-  Serial.print(" : ");
-  Serial.print(waterGoesVroom.LoxTank.CurrPressure/6895, 10);
-  Serial.print(" : ");
-  Serial.print(waterGoesVroom.HiPressTank.CurrPressure/6895, 10);
-  Serial.println(" fluid sim update ran");
-
-    for(auto tankPressController : tankPressControllerArray)
-    {
-            Serial.print( ": TankControllerState: ");
-            Serial.print(static_cast<uint8_t>(tankPressController->getState()));
-            Serial.println(": ");
-            Serial.print(static_cast<uint8_t>(tankPressController->getPrimaryPressValveState()));
-            Serial.print(": ");
-            Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
-            Serial.print(": ");
-            Serial.print(static_cast<uint8_t>(tankPressController->getTankVentState()));
-/*             Serial.print(": bangTimer: ");
-            Serial.print(tankPressController->bangtimer);
-            Serial.print(": minDeEnergizeTime: ");
-            Serial.print(tankPressController->valveMinimumDeenergizeTime);
-            Serial.print(": minEnergizeTime: ");
-            Serial.print(tankPressController->valveMinimumEnergizeTime);
-            Serial.println(": "); */
-            if (tankPressController->getIsBang())
-            {
-            Serial.print(": Target");
-            Serial.print(tankPressController->getTargetValue(),10);
-            Serial.print(": K_p");
-            Serial.print(tankPressController->getKp(),10);
-            Serial.print(": K_i");
-            Serial.print(tankPressController->getKi(),10);
-            Serial.print(": K_d");            
-            Serial.print(tankPressController->getKd(),10);
-            Serial.print(": e_p");
-            Serial.print(tankPressController->getPfunc(),10);
-            Serial.print(": e_i");
-            Serial.print(tankPressController->getIfunc(),10);
-            Serial.print(": e_d");            
-            Serial.print(tankPressController->getDfunc(),10);
-            Serial.print(": PID result");
-            Serial.println(tankPressController->getPIDoutput(),10);
-            }
-
-    }    
-    for(auto engineController : engineControllerArray)
-    {
-            Serial.print( ": EngineControllerState: ");
-            Serial.print(static_cast<uint8_t>(engineController->getState()));
-            Serial.println(": ");
-            Serial.print(static_cast<uint8_t>(engineController->getPilotMVFuelValveState()));
-            Serial.print(": ");
-            Serial.print(static_cast<uint8_t>(engineController->getPilotMVLoxValveState()));
-            Serial.print(": ");
-            Serial.print(static_cast<uint8_t>(engineController->getIgniter1State()));
-            Serial.print(": ");
-            Serial.print(static_cast<uint8_t>(engineController->getIgniter2State()));
-            Serial.println(": ");
-
-            for (auto i = engineController->throttleProgram.begin(); i != engineController->throttleProgram.end(); ++i)
-            {
-                Serial.print(" throttle program point: ");
-                Serial.print(" time: ");
-                Serial.print(i->autoSequenceTimeValue);
-                Serial.print(" Pc: ");
-                Serial.println(i->targetPcValue);
-            }
-
-    }
-    
-    for(auto valve : valveArray)
-    {
-            //Serial.print("ValveNodeID: ");
-            //Serial.print(static_cast<uint8_t>(valve->getValveNodeID()));
-            //Serial.print("ValveID: ");
-            //Serial.print(static_cast<uint8_t>(valve->getValveID()));
-        
-        if (valve->getValveNodeID() == PropulsionSysNodeID)
-        {
-            Serial.print(" ValveID: ");
-            Serial.print(static_cast<uint8_t>(valve->getValveID()));
-            Serial.print( ": ValveState: ");
-            Serial.print(static_cast<uint8_t>(valve->getState()));
-            Serial.print(": ");
-/*             Serial.print( ": ValveType: ");
-            Serial.print(static_cast<uint8_t>(valve->getValveType()));
-            Serial.print( ": HP Channel: ");
-            Serial.print(valve->getHPChannel());
-            Serial.print( ": PinDigital: ");
-            Serial.print(valve->getPinDigital());
-            Serial.print( ": PinPWM: ");
-            Serial.print(valve->getPinPWM());
-            Serial.print( ": PinADC: ");
-            Serial.print(valve->getPinADC()); */
-            Serial.println(": ");
-        }
-    }
-    for(auto pyro : pyroArray)
-    {
-        
-            //Serial.print("PyroNodeID: ");
-            //Serial.print(static_cast<uint8_t>(pyro->getPyroNodeID()));
-            //Serial.print("PyroID: ");
-            //Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
-       if (pyro->getPyroNodeID() == PropulsionSysNodeID)
-         {
-            Serial.print(" PyroID:  ");
-            Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
-            Serial.print( ": PyroState:  ");
-            Serial.print(static_cast<uint8_t>(pyro->getState()));
-/*             Serial.print( ": HP Channel: ");
-            Serial.print(pyro->getHPChannel());
-            Serial.print( ": PinDigital: ");
-            Serial.print(pyro->getPinDigital());
-            Serial.print( ": PinPWM: ");
-            Serial.print(pyro->getPinPWM());
-            Serial.print( ": PinADC: ");
-            Serial.print(pyro->getPinADC()); */
-            Serial.println(": ");
-        }
-    }
-
-  }
-    for(auto sensor : sensorArray)
-    {
-        if (sensor->getSensorNodeID() == PropulsionSysNodeID)
-        {
-        sensor->setState(SensorState::Slow);
-         
-            Serial.print("SensorID: ");
-            Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
-            Serial.print( ": new converted bool: ");
-            //Serial.print( ": new raw bool: ");
-            //Serial.print(sensor->getNewSensorValueCheckCAN());
-            Serial.print(sensor->getNewSensorConversionCheck());
-            Serial.print( ": raw value: ");
-            Serial.print(sensor->getCurrentRawValue());
-            //Serial.print( ": timestamp S: ");
-            //Serial.print(sensor->getTimestampSeconds());
-            //Serial.print( ": timestamp uS: ");
-            //Serial.print(sensor->getTimestampMicros());
-
-/*             Serial.print( ": converted: ");
-            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
-            Serial.print( ": EMA: ");
-            Serial.print(sensor->getEMAConvertedValue(),10);
-            Serial.print( ": I: ");
-            Serial.print(sensor->getIntegralSum(),10);
-            if (sensor->getEnableLinearRegressionCalc())
-            {
-            Serial.print( ": D: ");
-            Serial.print(sensor->getLinRegSlope(),10);
-            } */
-            
-            Serial.println(": ");
-
-        }
-    
-    }
-
-  Serial.print("Current Autosequence Time: ");
-  Serial.println(IgnitionAutoSequence.getCurrentCountdown());
-
-  mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
-  //Serial.print("EEPROM Node ID Read :");
-  //Serial.println(EEPROM.read(nodeIDAddress));
-  }
-
 // Resets the startup bool, DO NOT REMOVE
 startup = false;
   
-  //Serial.println("main loop ran");
-
     //ALARASN& thisALARA = ALARASNmap[ALARAnodeID];
 /*     Serial.print("prop system nodeID: ");
     Serial.println(thisALARA.propulsionSysNodeID);
@@ -740,6 +548,18 @@ startup = false;
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
-Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
-
+//if (shittyCANTimer >= 1000)
+  //{
+    //Stupid hacky way to slow the send rates on CAN for the Pi to not crash
+    Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
+    shittyCANTimer = 0;
+  //}
+  
+  // Serial Print Functions
+  if (mainLoopTestingTimer >= 250)
+  {
+  SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
+  SerialUSBdataController.propulsionNodeCSVStreamPrints();
+  mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
+  }
 }

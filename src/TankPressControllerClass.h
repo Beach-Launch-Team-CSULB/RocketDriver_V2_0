@@ -88,6 +88,8 @@ class TankPressController
         bool resetIntegralCalcBool = false;
 
         bool controllerUpdate = false;
+        elapsedMillis quasistaticUpdateTimer;
+        bool quasistaticControllerUpdate = false;
         bool isWaterFlowSetup = true;
 
     public:
@@ -123,6 +125,9 @@ class TankPressController
         uint32_t getValveMinDeEnergizeTime(){return valveMinimumDeenergizeTime;}
         
         bool getControllerUpdate(){return controllerUpdate;}
+        bool getQuasistaticControllerUpdate(){return quasistaticControllerUpdate;}
+        void setQuasistaticControllerUpdate(bool quasistaticControllerUpdateIn){quasistaticControllerUpdate = quasistaticControllerUpdateIn;}
+        elapsedMillis getQuasistaticUpdateTimer(){return quasistaticUpdateTimer;}
         bool getAbortFlag(){return abortFlag;}
 
         bool getResetIntegralCalcBool()
