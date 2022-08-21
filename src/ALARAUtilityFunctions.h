@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <cstring>
-#include "piezoSongs.h"
+//#include "piezoSongs.h"
 
 void ALARAHPOverride(uint8_t pinArrayIn[][11], bool& outputOverride);
 
@@ -51,7 +51,7 @@ void writeToRollingArray(uint8_t rollingArray[], uint8_t newInputArrayValue, uin
 };
  */
 
-class ALARAbuzzer
+/* class ALARAbuzzer
 {
     private:
         const uint8_t buzzerPin;
@@ -77,7 +77,7 @@ class ALARAbuzzer
         void playSongVector(std::vector<buzzerTone> songIn, uint16_t BPMset = 120);
 
 };
-
+ */
 void toneBuzzer();
 
 #endif

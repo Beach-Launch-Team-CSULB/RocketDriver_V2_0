@@ -196,6 +196,11 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
       //Serial.print("EEPROM Node ID Read :");
   //Serial.println(EEPROM.read(nodeIDAddress));
 
+    //ALARASN& thisALARA = ALARASNmap[ALARAnodeID];
+/*     Serial.print("prop system nodeID: ");
+    Serial.println(thisALARA.propulsionSysNodeID);
+    Serial.print("board rev: ");
+    Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
 }
 
 

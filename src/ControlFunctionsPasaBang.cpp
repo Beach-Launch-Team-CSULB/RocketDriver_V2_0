@@ -1,4 +1,5 @@
 #include "ControlFunctionsPasaBang.h"
+#include "RGBLEDcolorDefinitions.h"
 
 // -------------------------------------------------------------
 // CONFIRM All DEFINES MATCH DEVICE DEFINITIONS
@@ -375,15 +376,19 @@ void controllerAbortCheck(VehicleState& currentState, const std::array<AutoSeque
     
 }
 
-void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag, bool& outputOverride)
+void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, ALARABoardController& boardController, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag, bool& outputOverride)
 {
     switch (currentState)
     {
         case VehicleState::passive:
+            // Set Board LED1 minimum on white
+            boardController.setLED(1,LED_WHITE_MIN);
             // Disable all HP outputs
             outputOverride = true;
             break;
         case VehicleState::standby:
+            // Set Board LED1 8% on white
+            boardController.setLED(1,LED_WHITE_8percent);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setK_i(0);  //turms K_i back off
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setK_i(0); //turms K_i back off
@@ -410,6 +415,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             break;            
         case VehicleState::abort:
             //haltFlag = true; //does this stay here???
+            // Set Board LED1 Yellow
+            boardController.setLED(1,LED_YELLOW);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Abort);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Abort);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Abort);
@@ -418,6 +425,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::vent:
+            // Set Board LED1 Violet
+            boardController.setLED(1,LED_VIOLET);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Hold);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Vent);
@@ -426,6 +435,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::HiPressArm:
+            // Set Board LED1 Teal 
+            boardController.setLED(1,LED_TEAL);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Armed);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
@@ -434,6 +445,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::HiPressPressurized:
+            // Set Board LED1 Blue
+            boardController.setLED(1,LED_BLUE);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
@@ -442,6 +455,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::TankPressArm:
+            // Set Board LED1 Lime 
+            boardController.setLED(1,LED_LIME);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Armed);
@@ -450,6 +465,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::TankPressPressurized:
+            // Set Board LED1 Green
+            boardController.setLED(1,LED_GREEN);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
@@ -458,6 +475,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::fireArmed:
+            // Set Board LED1 Orange
+            boardController.setLED(1,LED_ORANGE);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
@@ -466,6 +485,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::fire:
+            // Set Board LED1 Red
+            boardController.setLED(1,LED_RED);
             autoSequenceArray.at(0)->setState(AutoSequenceState::RunCommanded);            
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::RegPressActive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
@@ -780,13 +801,20 @@ void missionStateMachine(VehicleState& currentState, VehicleState& priorState, M
         switch (currentMissionState)
         {
         case MissionState::passive:
-            /* code */
+            // Set Board LED2  minimum on white
+            boardController.setLED(2,LED_WHITE_MIN);
+            break;
+        case MissionState::standby:
+            // Set Board LED2 8% on white
+            boardController.setLED(2,LED_WHITE_8percent);
             break;
         case MissionState::staticTestArmed:
-            /* code */
+            // Set Board LED2 Orange
+            boardController.setLED(2,LED_ORANGE);
             break;
         case MissionState::staticTestActive:
-            /* code */
+            // Set Board LED2 Red
+            boardController.setLED(2,LED_RED);
             break;
         case MissionState::postTest:
             /* code */

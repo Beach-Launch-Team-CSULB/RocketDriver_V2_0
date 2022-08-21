@@ -289,7 +289,7 @@ void writeToRollingArray(uint8_t rollingArray[], uint8_t newInputArrayValue, uin
   }
 }
 
-ALARAbuzzer::ALARAbuzzer(uint8_t setBuzzerPin, float setMaxToneFrequency, float setMinToneFrequency, uint8_t setMinPWM, uint8_t setMaxPWM)
+/* ALARAbuzzer::ALARAbuzzer(uint8_t setBuzzerPin, float setMaxToneFrequency, float setMinToneFrequency, uint8_t setMinPWM, uint8_t setMaxPWM)
          : buzzerPin{setBuzzerPin}, maxToneFrequency{setMaxToneFrequency}, minToneFrequency{setMinToneFrequency}, minPWM{setMinPWM}, maxPWM{setMaxPWM}
 {
   //nothing for now
@@ -393,7 +393,7 @@ void ALARAbuzzer::playSongVector(std::vector<buzzerTone> songIn, uint16_t BPMset
     songEnd = true;
   }
 }
-
+ */
 void toneBuzzer() //single tone
 {
 

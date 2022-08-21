@@ -63,9 +63,9 @@
 using std::string;
 #include <IntervalTimer.h>
 
-
 #include "ALARAUtilityFunctions.h"
 #include "ALARABoardControllerClass.h"
+#include "ALARABoardControllerDefinitions.h"
 //#include "ToMillisTimeTracker.h"
 #include "CANRead.h"
 #include "CANWrite.h"
@@ -80,17 +80,13 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#include "PCA9685.h"
-
 #define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
+
+//uint8_t ALARA_HP_Array[3][11];
 
 uint32_t rocketDriverSeconds;
 uint32_t rocketDriverMicros;
 
-ALARABoardController boardController;
-ALARAbuzzer buzzerr(ALARA_BUZZ);
-
-PCA9685 ALARALEDController;     // Library using default B000000 (A5-A0) i2c address, and default Wire @400kHz
 
 // Timer for setting main loop debugging print rate
 elapsedMillis mainLoopTestingTimer;
@@ -194,7 +190,6 @@ uint16_t NodeIDAddress3{24};
 //-------------------------------------------------------//
 void setup() {
   startup = true;   // Necessary to set startup to true for the code loop so it does one startup loop for the state machine before entering regular loop behavior
-
   // ----- MUX Setups for ALARA -----
   // Board Addressing MUX
   MUXSetup(true, ALARA_DIGITAL_ADDRESS_1, ALARA_DIGITAL_ADDRESS_2, ALARA_DIGITAL_ADDRESS_3, ALARA_DIGITAL_ADDRESS_4);
@@ -264,146 +259,18 @@ void setup() {
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
 
 
-  // pin setup
-  // NEEDS LOTS OF UPDATES FOR ALARA V2
-  //pinMode(LED_BUILTIN, OUTPUT);
-  
-
   Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
 
   Wire.begin();
-  ALARALEDController.resetDevices();
-  ALARALEDController.init();
-  ALARALEDController.setPWMFrequency(2000);
-  //ALARALEDController.setAllChannelsPWM(4096);
-  //ALARALEDController.setAllChannelsPWM(1);
-  pinMode(ALARA_PWM_EXPANDER_OE,OUTPUT);
-  // Startup with LED channels off via setting to "On", all unused channels "Off"
-  ALARALEDController.setChannelOn(0);
-  ALARALEDController.setChannelOn(1);
-  ALARALEDController.setChannelOn(2);
-  ALARALEDController.setChannelOn(3);
-  ALARALEDController.setChannelOn(4);
-  ALARALEDController.setChannelOn(5);
-  ALARALEDController.setChannelOff(6);
-  ALARALEDController.setChannelOff(7);
-  ALARALEDController.setChannelOff(8);
-  ALARALEDController.setChannelOff(9);
-  ALARALEDController.setChannelOff(10);
-  ALARALEDController.setChannelOff(11);
-  ALARALEDController.setChannelOff(12);
-  ALARALEDController.setChannelOff(13);
-  ALARALEDController.setChannelOff(14);
-  ALARALEDController.setChannelOff(15);
-  digitalWriteExtended(ALARA_PWM_EXPANDER_OE,HIGH);
 
-SerialUSBdataController.setPropStatusPrints(true);
-SerialUSBdataController.setPropCSVStreamPrints(true);
+  boardController.begin();
+
+  SerialUSBdataController.setPropStatusPrints(true);
+  SerialUSBdataController.setPropCSVStreamPrints(false);
 }
 
 void loop() 
 {
-/*   ALARALEDController.setChannelOn(0);
-  ALARALEDController.setChannelOn(1);
-  ALARALEDController.setChannelOn(2);
-  ALARALEDController.setChannelOn(3);
-  ALARALEDController.setChannelOn(4);
-  ALARALEDController.setChannelOn(5); */
-
-/*   ALARALEDController.setChannelOff(0);
-  ALARALEDController.setChannelOff(1);
-  ALARALEDController.setChannelOff(2);
-  ALARALEDController.setChannelOff(3);
-  ALARALEDController.setChannelOff(4);
-  ALARALEDController.setChannelOff(5); */
-
-if (currentVehicleState == VehicleState::passive)
-{
-// Nearly Off
-ALARALEDController.setChannelPWM(0, 4093);
-ALARALEDController.setChannelPWM(1, 4093);
-ALARALEDController.setChannelPWM(2, 4093);
-}
-if (currentVehicleState == VehicleState::HiPressArm)
-{
-// Teal
-ALARALEDController.setChannelPWM(0, 4096);
-ALARALEDController.setChannelPWM(1, 50);
-ALARALEDController.setChannelPWM(2, 500);
-}
-if (currentVehicleState == VehicleState::HiPressPressurized)
-{
-// Blue
-ALARALEDController.setChannelPWM(0, 4096);
-ALARALEDController.setChannelPWM(1, 4096);
-ALARALEDController.setChannelPWM(2, 0);
-}
-if (currentVehicleState == VehicleState::TankPressArm)
-{
-// Yellow/Green
-ALARALEDController.setChannelPWM(0, 50);
-ALARALEDController.setChannelPWM(1, 500);
-ALARALEDController.setChannelPWM(2, 4096);
-}
-if (currentVehicleState == VehicleState::TankPressPressurized)
-{
-// Green
-ALARALEDController.setChannelPWM(0, 4096);
-ALARALEDController.setChannelPWM(1, 0);
-ALARALEDController.setChannelPWM(2, 4096);
-}
-if (currentVehicleState == VehicleState::fireArmed)
-{
-// Orange  
-ALARALEDController.setChannelPWM(0, 0);
-ALARALEDController.setChannelPWM(1, 3700);
-ALARALEDController.setChannelPWM(2, 4096);
-}
-if (currentVehicleState == VehicleState::fire)
-{
-// Red
-ALARALEDController.setChannelPWM(0, 0);
-ALARALEDController.setChannelPWM(1, 4096);
-ALARALEDController.setChannelPWM(2, 4096);
-}
-if (currentVehicleState == VehicleState::vent)
-{
-// Purple
-ALARALEDController.setChannelPWM(0, 30);
-ALARALEDController.setChannelPWM(1, 4096);
-ALARALEDController.setChannelPWM(2, 3500);
-}
-if (currentVehicleState == VehicleState::abort)
-{
-// Yellow
-ALARALEDController.setChannelPWM(0, 750);
-ALARALEDController.setChannelPWM(1, 2800);
-ALARALEDController.setChannelPWM(2, 4096);
-}
-
-if (currentMissionState == MissionState::passive)
-{
-// Nearly Off
-ALARALEDController.setChannelPWM(3, 4093);
-ALARALEDController.setChannelPWM(4, 4093);
-ALARALEDController.setChannelPWM(5, 4093);
-}
-if (currentMissionState == MissionState::staticTestArmed)
-{
-// Orange
-ALARALEDController.setChannelPWM(3, 0);
-ALARALEDController.setChannelPWM(4, 3700);
-ALARALEDController.setChannelPWM(5, 4096);
-}
-if (currentMissionState == MissionState::staticTestActive)
-{
-// Red
-ALARALEDController.setChannelPWM(3, 0);
-ALARALEDController.setChannelPWM(4, 4096);
-ALARALEDController.setChannelPWM(5, 4096);
-}
-
-
 
 //fakesensorShit(rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
 
@@ -489,17 +356,12 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //process config message
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
 ///// ------------------------------------ /////  
-/* if (VehicleState == stat)
-{
-  waterGoesVroom.resetSim();
-} */
 
   if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
   {
-  //waterGoesVroom.fluidSystemUpdate();
   
   // -----Process Commands Here-----
-  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
+  vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, boardController, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
@@ -509,7 +371,6 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
   //fluid sim run
   waterGoesVroom.fluidSystemUpdate();
-  //Serial.println(waterGoesVroom.FuelTank.CurrPressure/6895);
   
   ezModeControllerTimer = 0;
   }
@@ -521,30 +382,16 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride);
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
   sei(); // reenables interrupts after propulsion output state set is completed
-  //sensorTasks(sensorArray, adc, rocketDriverSeconds, rocketDriverMicros, PropulsionSysNodeID);
   sensorTasks(sensorArray, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
 
   // -----Update States on EEPROM -----
   //change to only write if something new to write!!! Make wrapper function that checks for new info?
   //tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
 
-/*   // CAN State Report and Sensor data send Functions
-  CAN2PropSystemStateReport(Can0, currentVehicleState, currentCommand, valveArray, pyroArray, abortHaltFlag, PropulsionSysNodeID);
-  CAN2AutosequenceTimerReport(Can0, autoSequenceArray, abortHaltFlag, PropulsionSysNodeID);
-  CAN2SensorArraySend(Can0, sensorArray, PropulsionSysNodeID, CANSensorReportConverted);
- */
   // Reset function to reboot Teensy with internal reset register
   // Need to figure out how to rework using this feature with reworked ID system
   TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
-// Resets the startup bool, DO NOT REMOVE
-startup = false;
-  
-    //ALARASN& thisALARA = ALARASNmap[ALARAnodeID];
-/*     Serial.print("prop system nodeID: ");
-    Serial.println(thisALARA.propulsionSysNodeID);
-    Serial.print("board rev: ");
-    Serial.println(static_cast<uint8_t>(thisALARA.boardRev)); */
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
@@ -555,11 +402,14 @@ startup = false;
     shittyCANTimer = 0;
   //}
   
-  // Serial Print Functions
+///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 250)
   {
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints();
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   }
+
+// Resets the startup bool, DO NOT REMOVE
+startup = false;
 }
