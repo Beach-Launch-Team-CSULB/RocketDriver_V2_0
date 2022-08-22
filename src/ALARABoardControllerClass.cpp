@@ -6,14 +6,10 @@ ALARABoardController::ALARABoardController(PCA9685* setALARALEDExtPWM, uint8_t s
 
 }
 
-/* ALARABoardController::ALARABoardController(RGB_LED* setLed1, RGB_LED* setLed2, ALARAbuzzer* setbuzzer)
-    : Led1{*setLed1}, Led2{*setLed2}, buzzerr{*setbuzzer}
-{
-
-} */
 
 void ALARABoardController::begin()
 {
+    // LED stuff
     ALARALEDExtPWM.resetDevices();
     ALARALEDExtPWM.init();
     ALARALEDExtPWM.setPWMFrequency(2000);
@@ -40,7 +36,7 @@ void ALARABoardController::begin()
 void ALARABoardController::boardTasks()
 {
     //stuff to do at regular program interval
-
+    // Led and buzzer routines beyond single color/tone would update here
 }
 
 void ALARABoardController::setLED(uint8_t LedN, RGB_12bitColor ledInput)

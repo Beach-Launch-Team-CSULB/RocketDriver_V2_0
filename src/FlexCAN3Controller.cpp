@@ -8,8 +8,9 @@ const uint32_t max18bitvalue = 262143;  //preset as constant to not calculate it
 void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message_t& msgIn, uint16_t IDA)
 {
     msgIn.len = 8; //always a full frame this format
-    msgIn.ext = 1;
-    msgIn.id = IDA + (byteArray[0] << 13) + (byteArray[1] << 21);   //standard ID plus pack first two bytes into back of extendedID field
+    msgIn.flags.extended = 1;
+    msgIn.flags.remote = 0;
+    msgIn.id = IDA + (byteArray[0] << 12) + (byteArray[1] << 20);   //standard ID plus pack first two bytes into back of extendedID field
     for (size_t i = 0; i < 8; i++)
     {
         msgIn.buf[i] = byteArray[i+2];  //pack the back 8 elements of byte array into normal CAN2 bytes
@@ -31,52 +32,17 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, fl
     frameToPackage.flags.extended = 0;
     frameToPackage.flags.remote = 0;
     frameToPackage.id = msgIDIn;
+    frameToPackage.len = 8;
     func_floatValue = float1In;
-/*     Serial.print("msgIDIn: ");
-    Serial.print(msgIDIn);
-    Serial.print(" : float1In: ");
-    Serial.print(float1In);
-    Serial.print(" : float union: ");
-    Serial.print(func_floatValue);
-    Serial.print(" : byte 0: ");
-    Serial.print(func_uint8Value4X[0]);
-    Serial.print(" : byte 1: ");
-    Serial.print(func_uint8Value4X[1]);
-    Serial.print(" : byte 2: ");
-    Serial.print(func_uint8Value4X[2]);
-    Serial.print(" : byte 3: ");
-    Serial.print(func_uint8Value4X[3]); */
     frameToPackage.buf[0] = func_uint8Value4X[0];
     frameToPackage.buf[1] = func_uint8Value4X[1];
     frameToPackage.buf[2] = func_uint8Value4X[2];
     frameToPackage.buf[3] = func_uint8Value4X[3];
     func_floatValue = float2In;
-/*     Serial.print(" : float2In: ");
-    Serial.print(float2In);
-    Serial.print(" : float union: ");
-    Serial.print(func_floatValue);
-    Serial.print(" : byte 0: ");
-    Serial.print(func_uint8Value4X[0]);
-    Serial.print(" : byte 1: ");
-    Serial.print(func_uint8Value4X[1]);
-    Serial.print(" : byte 2: ");
-    Serial.print(func_uint8Value4X[2]);
-    Serial.print(" : byte 3: ");
-    Serial.print(func_uint8Value4X[3]);
-    Serial.println(" : "); */
-
     frameToPackage.buf[4] = func_uint8Value4X[0];
     frameToPackage.buf[5] = func_uint8Value4X[1];
     frameToPackage.buf[6] = func_uint8Value4X[2];
     frameToPackage.buf[7] = func_uint8Value4X[3];
-    
-/*     for (size_t i = 0; i < 8; i++)
-    {
-    Serial.print(" : buf[i]: ");
-    Serial.print(frameToPackage.buf[i]);
-    Serial.print(" : ");
-    }
-    Serial.println(" : "); */
 
     return frameToPackage;
 }
@@ -93,6 +59,7 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1
     frameToPackage.flags.extended = 0;
     frameToPackage.flags.remote = 0;
     frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
+    frameToPackage.len = 8;
     func_uint32Value = uint32_t1In;
     frameToPackage.buf[0] = func_uint8Value4X[0];
     frameToPackage.buf[1] = func_uint8Value4X[1];
@@ -223,6 +190,7 @@ void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array
         //Serial.print("do I get past i loop");
         //Serial.println(sensorReadStruct.numberSensors);
 sensorReadStruct.packedSensorCAN2.flags.extended = 1;
+sensorReadStruct.packedSensorCAN2.flags.remote = 0;
 //sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0];
 //sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + (sensorReadStruct.sensorTimestampMicros[0] << 11);
 sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
@@ -353,7 +321,8 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
             //Serial.print("do I get past i loop");
             //Serial.println(sensorReadStruct.numberSensors);
-    //sensorReadStruct.packedSensorCAN2.ext = 1;
+    sensorReadStruct.packedSensorCAN2.flags.extended = 1;
+    sensorReadStruct.packedSensorCAN2.flags.remote = 0;
     sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
 
     //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
@@ -433,7 +402,7 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             tankPressControllerReportsStruct.controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
             
             // Controller State Report and other quasistatic info to send low rate
-            if (tankPressControllerReportsStruct.quasistaticSendBool)
+            if (tankPressControllerReportsStruct.quasistaticSendBool || externalStateChange)
             {
             tankPressControllerReportsStruct.controllerStateReportCanFrame.id = tankPressControllerReportsStruct.controllerStateReportID;
             tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.extended = 0;
@@ -468,8 +437,53 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
     }
 }
 
+void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
+{
+    
+    //if (AutoSequenceReportTimer >= 100)
+    //{
+    // build message
+        static CAN_message_t msgOut;
+        msgOut.flags.extended = 0;
+        msgOut.flags.remote = 0;
+        //change ID format to be better and match my updated plan
+        for(auto autoSequence : autoSequenceArray)
+        if (autoSequence->getHostNodeID() == propulsionNodeIDIn)
+        {
+            {
+                msgOut.id = 1000 + (autoSequence->getAutoSequenceID()*100);  //
+                msgOut.len = 8;
+                int64_t autosequenceTimer = autoSequence->getCurrentCountdown();
+                uint8_t autosequenceTimerStateEnumToInt = static_cast<uint8_t>(autoSequence->getAutoSequenceState());
 
-void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+/*                 Serial.print("Autosequence: State : ");
+                Serial.print(autosequenceTimerStateEnumToInt);
+                Serial.print(" Timer : ");
+                Serial.print(autosequenceTimer);
+                Serial.println(); */
+
+                msgOut.buf[0] = autosequenceTimerStateEnumToInt;
+                msgOut.buf[1] = autosequenceTimer;
+                msgOut.buf[2] = (autosequenceTimer >> 8);
+                msgOut.buf[3] = (autosequenceTimer >> 16);
+                msgOut.buf[4] = (autosequenceTimer >> 24);
+                msgOut.buf[5] = (autosequenceTimer >> 32);
+                msgOut.buf[6] = (autosequenceTimer >> 40);
+                msgOut.buf[7] = (autosequenceTimer >> 48);
+                
+                // write message to bus
+                CANbus.write(msgOut);
+            }    
+            {
+                // add write error handling here, for now it does nothing
+            }
+            //AutoSequenceReportTimer = 0;
+        }
+    //}
+}
+
+
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
 {
     //call this every loop of main program
     //call all the types of messages inside this function and execute as needed
@@ -478,59 +492,31 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     generateHPObjectIDmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
     objectIDmsgs = true;
     }
-    if (highPowerObjectIDmsgTimer >= (1000/(highPowerObjectIDRateHz/highPowerObjectIDRateHzDenominator))) //send low rate ping of what objects are on this node HP channels
+    if (highPowerObjectIDmsgTimer >= highPowerObjectIDRateMillis) //send low rate ping of what objects are on this node HP channels
     {
-    //CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
-    highPowerObjectIDmsgTimer = 0;
-    
-/*     Serial.println(" do I get to send ObjectID CAN msg ");
-            Serial.print(" id: ");
-            Serial.print(nodeObjectIDReportStruct.objectIDmsg.id);
-            //Serial.print(" timestamp: ");
-            //Serial.print(sensorReadStruct.sensorTimestampMicros[0]);
-            
-        for (size_t i = 0; i < nodeObjectIDReportStruct.objectIDmsg.len; i++)
-        {
-            Serial.print(" : ");
-            Serial.print(nodeObjectIDReportStruct.objectIDmsg.buf[i]);
-            Serial.print(" : ");
-        }
-        Serial.println();   */  
+    // spamming writes too fast, rate isnt limiting correctly
+    CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
+    highPowerObjectIDmsgTimer = 0; 
     }
     
-    if (highPowerStatemsgTimer >= (1000/highPowerStateReportRateHz))
+    if (highPowerStatemsgTimer >= highPowerStateReportRateMillis || externalStateChange)
     {
         // make and send high power state report
     generateHPObjectStateReportmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
     //nodeObjectStateReportStruct.objectIDmsg.flags.extended = 1;
+    //nodeObjectStateReportStruct.objectIDmsg.flags.remote = 0;
     CANbus.write(nodeObjectStateReportStruct.objectIDmsg);    
-        highPowerStatemsgTimer = 0;
-
-/*     Serial.println(" do I get to send Object State CAN msg ");
-            Serial.print(" id: ");
-            Serial.print(nodeObjectStateReportStruct.objectIDmsg.id);
-            //Serial.print(" timestamp: ");
-            //Serial.print(sensorReadStruct.sensorTimestampMicros[0]);
-            
-        for (size_t i = 0; i < nodeObjectStateReportStruct.objectIDmsg.len; i++)
-        {
-            Serial.print(" : ");
-            Serial.print(nodeObjectStateReportStruct.objectIDmsg.buf[i]);
-            Serial.print(" : ");
-        }
-        Serial.println();    
- */    }
+    highPowerStatemsgTimer = 0;
+    }
     
-    if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
+    if (convertedValueUpdateTimer >= (convertedSendRateMillis))
     {
-        //generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
         convertedValueUpdateTimer = 0;
-    
-    
     }
 
     //set this up to run until raw messages all cleared each loop
-    //generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
 
 /*         if (loxTankPressControllerReportsStruct.quasistaticUpdateTimer >= loxTankPressControllerReportsStruct.quasistaticSendTime)
         {
@@ -547,8 +533,14 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
             fuelTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
         } */
 
-    
+    if (AutoSequenceReportTimer >= 100)
+    {
+        generateAutoSequenceUpdatemsg(Can0, autoSequenceArray, propulsionNodeIDIn);
+        AutoSequenceReportTimer = 0;
+    }
 
 
     generateTankControllermsgs(Can0,tankPressControllerArray,propulsionNodeIDIn);
+    //reset external state change bool
+    externalStateChange = false;
 }

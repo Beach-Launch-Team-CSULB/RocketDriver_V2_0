@@ -93,12 +93,17 @@ class FlexCan3Controller
         elapsedMillis highPowerObjectIDmsgTimer;
         elapsedMillis highPowerStatemsgTimer;
         elapsedMillis nodeSystemTimemsgTimer;
-
-        uint16_t highPowerObjectIDRateHz = 1;   // in Hz default value
-        uint16_t highPowerObjectIDRateHzDenominator = 2;   // used to get less than 1Hz value via fraction
-        uint16_t highPowerStateReportRateHz = 2;   // in Hz default value
-        uint16_t convertedSendRateHz = 10;          // in Hz default value
+        elapsedMillis AutoSequenceReportTimer;
+        uint32_t highPowerObjectIDRateMillis = 10000;   // in Millis default value
+        //uint32_t highPowerObjectIDRateHzDenominator = 2;   // used to get less than 1Hz value via fraction
+        uint32_t highPowerStateReportRateMillis = 250;   // in Millis default value
+        uint32_t convertedSendRateMillis = 250;          // in Millis default value
+        uint32_t nodeSystemTimemsgSendRateMillis = 1000;          // in Millis default value
         bool objectIDmsgs = false;  //bool for if the msg has been generated yet
+        bool objectIDmsgsSendBool = false;  //bool for if the msg should be sent based on controller setting the bool
+
+        bool externalStateChange = false;    //bool that can be used to send all infrequent messages at a state change
+
 
     public:
 
@@ -108,12 +113,14 @@ class FlexCan3Controller
         void generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
         void generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
         void generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn);
-        
+        void generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn);
+
         void writeObjectByteArray(uint8_t byteArray[10], CAN_message_t& msgIn, uint16_t IDA);
         void nodeSystemTimemsg(FlexCAN& CANbus);
-
+        // External state change bool set function
+        void setExternalStateChange(bool stateChangeIn){externalStateChange = stateChangeIn;}
         //Controller loop function
-        void controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
+        void controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn);
 };
 
 #endif

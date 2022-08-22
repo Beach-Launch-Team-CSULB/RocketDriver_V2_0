@@ -357,7 +357,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
 ///// ------------------------------------ /////  
 
-  if (ezModeControllerTimer >= 5) // 5 = 200Hz controller rate
+  if (ezModeControllerTimer >= 50) // 5 = 200Hz controller rate
   {
   
   // -----Process Commands Here-----
@@ -395,11 +395,15 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
-//if (shittyCANTimer >= 1000)
+if (shittyCANTimer >= 1000)
+{
+  Can2msgController.setExternalStateChange(true);
+  shittyCANTimer = 0;
+}
   //{
     //Stupid hacky way to slow the send rates on CAN for the Pi to not crash
-    Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
-    shittyCANTimer = 0;
+    Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
+    //shittyCANTimer = 0;
   //}
   
 ///// ----- Serial Print Functions ----- /////
