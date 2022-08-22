@@ -402,7 +402,7 @@ if (shittyCANTimer >= 1000)
 }
   //{
     //Stupid hacky way to slow the send rates on CAN for the Pi to not crash
-    Can2msgController.controllerTasks(Can0, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
+    Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
     //shittyCANTimer = 0;
   //}
   

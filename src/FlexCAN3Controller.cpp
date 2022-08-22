@@ -18,6 +18,17 @@ void FlexCan3Controller::writeObjectByteArray(uint8_t byteArray[10], CAN_message
     //return msgIn;
 }
 
+void FlexCan3Controller::writeNodeStateReportByteArray(uint8_t byteArray[8], CAN_message_t& msgIn, uint16_t IDA)
+{
+    msgIn.len = 8; //always a full frame this format
+    msgIn.flags.extended = 0;
+    msgIn.flags.remote = 0;
+    msgIn.id = IDA;   //standard ID plus pack first two bytes into back of extendedID field
+    for (size_t i = 0; i < 8; i++)
+    {
+        msgIn.buf[i] = byteArray[i];  //pack the back 8 elements of byte array into normal CAN2 bytes
+    }
+}
 
 CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, float float2In)
 {
@@ -408,7 +419,7 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.extended = 0;
             tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.remote = 0;
             tankPressControllerReportsStruct.controllerStateReportCanFrame.buf[0] = static_cast<uint8_t>(tankPressController->getState());
-            CANbus.write(tankPressControllerReportsStruct.controllerStateReportCanFrame);
+            //CANbus.write(tankPressControllerReportsStruct.controllerStateReportCanFrame);
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime()));
@@ -454,7 +465,7 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
                 msgOut.id = 1000 + (autoSequence->getAutoSequenceID()*100);  //
                 msgOut.len = 8;
                 int64_t autosequenceTimer = autoSequence->getCurrentCountdown();
-                uint8_t autosequenceTimerStateEnumToInt = static_cast<uint8_t>(autoSequence->getAutoSequenceState());
+                //uint8_t autosequenceTimerStateEnumToInt = static_cast<uint8_t>(autoSequence->getAutoSequenceState());
 
 /*                 Serial.print("Autosequence: State : ");
                 Serial.print(autosequenceTimerStateEnumToInt);
@@ -462,14 +473,16 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
                 Serial.print(autosequenceTimer);
                 Serial.println(); */
 
-                msgOut.buf[0] = autosequenceTimerStateEnumToInt;
-                msgOut.buf[1] = autosequenceTimer;
-                msgOut.buf[2] = (autosequenceTimer >> 8);
-                msgOut.buf[3] = (autosequenceTimer >> 16);
-                msgOut.buf[4] = (autosequenceTimer >> 24);
-                msgOut.buf[5] = (autosequenceTimer >> 32);
-                msgOut.buf[6] = (autosequenceTimer >> 40);
-                msgOut.buf[7] = (autosequenceTimer >> 48);
+                //msgOut.buf[0] = autosequenceTimerStateEnumToInt;
+                //is this bit shifting logically backwards???
+                msgOut.buf[0] = autosequenceTimer;
+                msgOut.buf[1] = (autosequenceTimer >> 8);
+                msgOut.buf[2] = (autosequenceTimer >> 16);
+                msgOut.buf[3] = (autosequenceTimer >> 24);
+                msgOut.buf[4] = (autosequenceTimer >> 32);
+                msgOut.buf[5] = (autosequenceTimer >> 40);
+                msgOut.buf[6] = (autosequenceTimer >> 48);
+                msgOut.buf[7] = (autosequenceTimer >> 56);
                 
                 // write message to bus
                 CANbus.write(msgOut);
@@ -481,12 +494,38 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
         }
     //}
 }
+void FlexCan3Controller::generatePropNodeStateReport(FlexCAN& CANbus,  VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn)
+{
+    CAN_message_t stateReport;
 
+    stateReport.len = 8; //always a full frame this format
+    stateReport.flags.extended = 0;
+    stateReport.flags.remote = 0;
+    stateReport.id = propulsionNodeIDIn + 512;   //standard ID plus pack first two bytes into back of extendedID field
+    
+    stateReport.buf[0] = static_cast<uint8_t>(currentState);
+    stateReport.buf[1] = static_cast<uint8_t>(currentMissionState);
+    stateReport.buf[2] = static_cast<uint8_t>(currentCommand);
+    stateReport.buf[3] = static_cast<uint8_t>(autoSequenceArray.at(0)->getAutoSequenceState());
+    stateReport.buf[4] = static_cast<uint8_t>(engineControllerArray.at(0)->getState());
+    stateReport.buf[5] = static_cast<uint8_t>(tankPressControllerArray.at(0)->getState());
+    stateReport.buf[6] = static_cast<uint8_t>(tankPressControllerArray.at(1)->getState());
+    stateReport.buf[7] = static_cast<uint8_t>(tankPressControllerArray.at(2)->getState());
 
-void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
+    //writeNodeStateReportByteArray(stateReportArray, stateReport, propulsionNodeIDIn);
+    CANbus.write(stateReport);
+}
+
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
 {
     //call this every loop of main program
     //call all the types of messages inside this function and execute as needed
+    if (propNodeStateReportTimer >= propNodeStateReportRateMillis)
+    {
+    generatePropNodeStateReport(CANbus, currentState, currentMissionState, currentCommand, autoSequenceArray, engineControllerArray, tankPressControllerArray, propulsionNodeIDIn);
+    propNodeStateReportTimer = 0;
+    }
+
     if (!objectIDmsgs)  //generate the message once
     {
     generateHPObjectIDmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
@@ -494,7 +533,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     }
     if (highPowerObjectIDmsgTimer >= highPowerObjectIDRateMillis) //send low rate ping of what objects are on this node HP channels
     {
-    // spamming writes too fast, rate isnt limiting correctly
+    //
     CANbus.write(nodeObjectIDReportStruct.objectIDmsg);
     highPowerObjectIDmsgTimer = 0; 
     }
@@ -503,8 +542,6 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     {
         // make and send high power state report
     generateHPObjectStateReportmsgs(CANbus, valveArray, pyroArray, propulsionNodeIDIn);
-    //nodeObjectStateReportStruct.objectIDmsg.flags.extended = 1;
-    //nodeObjectStateReportStruct.objectIDmsg.flags.remote = 0;
     CANbus.write(nodeObjectStateReportStruct.objectIDmsg);    
     highPowerStatemsgTimer = 0;
     }
@@ -518,22 +555,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, const std::array<TankP
     //set this up to run until raw messages all cleared each loop
     generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
 
-/*         if (loxTankPressControllerReportsStruct.quasistaticUpdateTimer >= loxTankPressControllerReportsStruct.quasistaticSendTime)
-        {
-            //set the quasistatic message bool to true when timer checks true
-            loxTankPressControllerReportsStruct.quasistaticSendBool = true;
-            //reset send timer
-            loxTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
-        }
-        if (fuelTankPressControllerReportsStruct.quasistaticUpdateTimer >= fuelTankPressControllerReportsStruct.quasistaticSendTime)
-        {
-            //set the quasistatic message bool to true when timer checks true
-            fuelTankPressControllerReportsStruct.quasistaticSendBool = true;
-            //reset send timer
-            fuelTankPressControllerReportsStruct.quasistaticUpdateTimer = 0;
-        } */
-
-    if (AutoSequenceReportTimer >= 100)
+    if (AutoSequenceReportTimer >= 200)
     {
         generateAutoSequenceUpdatemsg(Can0, autoSequenceArray, propulsionNodeIDIn);
         AutoSequenceReportTimer = 0;
