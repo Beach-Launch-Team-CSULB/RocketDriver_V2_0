@@ -21,7 +21,7 @@ class SerialUSBController
     // Functiom for Programming/Debugging Serial Print stream
     void propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
     // Functiom for data logging/CSV Serial Print stream
-    void propulsionNodeCSVStreamPrints();
+    void propulsionNodeCSVStreamPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
 
 };
 

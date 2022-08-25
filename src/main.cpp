@@ -75,14 +75,14 @@ using std::string;
 #include "FlexCAN3Controller.h"
 #include "SerialUSBController.h"
 #include "extendedIO/extendedIO.h"
-
+#include "ms5607/ms5607.h"
 //Trying to figure out RTC stuff with these libs
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
 #define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
 
-//uint8_t ALARA_HP_Array[3][11];
+MS5607 ALARAbaro;
 
 uint32_t rocketDriverSeconds;
 uint32_t rocketDriverMicros;
@@ -139,7 +139,7 @@ CAN_filter_t wtf;
 FlexCan3Controller Can2msgController;
 SerialUSBController SerialUSBdataController;
 
-const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
+const int CAN2busSpeed = 125000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
 bool startup{true}; // bool for storing if this is the first loop on startup, ESSENTIAL FOR STATE MACHINE OPERATION (maybe not anymore?)
 
@@ -254,6 +254,8 @@ void setup() {
   
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
+
+
   //sensorSetUp(sensorArray, rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
   // ----- Set Controller Dependent Sensor Settings -----
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
@@ -262,7 +264,8 @@ void setup() {
   Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
 
   Wire.begin();
-
+  SPI.begin();
+  ALARAbaro.init(ALARA_BPS_CSN,OSR_1024);
   boardController.begin();
 
   SerialUSBdataController.setPropStatusPrints(true);
@@ -285,12 +288,12 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   // --- Read CAN bus and update current command ---
   if(CANread(Can0, configVerificationKey, NewConfigMessage, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
   {
-    Serial.print("CAN Message Recieved: ");
-    Serial.println(currentCommand); //currently only does the command not any message
+    //Serial.print("CAN Message Recieved: ");
+    //Serial.println(currentCommand); //currently only does the command not any message
   }
   if(SerialAsCANread())
   {
-    Serial.println("Command Entered");
+    //Serial.println("Command Entered");
   }
   
   //while (Serial.available())
@@ -373,6 +376,9 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   waterGoesVroom.fluidSystemUpdate();
   
   ezModeControllerTimer = 0;
+
+//ALARAbaro.update();
+//ALARAbaro.print_all();
   }
 
   // -----Advance needed controller system tasks (tank press controllers, ignition autosequence, . ..) ----- //
@@ -410,8 +416,9 @@ if (shittyCANTimer >= 1000)
   if (mainLoopTestingTimer >= 250)
   {
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
-  SerialUSBdataController.propulsionNodeCSVStreamPrints();
+  SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
+
   }
 
 // Resets the startup bool, DO NOT REMOVE

@@ -29,11 +29,11 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
   Serial.println();
   Serial.print(fluidSim.TimeDelta, 10);
   Serial.print(" : ");
-  Serial.print(fluidSim.FuelTank.CurrPressure/6895, 10);
+  Serial.print(fluidSim.FuelTank.CurrPressure/6895, 5);
   Serial.print(" : ");
-  Serial.print(fluidSim.LoxTank.CurrPressure/6895, 10);
+  Serial.print(fluidSim.LoxTank.CurrPressure/6895, 5);
   Serial.print(" : ");
-  Serial.print(fluidSim.HiPressTank.CurrPressure/6895, 10);
+  Serial.print(fluidSim.HiPressTank.CurrPressure/6895, 5);
   Serial.println(" fluid sim update ran");
 
     for(auto tankPressController : tankPressControllerArray)
@@ -56,21 +56,21 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             if (tankPressController->getIsBang())
             {
             Serial.print(": Target");
-            Serial.print(tankPressController->getTargetValue(),10);
+            Serial.print(tankPressController->getTargetValue(),5);
             Serial.print(": K_p");
-            Serial.print(tankPressController->getKp(),10);
+            Serial.print(tankPressController->getKp(),5);
             Serial.print(": K_i");
-            Serial.print(tankPressController->getKi(),10);
+            Serial.print(tankPressController->getKi(),5);
             Serial.print(": K_d");            
-            Serial.print(tankPressController->getKd(),10);
+            Serial.print(tankPressController->getKd(),5);
             Serial.print(": e_p");
-            Serial.print(tankPressController->getPfunc(),10);
+            Serial.print(tankPressController->getPfunc(),5);
             Serial.print(": e_i");
-            Serial.print(tankPressController->getIfunc(),10);
+            Serial.print(tankPressController->getIfunc(),5);
             Serial.print(": e_d");            
-            Serial.print(tankPressController->getDfunc(),10);
+            Serial.print(tankPressController->getDfunc(),5);
             Serial.print(": PID result");
-            Serial.println(tankPressController->getPIDoutput(),10);
+            Serial.println(tankPressController->getPIDoutput(),5);
             }
 
     }    
@@ -156,7 +156,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
     {
         if (sensor->getSensorNodeID() == propulsionNodeIDIn)
         {
-        sensor->setState(SensorState::Slow);
+        //sensor->setState(SensorState::Slow);
          
             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
@@ -204,12 +204,83 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
 }
 
 
-void SerialUSBController::propulsionNodeCSVStreamPrints()
+void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
 {
     // Prints active if bool is true
     if (propCSVStreamPrints)
     {
-        Serial.println(" did my bool shit work ");
+    
+    // Fluid Sim
+    Serial.print(fluidSim.TimeDelta, 5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(fluidSim.FuelTank.CurrPressure/6895, 5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(fluidSim.LoxTank.CurrPressure/6895, 5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(fluidSim.HiPressTank.CurrPressure/6895, 5);
+    Serial.print(", ");   // comma delimeter
+/*     // Tank Controllers
+    for(auto tankPressController : tankPressControllerArray)
+    {
+    Serial.print(static_cast<uint8_t>(tankPressController->getState()));
+    Serial.print(", ");   // comma delimeter
+
+    if (tankPressController->getIsBang())
+    {
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getTargetValue(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getKp(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getKi(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getKd(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getPfunc(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getIfunc(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getDfunc(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(tankPressController->getPIDoutput(),5);
+    Serial.print(", ");   // comma delimeter
+    }
+
+    }
+    // Sensors
+    for(auto sensor : sensorArray)
+    {
+    if (sensor->getSensorNodeID() == propulsionNodeIDIn)
+    {
+    Serial.print(sensor->getCurrentRawValue());
+    Serial.print(", ");   // comma delimeter
+    //Serial.print( ": timestamp S: ");
+    //Serial.print(sensor->getTimestampSeconds());
+    //Serial.print( ": timestamp uS: ");
+    //Serial.print(sensor->getTimestampMicros());
+
+    Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
+    Serial.print(", ");   // comma delimeter
+    Serial.print(sensor->getEMAConvertedValue(),5);
+    Serial.print(", ");   // comma delimeter
+    Serial.print(sensor->getIntegralSum(),5);
+    if (sensor->getEnableLinearRegressionCalc())
+    {
+    Serial.print(", ");   // comma delimeter
+    Serial.print(sensor->getLinRegSlope(),5);
+    Serial.print(", ");   // comma delimeter
     }
     
+
+    }
+    
+    }
+ */
+    // End
+    Serial.println();  //end line change
+    }
+    
+
+
+
 }
