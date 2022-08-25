@@ -139,7 +139,7 @@ CAN_filter_t wtf;
 FlexCan3Controller Can2msgController;
 SerialUSBController SerialUSBdataController;
 
-const int CAN2busSpeed = 125000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
+const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
 bool startup{true}; // bool for storing if this is the first loop on startup, ESSENTIAL FOR STATE MACHINE OPERATION (maybe not anymore?)
 
