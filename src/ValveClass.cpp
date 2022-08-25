@@ -532,14 +532,18 @@ void Valve::controllerStateOperations()
             {
                 case NormalClosed:
                     timer = 0;
-                    state = ValveState::OpenProcess;
+                    setState(ValveState::OpenProcess);
+                    //priorState = state;
+                    //state = ValveState::OpenProcess;
                     //controllerUpdate = true;
                     //Serial.print("NC OpenCommanded: ");
                     //Serial.println(valveID);
                     break;
                 case NormalOpen:
                     timer = 0;
-                    state = ValveState::Open;
+                    setState(ValveState::Open);
+                    //priorState = state;
+                    //state = ValveState::Open;
                     //controllerUpdate = true;
                     //Serial.print("NO OpenCommanded: ");
                     //Serial.println(valveID);                
@@ -561,14 +565,18 @@ void Valve::controllerStateOperations()
             {
                 case NormalClosed:
                     timer = 0;
-                    state = ValveState::BangOpenProcess;
+                    setState(ValveState::BangOpenProcess);
+                    //priorState = state;
+                    //state = ValveState::BangOpenProcess;
                     //controllerUpdate = true;
                     //Serial.print("NC OpenCommanded: ");
                     //Serial.println(valveID);
                     break;
                 case NormalOpen:
                     timer = 0;
-                    state = ValveState::Open;
+                    setState(ValveState::Open);
+                    //priorState = state;
+                    //state = ValveState::Open;
                     //controllerUpdate = true;
                     //Serial.print("NO OpenCommanded: ");
                     //Serial.println(valveID);                
@@ -592,12 +600,16 @@ void Valve::controllerStateOperations()
             {
                 case NormalClosed:
                     timer = 0;
-                    state = ValveState::Closed;
+                    setState(ValveState::Closed);
+                    //priorState = state;
+                    //state = ValveState::Closed;
                     //controllerUpdate = true;
                     break;
                 case NormalOpen:
                     timer = 0;
-                    state = ValveState::CloseProcess;
+                    setState(ValveState::CloseProcess);
+                    //priorState = state;
+                    //state = ValveState::CloseProcess;
                     //controllerUpdate = true;
                     break;
                 default:
@@ -617,12 +629,16 @@ void Valve::controllerStateOperations()
             {
                 case NormalClosed:
                     timer = 0;
-                    state = ValveState::BangingClosed;
+                    setState(ValveState::BangingClosed);
+                    //priorState = state;
+                    //state = ValveState::BangingClosed;
                     //controllerUpdate = true;
                     break;
                 case NormalOpen:    //I think this is bogus??
                     timer = 0;
-                    state = ValveState::CloseProcess;
+                    setState(ValveState::CloseProcess);
+                    //priorState = state;
+                    //state = ValveState::CloseProcess;
                     //controllerUpdate = true;
                     break;
                 default:
@@ -641,7 +657,9 @@ void Valve::controllerStateOperations()
         if(timer >= fullDutyTime)
         {
             timer = 0;
-            state = ValveState::Open;
+            setState(ValveState::Open);
+            //priorState = state;
+            //state = ValveState::Open;
             //controllerUpdate = true;
         }
         break;
@@ -649,7 +667,9 @@ void Valve::controllerStateOperations()
         if(timer >= fullDutyTime)
         {
             timer = 0;
-            state = ValveState::BangingOpen;
+            setState(ValveState::BangingOpen);
+            //priorState = state;
+            //state = ValveState::BangingOpen;
             controllerUpdate = true;
         }
         break;
@@ -661,7 +681,9 @@ void Valve::controllerStateOperations()
             //analogWrite(pinPWM, holdDuty);
             //digitalWriteFast(pinDigital, HIGH);
             timer = 0;
-            state = ValveState::Closed;
+            setState(ValveState::Closed);
+            //priorState = state;
+            //state = ValveState::Closed;
             //controllerUpdate = true;
         }
         break;

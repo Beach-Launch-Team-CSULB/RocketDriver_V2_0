@@ -385,6 +385,9 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             boardController.setLED(1,LED_WHITE_MIN);
             // Disable all HP outputs
             outputOverride = true;
+            tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             break;
         case VehicleState::standby:
             // Set Board LED1 8% on white
@@ -392,9 +395,9 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setK_i(0);  //turms K_i back off
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setK_i(0); //turms K_i back off
-            tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
-            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
-            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
+            tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Standby);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Standby);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Standby);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
             fluidSim.resetSim();
             haltFlag = false;

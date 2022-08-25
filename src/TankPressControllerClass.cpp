@@ -85,10 +85,26 @@ void TankPressController::stateOperations()
         //set abortFlag false when going to passive;
         abortFlag = false;
         //don't do shit
+        //if (priorState != TankPressControllerState::Passive)
+        //{
         primaryPressValve.setState(ValveState::CloseCommanded);
         pressLineVent.setState(ValveState::CloseCommanded);
         tankVent.setState(ValveState::CloseCommanded);
         sensorState = SensorState::Slow;
+        //}
+        break;
+    case TankPressControllerState::Standby:
+        testPass = false;
+        //set abortFlag false when going to passive;
+        abortFlag = false;
+        //don't do shit
+        if (priorState != TankPressControllerState::Standby)
+        {
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::CloseCommanded);
+        tankVent.setState(ValveState::CloseCommanded);
+        sensorState = SensorState::Slow;
+        }
         break;
     case TankPressControllerState::RegPressActive:
         testPass = false;

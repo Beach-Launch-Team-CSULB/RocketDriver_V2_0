@@ -110,6 +110,8 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
         {
             Serial.print(" ValveID: ");
             Serial.print(static_cast<uint8_t>(valve->getValveID()));
+            Serial.print( ": priorState: ");
+            Serial.print(static_cast<uint8_t>(valve->getPriorState()));
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
             Serial.print(": ");

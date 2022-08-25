@@ -8,16 +8,17 @@
 enum class TankPressControllerState
 {
     Passive,                    // 0
-    BangBangActive,             // 1
-    RegPressActive,            // 2
-    HiPressPassthroughVent,     // 3
-    Armed,                      // 4
-    Vent,                       // 5
-    Abort,                      // 6
-    TestPassthrough,            // 7
-    OffNominalPassthrough,      // 8
-    AutosequenceCommanded,      // 9
-    ControllerState_SIZE,       // 10
+    Standby,                    // 1
+    BangBangActive,             // 2
+    RegPressActive,            // 3
+    HiPressPassthroughVent,     // 4
+    Armed,                      // 5
+    Vent,                       // 6
+    Abort,                      // 7
+    TestPassthrough,            // 8
+    OffNominalPassthrough,      // 9
+    AutosequenceCommanded,      // 10
+    ControllerState_SIZE,       // 11
 };
 
 // generic below, probably supercede/replace as I get to other controllers
