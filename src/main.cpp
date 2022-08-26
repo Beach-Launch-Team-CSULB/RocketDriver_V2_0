@@ -403,14 +403,11 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 // Run every loop
 if (shittyCANTimer >= 1000)
 {
-  Can2msgController.setExternalStateChange(true);
+  Can2msgController.setExternalStateChange(true); //cheater force for quasi messages
   shittyCANTimer = 0;
 }
-  //{
-    //Stupid hacky way to slow the send rates on CAN for the Pi to not crash
-    Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
-    //shittyCANTimer = 0;
-  //}
+  
+  Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
   
 ///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 10)
@@ -418,7 +415,6 @@ if (shittyCANTimer >= 1000)
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
-
   }
 
 // Resets the startup bool, DO NOT REMOVE

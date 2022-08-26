@@ -97,13 +97,15 @@ class FlexCan3Controller
         uint32_t highPowerObjectIDRateMillis = 10000;   // in Millis default value
         //uint32_t highPowerObjectIDRateHzDenominator = 2;   // used to get less than 1Hz value via fraction
         uint32_t highPowerStateReportRateMillis = 250;   // in Millis default value
-        uint32_t convertedSendRateMillis = 25;          // in Millis default value
+        uint32_t convertedSendRateMillis = 125;          // in Millis default value
         uint32_t nodeSystemTimemsgSendRateMillis = 1000;          // in Millis default value
         bool objectIDmsgs = false;  //bool for if the msg has been generated yet
         bool objectIDmsgsSendBool = false;  //bool for if the msg should be sent based on controller setting the bool
 
         bool externalStateChange = false;    //bool that can be used to send all infrequent messages at a state change
-
+        
+        elapsedMicros convertedSendTimeoutbreak;
+        uint32_t convertedSendTimeoutMicros = 500;
 
     public:
 
@@ -112,7 +114,7 @@ class FlexCan3Controller
         void generateHPObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn);
         void generateHPObjectStateReportmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn);
         void generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
-        void generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
+        bool generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn);
         void generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn);
         void generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn);
 

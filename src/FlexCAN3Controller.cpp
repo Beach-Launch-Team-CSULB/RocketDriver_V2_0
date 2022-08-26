@@ -272,16 +272,21 @@ CANbus.write(sensorReadStruct.packedSensorCAN2);
 
 //NOT CHANGED YET FROM RAW VERSION!!!! Needs to pull converted values at a given rate (if new available) and set the new converted false when reading just like with raw
 //Use a one decimal place shifted version of the float as Int, will give up to ~6500.0 PSI max value on all the pressures.
-void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
 {
     //if (convertedValueUpdateTimer >= 0)
     //if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
     //{
+        bool concersionChecksRemainingBool = true;  // use for return bool, set false at end of sensor array
+
         convertedValueUpdateTimer = 0;
         bool isFirstSample = true;
         ALARA_ConvertedSensorReadmsg sensorReadStruct;
-        
-        
+
+        //auto sensorConvertedIt = sensorArray.begin();
+        //std::array<SENSORBASE, NUM_SENSORS>::iterator sensorIt;
+        //sensorIt = sensorArray.begin();
+
         sensorReadStruct.timestampTolerance = 1000000; //anything within 10 Hz window is good enough for packing converted values together
         uint32_t currentIteratoinTimeStamp = 0;
         // grab up to 3 samples
@@ -289,6 +294,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
         {
             //Serial.print(" :i of msg loop: ");
             //Serial.println(i);
+            //for (auto sensor : sensorArray)
             for (auto sensor : sensorArray)
             {
                 if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorConversionCheck()) // if on this node and a new value to send
@@ -324,7 +330,11 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
                     }
                 }
             
-            //sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
+            
+            //if (sensorArray.end() == sensor)
+            //{
+                /* code */
+            //}
             }
             break;  //if all sensors checked still break even if 3 samples have not been found
 
@@ -396,6 +406,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
     CANbus.write(sensorReadStruct.packedSensorCAN2);
     }
     //}
+    return isFirstSample; // for later use when I get iterators working inside here
 }
 
 void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn)
@@ -548,11 +559,17 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
     
     if (convertedValueUpdateTimer >= (convertedSendRateMillis))
     {
+    //auto sensorConvertedIt = sensorArray.begin();
+        // Lazy way to make sure I send all the possible queued up conversions
+        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
         convertedValueUpdateTimer = 0;
     }
 
     //set this up to run until raw messages all cleared each loop
+    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
     generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
 
     if (AutoSequenceReportTimer >= 200)
