@@ -269,7 +269,7 @@ void setup() {
   boardController.begin();
 
   SerialUSBdataController.setPropStatusPrints(true);
-  SerialUSBdataController.setPropCSVStreamPrints(false);
+  SerialUSBdataController.setPropCSVStreamPrints(true);
 }
 
 void loop() 
@@ -413,7 +413,7 @@ if (shittyCANTimer >= 1000)
   //}
   
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 250)
+  if (mainLoopTestingTimer >= 10)
   {
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);

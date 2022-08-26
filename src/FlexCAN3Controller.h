@@ -97,7 +97,7 @@ class FlexCan3Controller
         uint32_t highPowerObjectIDRateMillis = 10000;   // in Millis default value
         //uint32_t highPowerObjectIDRateHzDenominator = 2;   // used to get less than 1Hz value via fraction
         uint32_t highPowerStateReportRateMillis = 250;   // in Millis default value
-        uint32_t convertedSendRateMillis = 250;          // in Millis default value
+        uint32_t convertedSendRateMillis = 25;          // in Millis default value
         uint32_t nodeSystemTimemsgSendRateMillis = 1000;          // in Millis default value
         bool objectIDmsgs = false;  //bool for if the msg has been generated yet
         bool objectIDmsgsSendBool = false;  //bool for if the msg should be sent based on controller setting the bool

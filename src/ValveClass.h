@@ -73,6 +73,21 @@ class Valve
     // set functions, allows the setting of a variable
         void setState(ValveState newState) 
             {
+                    if (newState != state)
+                    {
+                        priorState = state;
+                        state = newState;
+                    }
+                    else
+                    {
+                        // do nothing
+                    }
+                    
+            }
+
+/*
+         void setState(ValveState newState) 
+            {
                 if (newState == ValveState::OpenCommanded)
                 {
                     if (priorState == ValveState::OpenProcess || priorState == ValveState::Open)
@@ -112,7 +127,7 @@ class Valve
                 state = newState;
                 }
             }
-            
+ */            
         //every time a state is set, the timer should reset
         //Is the above still true?
 

@@ -173,9 +173,9 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             //Serial.print( ": timestamp uS: ");
             //Serial.print(sensor->getTimestampMicros());
 
-/*             Serial.print( ": converted: ");
+            Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
-            Serial.print( ": EMA: ");
+/*             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
             Serial.print( ": I: ");
             Serial.print(sensor->getIntegralSum(),10);
@@ -183,8 +183,8 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             {
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
-            } */
-            
+            }
+ */            
             Serial.println(": ");
 
         }
@@ -221,7 +221,7 @@ void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVeh
     Serial.print(", ");   // comma delimeter
     Serial.print(fluidSim.HiPressTank.CurrPressure/6895, 5);
     Serial.print(", ");   // comma delimeter
-/*     // Tank Controllers
+    // Tank Controllers
     for(auto tankPressController : tankPressControllerArray)
     {
     Serial.print(static_cast<uint8_t>(tankPressController->getState()));
@@ -277,7 +277,7 @@ void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVeh
     }
     
     }
- */
+
     // End
     Serial.println();  //end line change
     }

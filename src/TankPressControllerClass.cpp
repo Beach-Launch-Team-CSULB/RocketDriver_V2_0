@@ -87,9 +87,9 @@ void TankPressController::stateOperations()
         //don't do shit
         //if (priorState != TankPressControllerState::Passive)
         //{
-        primaryPressValve.setState(ValveState::CloseCommanded);
-        pressLineVent.setState(ValveState::CloseCommanded);
-        tankVent.setState(ValveState::CloseCommanded);
+        //primaryPressValve.setState(ValveState::CloseCommanded);
+        //pressLineVent.setState(ValveState::CloseCommanded);
+        //tankVent.setState(ValveState::CloseCommanded);
         sensorState = SensorState::Slow;
         //}
         break;

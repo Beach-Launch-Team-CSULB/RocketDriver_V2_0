@@ -303,7 +303,7 @@ void FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
                             break;
                         }
                     }
-                    sensorReadStruct.sensorID[i] = sensor->getSensorID();
+                    sensorReadStruct.sensorID[i] = (sensor->getSensorID())+1;
                     //sensorReadStruct.sensorTimestampSeconds[i] = sensor->getTimestampSeconds();
                     sensorReadStruct.sensorTimestampMicros[i] = currentIteratoinTimeStamp;
 

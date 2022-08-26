@@ -199,10 +199,13 @@ void EngineController::stateOperations()
         //don't do shit
         throttleProgramPos = throttleProgram.begin(); //sets/resets throttle program iterator
         autoSequenceTargetPcUpdate(false);
+        //if (priorState != EngineControllerState::Passive)
+        //{
         pilotMVFuelValve.setState(ValveState::CloseCommanded);
         pilotMVLoxValve.setState(ValveState::CloseCommanded);
         pneumaticVent.setState(ValveState::CloseCommanded);
         sensorState = SensorState::Slow;
+        //}
         //igniter1.setState(PyroState::OffCommanded);
         //igniter2.setState(PyroState::OffCommanded);
         igniter1.resetPyro();

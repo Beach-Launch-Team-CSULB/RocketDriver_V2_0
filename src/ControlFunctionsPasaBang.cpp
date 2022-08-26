@@ -21,7 +21,7 @@
 
 // sensorArray position defines for pointers
 
-#define ChamberPT1_ArrayPointer 0
+#define MVPneumaticsPT_ArrayPointer 0
 #define FuelLinePT_ArrayPointer 1
 #define LoxLinePT_ArrayPointer 2
 #define FuelTank1PT_ArrayPointer 3
@@ -30,12 +30,12 @@
 #define LoxTank2PT_ArrayPointer 6
 #define HiPressPT_ArrayPointer 7
 
-#define FakeChamberPT1_ArrayPointer 8
-#define FakeFuelLinePT_ArrayPointer 9
-#define FakeLoxLinePT_ArrayPointer 10
-#define FakeFuelTankPT_ArrayPointer 11
-#define FakeLoxTankPT_ArrayPointer 12
-#define FakeHiPressPT_ArrayPointer 13
+//#define FakeChamberPT1_ArrayPointer 8
+#define FakeFuelLinePT_ArrayPointer 8
+#define FakeLoxLinePT_ArrayPointer 9
+#define FakeFuelTankPT_ArrayPointer 10
+#define FakeLoxTankPT_ArrayPointer 11
+#define FakeHiPressPT_ArrayPointer 12
 
 // actuator position defines for pointers
 #define Engine1TVC_Y_ArrayPointer 0
@@ -145,7 +145,7 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Missio
                 }
                 break;
             case command_TankPressArm:
-                if(currentState == VehicleState::HiPressPressurized)
+                if(currentState == VehicleState::HiPressPressurized || currentState == VehicleState::standby)
                 {
                 currentState = VehicleState::TankPressArm;
                 currentMissionState = MissionState::staticTestArmed;
@@ -855,7 +855,7 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         sensorArray.at(LoxTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxTank2PT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(HiPressPT_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ChamberPT1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(MVPneumaticsPT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelLinePT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxLinePT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
   
