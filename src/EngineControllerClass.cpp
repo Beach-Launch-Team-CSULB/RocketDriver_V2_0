@@ -15,9 +15,11 @@ EngineController::EngineController(uint32_t setControllerID, uint8_t setControll
     throttlePoint initialThrottlePoint = {0, currentPcTarget};
     throttleProgram.push_back(initialThrottlePoint);
     //temp throttle points
-    throttlePoint testSecondThrottlePoint = {2000000, 290};
+    throttlePoint testSecondThrottlePoint = {5000000, 290};
+    //throttlePoint testSecondThrottlePoint = {2000000, 290};
     throttleProgram.push_back(testSecondThrottlePoint);
-    throttlePoint testThirdThrottlePoint = {4000000, 330};
+    //throttlePoint testThirdThrottlePoint = {4000000, 330};
+    throttlePoint testThirdThrottlePoint = {10000000, 330};
     throttleProgram.push_back(testThirdThrottlePoint);
     //throttle program iterator
     throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
@@ -167,10 +169,9 @@ void EngineController::autoSequenceTargetPcUpdate(bool runBool)
         for (; throttleProgramPos != throttleProgram.end();)
         //for (auto throttleProgramPos = throttleProgram.begin(); != throttleProgram.end();) //old version that doesn't pick up where we left off
         {
-            //Serial.println(" here in for");
             if (currentAutosequenceTime >= (throttleProgramPos->autoSequenceTimeValue))
             {
-            //Serial.println(" here in if");
+                currentPcTarget = (throttleProgramPos)->targetPcValue;
                 ++throttleProgramPos;
                 if (throttleProgramPos == throttleProgram.end())    //DIDNT work it bricked and didn't update iterator ever
                 {
@@ -178,14 +179,10 @@ void EngineController::autoSequenceTargetPcUpdate(bool runBool)
                     --throttleProgramPos;
                 }
             }
-            //Serial.println(" here after if");
             break;
         }
-            currentPcTarget = (throttleProgramPos)->targetPcValue;
-            //Serial.println(" currentPcTarget inside update: ");
-            //Serial.println(currentPcTarget);
     }
-    else    //if not set to run, grabs the first element in the throttle array
+    else    //if not set to run, grabs the first element in the throttle array to get tank press target
     {
         currentPcTarget = throttleProgram.begin()->targetPcValue;
     }

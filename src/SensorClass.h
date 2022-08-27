@@ -45,7 +45,8 @@ class SENSORBASE
     virtual bool getNewSensorValueCheckLog();
     virtual bool getNewSensorConversionCheck();
     virtual bool getEnableLinearRegressionCalc();
-
+    virtual bool getEnableIntegralCalc();
+    
     virtual void setNodeIDCheck(bool updatedNodeIDCheck);
     virtual void setState(SensorState newState);
     virtual void setSYSTimestamp(uint32_t timestampSeconds, uint32_t timestampMicros);

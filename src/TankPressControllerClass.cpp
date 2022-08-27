@@ -74,6 +74,12 @@ void TankPressController::stateOperations()
 
     if (isSystemBang)
     {
+        // Hold the reset integral calc bool true each cycle while in T minus to prevent windup
+        if (currentAutosequenceTime <= 0)
+        {
+            resetIntegralCalcBool = true;
+        }
+    // Run PID math on BangBang Tank Controllers
     bangPIDoutput = PIDmath();
     }
 
@@ -377,18 +383,22 @@ void TankPressController::setPcTarget(float PcTargetIn)
 {
     if (PcTargetIn <= 600 && PcTargetIn >= 200) 
     {
-        targetPcValue = PcTargetIn;
-        // set target point based on dP, make the math function later
-        //targetValue = targetPcValue + tankToChamberDp;
-        if (!isWaterFlowSetup)
+        // Only continue if the new target is different than current target
+        if (targetPcValue != PcTargetIn)
         {
-        targetValue = targetPcValue*1.25; //very crude dP approx
+            resetIntegralCalcBool = true;
+            targetPcValue = PcTargetIn;
+            // set target point based on dP, make the math function later
+            //targetValue = targetPcValue + tankToChamberDp;
+            if (!isWaterFlowSetup)
+            {
+            targetValue = targetPcValue*1.25; //very crude dP approx
+            }
+            else 
+            {
+            targetValue = targetPcValue*0.25; //very crude dP approx
+            }
         }
-        else 
-        {
-        targetValue = targetPcValue*0.25; //very crude dP approx
-        }
-    
     }
 }
 

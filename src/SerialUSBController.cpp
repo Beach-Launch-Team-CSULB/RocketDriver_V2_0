@@ -162,10 +162,10 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
          
             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
-            Serial.print( ": new converted bool: ");
+            //Serial.print( ": new converted bool: ");
             //Serial.print( ": new raw bool: ");
             //Serial.print(sensor->getNewSensorValueCheckCAN());
-            Serial.print(sensor->getNewSensorConversionCheck());
+            //Serial.print(sensor->getNewSensorConversionCheck());
             Serial.print( ": raw value: ");
             Serial.print(sensor->getCurrentRawValue());
             //Serial.print( ": timestamp S: ");
@@ -175,16 +175,20 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
 
             Serial.print( ": converted: ");
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
-/*             Serial.print( ": EMA: ");
+            Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
+            Serial.print( ": Integral Enabled: ");
+            Serial.print(sensor->getEnableIntegralCalc());
             Serial.print( ": I: ");
             Serial.print(sensor->getIntegralSum(),10);
-            if (sensor->getEnableLinearRegressionCalc())
-            {
+            //if (sensor->getEnableLinearRegressionCalc())
+            //{
+            Serial.print( ": LinReg Enabled: ");
+            Serial.print(sensor->getEnableLinearRegressionCalc());
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
-            }
- */            
+            //}
+            
             Serial.println(": ");
 
         }
@@ -229,7 +233,6 @@ void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVeh
 
     if (tankPressController->getIsBang())
     {
-    Serial.print(", ");   // comma delimeter
     Serial.print(tankPressController->getTargetValue(),5);
     Serial.print(", ");   // comma delimeter
     Serial.print(tankPressController->getKp(),5);
@@ -272,7 +275,12 @@ void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVeh
     Serial.print(sensor->getLinRegSlope(),5);
     Serial.print(", ");   // comma delimeter
     }
-    
+    else 
+    {
+    Serial.print(", ");   // comma delimeter
+    Serial.print("No Lin Reg Slope");   // comma delimeter
+    Serial.print(", ");   // comma delimeter
+    }
 
     }
     

@@ -38,7 +38,7 @@ class EXT_SENSOR : public SENSORBASE
     uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
     const uint32_t sampleRateSlowMode_Default = 1;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateMedMode_Default = 10;         //the sample rate this given sensor will be read at
-    const uint32_t sampleRateFastMode_Default = 100;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateFastMode_Default = 200;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode_Default = 10;        //the sample rate this given sensor will be read at
     uint32_t sampleRateSlowMode;        //the sample rate this given sensor will be read at
     uint32_t sampleRateMedMode;         //the sample rate this given sensor will be read at
@@ -125,6 +125,8 @@ class EXT_SENSOR : public SENSORBASE
     bool getNewSensorValueCheckLog(){return newSensorValueCheck_Log;}
     bool getNewSensorConversionCheck(){return newConversionCheck;}
     bool getEnableLinearRegressionCalc(){return enableLinearRegressionCalc;}
+    bool getEnableIntegralCalc(){return enableIntegralCalc;}
+    
     
     float getEMAConvertedValue(){return newEMAOutput;}
     float getIntegralSum(){return currentIntegralSum;}

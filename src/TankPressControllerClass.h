@@ -54,8 +54,8 @@ class TankPressController
         float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
         float sensorIntervalTimeStep = 0.01;
 
-        bool trustBangSensor1 = true;
-        bool trustBangSensor2 = true;
+        bool trustBangSensor1 = false;
+        bool trustBangSensor2 = false;
         bool trustBangSensor3 = true;
         float bangSensor1EMA = 0;   //primary PT
         float bangSensor2EMA = 0;   //secondary PT

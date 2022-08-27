@@ -155,6 +155,8 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Missio
                 //if(currentState == VehicleState::TankPressArm || currentState ==VehicleState::fireArmed) //do we want to be able to go backwards out of fire armed?
                 if(currentState == VehicleState::TankPressArm)
                 {
+                tankPressControllerArray.at(LoxTankController_ArrayPointer)->resetIntegralCalc(true);
+                tankPressControllerArray.at(FuelTankController_ArrayPointer)->resetIntegralCalc(true);
                 currentState = VehicleState::TankPressPressurized;
                 currentMissionState = MissionState::staticTestArmed;
                 }
@@ -852,8 +854,10 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
  */
         sensorArray.at(FuelTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelTank2PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(FakeFuelTankPT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(LoxTank2PT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(FakeLoxTankPT_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(HiPressPT_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(MVPneumaticsPT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelLinePT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
@@ -879,10 +883,15 @@ void controllerSensorSetup(const std::array<Valve*, NUM_VALVES>& valveArray, con
     sensorArray.at(LoxTank1PT_ArrayPointer)->setEnableIntegralCalc(true);
     sensorArray.at(LoxTank2PT_ArrayPointer)->initializeLinReg(10);
     sensorArray.at(LoxTank2PT_ArrayPointer)->setEnableIntegralCalc(true);
+    sensorArray.at(FakeLoxTankPT_ArrayPointer)->initializeLinReg(10);
+    sensorArray.at(FakeLoxTankPT_ArrayPointer)->setEnableIntegralCalc(true);
+    
     sensorArray.at(FuelTank1PT_ArrayPointer)->initializeLinReg(10);
     sensorArray.at(FuelTank1PT_ArrayPointer)->setEnableIntegralCalc(true);
     sensorArray.at(FuelTank2PT_ArrayPointer)->initializeLinReg(10);
     sensorArray.at(FuelTank2PT_ArrayPointer)->setEnableIntegralCalc(true);
+    sensorArray.at(FakeFuelTankPT_ArrayPointer)->initializeLinReg(10);
+    sensorArray.at(FakeFuelTankPT_ArrayPointer)->setEnableIntegralCalc(true);
 }
 
 void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray)
@@ -902,13 +911,27 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     engineControllerArray.at(Engine1Controller_ArrayPointer)->setPilotMVLoxValveState(valveArray.at(LoxMV_ArrayPointer)->getSyncState());
  */
     //integral unwinds
-    sensorArray.at(LoxTank1PT_ArrayPointer)->resetIntegralCalc(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getResetIntegralCalcBool(), 0);
-    sensorArray.at(FuelTank1PT_ArrayPointer)->resetIntegralCalc(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getResetIntegralCalcBool(), 0);
+    // Grab the bools from each tank controller ONCE and set into in function bools, calling function resets the bool in the tank controller to false
+    bool loxTankControllerResetIntegralCalcBool = false;
+    bool fuelTankControllerResetIntegralCalcBool = false;
+    loxTankControllerResetIntegralCalcBool = tankPressControllerArray.at(LoxTankController_ArrayPointer)->getResetIntegralCalcBool();
+    fuelTankControllerResetIntegralCalcBool = tankPressControllerArray.at(FuelTankController_ArrayPointer)->getResetIntegralCalcBool();
+    // Set each sensor resetIntegralCalc based on corresponding tank press controller bool from above
+    sensorArray.at(LoxTank1PT_ArrayPointer)->resetIntegralCalc(loxTankControllerResetIntegralCalcBool, 0);
+    sensorArray.at(LoxTank2PT_ArrayPointer)->resetIntegralCalc(loxTankControllerResetIntegralCalcBool, 0);
+    sensorArray.at(FakeLoxTankPT_ArrayPointer)->resetIntegralCalc(loxTankControllerResetIntegralCalcBool, 0);
+    sensorArray.at(FuelTank1PT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
+    sensorArray.at(FuelTank2PT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
+    sensorArray.at(FakeFuelTankPT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
     
     //Lox Tank sensor target value update
     sensorArray.at(LoxTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
+    sensorArray.at(LoxTank2PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
+    sensorArray.at(FakeLoxTankPT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
     //Fuel Tank sensor target value update
     sensorArray.at(FuelTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
+    sensorArray.at(FuelTank2PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
+    sensorArray.at(FakeFuelTankPT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
     //Lox Tank Controller Sensor Data fetch
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput2(sensorArray.at(LoxTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank2PT_ArrayPointer)->getLinRegSlope());

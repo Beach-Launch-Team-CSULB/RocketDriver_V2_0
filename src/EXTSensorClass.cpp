@@ -68,7 +68,7 @@ EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t s
   sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
   //temporarily default initialize the simulated sensors to a given rate
   //currentSampleRate = 200;
-  sensorState = SensorState::Slow;
+  sensorState = SensorState::Fast;
 
   linConvCoef1_m = linConvCoef1_m_Default;
   linConvCoef1_b = linConvCoef1_b_Default;
@@ -193,6 +193,7 @@ if (sensorSource == simulatedInput)
                     writeToRollingArray(convertedValueArray, currentConvertedValue);
                     exponentialMovingAverage();
                     accumulatedI_float();
+                    timer = 0;
             }
         }
     }
@@ -432,8 +433,15 @@ void EXT_SENSOR::accumulatedI_float()
 {
     if (enableIntegralCalc)
     {
-        timeStepAccumI = (currentTimestampSeconds - priorTimestampSeconds) + ((currentTimestampMicros - priorTimestampMicros)*1000000); //calculates timestep between samples in S
-        timeStepAccumI = 0.01;
+        //timeStepAccumI = (currentTimestampSeconds - priorTimestampSeconds) + ((currentTimestampMicros - priorTimestampMicros)*1000000); //calculates timestep between samples in S
+        timeStepAccumI = timer/float(1000000);
+        //timeStepAccumI = 0.01;
+/*         Serial.print(" ID: ");
+        Serial.print(sensorID);
+        Serial.print(" timer: ");
+        Serial.println(timer,10);
+        Serial.print(" timeStepAccumI: ");
+        Serial.println(timeStepAccumI,10); */
         // trapazoid method for area under the curve using current and previous values as the end points
         /* Serial.print("currentInputValue");
         Serial.println(currentInputValue);
