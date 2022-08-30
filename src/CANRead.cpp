@@ -158,15 +158,15 @@ bool CANread(FlexCAN& CANbus, uint8_t configVerificationKey, bool& NewConfigMess
                 }
                 else if (msg.len == 5)
                 {
-                    configStruct.uint32Value = msg.buf[3] + (msg.buf[4] << 8);
+                    configStruct.uint32Value = msg.buf[4] + (msg.buf[3] << 8);
                 }
                 else if (msg.len == 6)
                 {
-                    configStruct.uint32Value = msg.buf[3] + (msg.buf[4] << 8) + (msg.buf[5] << 16);
+                    configStruct.uint32Value = msg.buf[5] + (msg.buf[4] << 8) + (msg.buf[3] << 16);
                 }
                 else
                 {
-                    configStruct.uint32Value = msg.buf[3] + (msg.buf[4] << 8) + (msg.buf[5] << 16) + (msg.buf[6] << 24);    //might have endianness backwards, test
+                    configStruct.uint32Value = msg.buf[6] + (msg.buf[5] << 8) + (msg.buf[4] << 16) + (msg.buf[3] << 24);    //might have endianness backwards, test
                 }
 
                 //Serial.print("Target ID: ");
