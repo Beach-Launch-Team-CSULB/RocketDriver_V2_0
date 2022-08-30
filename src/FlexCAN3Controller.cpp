@@ -45,15 +45,15 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, fl
     frameToPackage.id = msgIDIn;
     frameToPackage.len = 8;
     func_floatValue = float1In;
-    frameToPackage.buf[0] = func_uint8Value4X[0];
-    frameToPackage.buf[1] = func_uint8Value4X[1];
-    frameToPackage.buf[2] = func_uint8Value4X[2];
-    frameToPackage.buf[3] = func_uint8Value4X[3];
+    frameToPackage.buf[0] = func_uint8Value4X[3];
+    frameToPackage.buf[1] = func_uint8Value4X[2];
+    frameToPackage.buf[2] = func_uint8Value4X[1];
+    frameToPackage.buf[3] = func_uint8Value4X[0];
     func_floatValue = float2In;
-    frameToPackage.buf[4] = func_uint8Value4X[0];
-    frameToPackage.buf[5] = func_uint8Value4X[1];
-    frameToPackage.buf[6] = func_uint8Value4X[2];
-    frameToPackage.buf[7] = func_uint8Value4X[3];
+    frameToPackage.buf[4] = func_uint8Value4X[3];
+    frameToPackage.buf[5] = func_uint8Value4X[2];
+    frameToPackage.buf[6] = func_uint8Value4X[1];
+    frameToPackage.buf[7] = func_uint8Value4X[0];
 
     return frameToPackage;
 }
@@ -72,15 +72,15 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1
     frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
     frameToPackage.len = 8;
     func_uint32Value = uint32_t1In;
-    frameToPackage.buf[0] = func_uint8Value4X[0];
-    frameToPackage.buf[1] = func_uint8Value4X[1];
-    frameToPackage.buf[2] = func_uint8Value4X[2];
-    frameToPackage.buf[3] = func_uint8Value4X[3];
+    frameToPackage.buf[0] = func_uint8Value4X[3];
+    frameToPackage.buf[1] = func_uint8Value4X[2];
+    frameToPackage.buf[2] = func_uint8Value4X[1];
+    frameToPackage.buf[3] = func_uint8Value4X[0];
     func_uint32Value = uint32_t2In;
-    frameToPackage.buf[4] = func_uint8Value4X[0];
-    frameToPackage.buf[5] = func_uint8Value4X[1];
-    frameToPackage.buf[6] = func_uint8Value4X[2];
-    frameToPackage.buf[7] = func_uint8Value4X[3];
+    frameToPackage.buf[4] = func_uint8Value4X[3];
+    frameToPackage.buf[5] = func_uint8Value4X[2];
+    frameToPackage.buf[6] = func_uint8Value4X[1];
+    frameToPackage.buf[7] = func_uint8Value4X[0];
     
     return frameToPackage;
 }
