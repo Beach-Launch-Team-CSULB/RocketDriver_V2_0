@@ -203,8 +203,8 @@ void EngineController::stateOperations()
         pneumaticVent.setState(ValveState::CloseCommanded);
         sensorState = SensorState::Slow;
         //}
-        //igniter1.setState(PyroState::OffCommanded);
-        //igniter2.setState(PyroState::OffCommanded);
+        MVFuelFired = false;
+        MVLoxFired = false;
         igniter1.resetPyro();
         igniter2.resetPyro();
         break;
@@ -226,12 +226,18 @@ void EngineController::stateOperations()
         testPass = false;
         autoSequenceTargetPcUpdate(true);
         // I DO need this case to run every stateOperations cycle to check on sequence timing, or I need to move logic somewhere else
-        //Fuel MV autosequence check
-        if (currentAutosequenceTime >= fuelMVAutosequenceActuation) {pilotMVFuelValve.setState(ValveState::OpenCommanded);}
-        else {pilotMVFuelValve.setState(ValveState::FireCommanded);}
-        //Lox MV autosequence check
-        if (currentAutosequenceTime >= loxMVAutosequenceActuation) {pilotMVLoxValve.setState(ValveState::OpenCommanded);}
-        else {pilotMVLoxValve.setState(ValveState::FireCommanded);}
+        if (!MVFuelFired)
+        {
+            //Fuel MV autosequence check
+            if (currentAutosequenceTime >= fuelMVAutosequenceActuation) {pilotMVFuelValve.setState(ValveState::OpenCommanded); MVFuelFired = true;}
+            else {pilotMVFuelValve.setState(ValveState::FireCommanded);}
+        }
+        if (!MVLoxFired)
+        {
+            //Lox MV autosequence check
+            if (currentAutosequenceTime >= loxMVAutosequenceActuation) {pilotMVLoxValve.setState(ValveState::OpenCommanded); MVLoxFired = true;}
+            else {pilotMVLoxValve.setState(ValveState::FireCommanded);}
+        }
         //Engine Igniter1 autosequence check
         if (currentAutosequenceTime < igniter1Actuation) 
             {

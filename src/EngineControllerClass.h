@@ -58,6 +58,9 @@ class EngineController
         Pyro &igniter1;
         Pyro &igniter2;
 
+        bool MVFuelFired = false;
+        bool MVLoxFired = false;
+
         //uint32_t igniter1LiveOutTime = 500000;
         //uint32_t igniter2LiveOutTime = 500000;
         //elapsedMicros igniter1timer = 0;

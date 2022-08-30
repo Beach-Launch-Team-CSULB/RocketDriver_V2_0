@@ -526,7 +526,7 @@ void Valve::controllerStateOperations()
     {
     // if a valve is commanded open, if its normal closed it needs to fully actuate, if normal open it needs to drop power to zero
     case ValveState::OpenCommanded:
-        if (!(priorState == ValveState::Open) || !(priorState == ValveState::OpenProcess))
+        if (!((priorState == ValveState::Open) || (priorState == ValveState::OpenProcess)))
         {
             switch (valveType)
             {
@@ -554,7 +554,7 @@ void Valve::controllerStateOperations()
         }
         else
         {
-            state = ValveState::Open;
+            state = priorState;
         }
         break;
     case ValveState::BangOpenCommanded:
