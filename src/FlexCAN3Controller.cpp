@@ -486,7 +486,7 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
 
                 //msgOut.buf[0] = autosequenceTimerStateEnumToInt;
                 //is this bit shifting logically backwards???
-                msgOut.buf[0] = autosequenceTimer;
+/*                 msgOut.buf[0] = autosequenceTimer;
                 msgOut.buf[1] = (autosequenceTimer >> 8);
                 msgOut.buf[2] = (autosequenceTimer >> 16);
                 msgOut.buf[3] = (autosequenceTimer >> 24);
@@ -494,7 +494,17 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
                 msgOut.buf[5] = (autosequenceTimer >> 40);
                 msgOut.buf[6] = (autosequenceTimer >> 48);
                 msgOut.buf[7] = (autosequenceTimer >> 56);
-                
+ */
+
+                msgOut.buf[0] = (autosequenceTimer >> 56);
+                msgOut.buf[1] = (autosequenceTimer >> 48);
+                msgOut.buf[2] = (autosequenceTimer >> 40);
+                msgOut.buf[3] = (autosequenceTimer >> 32);
+                msgOut.buf[4] = (autosequenceTimer >> 24);
+                msgOut.buf[5] = (autosequenceTimer >> 16);
+                msgOut.buf[6] = (autosequenceTimer >> 8);
+                msgOut.buf[7] = autosequenceTimer;
+
                 // write message to bus
                 CANbus.write(msgOut);
             }    
