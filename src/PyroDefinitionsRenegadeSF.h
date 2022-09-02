@@ -4,6 +4,7 @@
 #include "PyroClass.h"
 #include <array>
 #include "ALARApinDefines.h"
+#pragma once
 
 // Define number of pyros here
 #define NUM_PYROS 2
@@ -12,10 +13,10 @@
 
 // NEED TO FIX PIN MAPPING FOR THE SECOND OUTPUT TO NEW REAL STAND WIRING
 // Engine Node
-Pyro EngineIgniter0{26, 2, 31, 31, 2000000};   // 0
-Pyro EngineIgniter1{27, 2, 32, 32, 2000000};    // 1
+Pyro EngineIgniter1{26, 2, 9, 2000000};   // 0
+Pyro EngineIgniter2{27, 2, 10, 2000000};    // 1
 
 // ADD PYROS TO THIS VALVE ARRAY IN THE FORM: &PYRO
-std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter0, &EngineIgniter1};
+std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter1, &EngineIgniter2};
 
 #endif

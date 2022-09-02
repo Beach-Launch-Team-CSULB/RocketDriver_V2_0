@@ -14,9 +14,9 @@
 Valve HiPressVent{17, 8, NormalClosed, 6, 25000, false};
 Valve LoxMV{24, 8, NormalClosed, 8, 25000, false, 50};
 Valve FuelMV{25, 8, NormalClosed, 5, 25000, false, 50};
-Valve LoxVent{18, 8, NormalOpen, 1, 100000, false, 50};
+Valve LoxVent{18, 8, NormalOpen, 1, 1000000, false, 50};
 Valve LoxBang{19, 8, NormalClosed, 2, 25000, false};
-Valve FuelVent{21, 8, NormalClosed, 4, 2500000, false};
+Valve FuelVent{21, 8, NormalClosed, 4, 1000000, false};
 Valve FuelBang{22, 8, NormalClosed, 3, 25000, false};
 
 // ADD VALVES TO THIS VALVE ARRAY IN THE FORM: &VALVE

@@ -618,7 +618,8 @@ void Valve::controllerStateOperations()
         }
         else
         {
-            state = ValveState::Closed;
+            state = priorState;
+            //state = ValveState::Closed;
         }
         break;
     case ValveState::BangCloseCommanded:

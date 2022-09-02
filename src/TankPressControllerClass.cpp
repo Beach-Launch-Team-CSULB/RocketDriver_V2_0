@@ -142,6 +142,7 @@ void TankPressController::stateOperations()
         abortFlag = false;
         if (priorState != TankPressControllerState::Vent)
         {
+            Serial.println("dis u? ");
         sensorState = SensorState::Fast;
         primaryPressValve.setState(ValveState::CloseCommanded);
         pressLineVent.setState(ValveState::OpenCommanded);

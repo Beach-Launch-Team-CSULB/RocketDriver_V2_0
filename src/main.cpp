@@ -179,9 +179,9 @@ uint16_t PropulsionSysNodeIDAddress3{18};
 uint16_t nodeIDDetermineAddress1{19};
 uint16_t nodeIDDetermineAddress2{20};
 uint16_t nodeIDDetermineAddress3{21};
-uint16_t NodeIDAddress1{22};
-uint16_t NodeIDAddress2{23};
-uint16_t NodeIDAddress3{24};
+uint16_t nodeIDAddress1{22};
+uint16_t nodeIDAddress2{23};
+uint16_t nodeIDAddress3{24};
 
 ///// Temp Sensor for TC Cold Junction /////        ----- Move into sensor classes (if this is even retained)
 //Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
@@ -270,6 +270,7 @@ void setup() {
 
   SerialUSBdataController.setPropStatusPrints(true);
   SerialUSBdataController.setPropCSVStreamPrints(false);
+    pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
 }
 
 void loop() 
@@ -419,4 +420,17 @@ if (shittyCANTimer >= 1000)
 
 // Resets the startup bool, DO NOT REMOVE
 startup = false;
+
+/* digitalWriteExtended(ALARA_DIGITAL_ADDRESS_OE,HIGH);
+
+uint8_t NodeIDAddressRead;
+  for (size_t i = 0; i < 8; i++)
+  {
+    NodeIDAddressRead = (readOnlyMUX(i, ALARA_DIGITAL_ADDRESS_1, ALARA_DIGITAL_ADDRESS_2, ALARA_DIGITAL_ADDRESS_3, ALARA_DIGITAL_ADDRESS_4) << (i+1))-1;
+  Serial.print("nodeID Read Inside Loop: ");
+  Serial.println(NodeIDAddressRead);
+  }
+  Serial.print("nodeID Read: ");
+  Serial.println(NodeIDAddressRead);
+ */
 }

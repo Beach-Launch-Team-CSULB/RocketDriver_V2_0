@@ -6,6 +6,7 @@
 #include "ALARApinDefines.h"
 #include "ValveDefinitionsPasaBang.h"
 #include "PyroDefinitionsPasaBang.h"
+#pragma once
 
 #define NUM_ENGINECONTROLLERS 1
 

@@ -76,8 +76,14 @@ uint8_t tripleEEPROMread(uint32_t byteAddress1, uint32_t byteAddress2, uint32_t 
 bool readOnlyMUX(uint8_t pinToReadMUX, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2, uint8_t pinMUX_A) // SN74CB3Q3251 MUX pin read operation for use only when MUX has OE tied to GND
 {
   digitalWriteExtended(pinMUX_S0, (pinToReadMUX >> 0) & 1L);
+  //Serial.print("(pinToReadMUX >> 0) & 1L: ");
+  //Serial.println((pinToReadMUX >> 0) & 1L);
   digitalWriteExtended(pinMUX_S1, (pinToReadMUX >> 1) & 1L);
+  //Serial.print("(pinToReadMUX >> 1) & 1L: ");
+  //Serial.println((pinToReadMUX >> 1) & 1L);
   digitalWriteExtended(pinMUX_S2, (pinToReadMUX >> 2) & 1L);
+  //Serial.print("(pinToReadMUX >> 2) & 1L: ");
+  //Serial.println((pinToReadMUX >> 2) & 1L);
   return digitalReadExtended(pinMUX_A);
 }
 
