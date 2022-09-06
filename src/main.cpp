@@ -385,8 +385,8 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   // -----Advance needed controller system tasks (tank press controllers, ignition autosequence, . ..) ----- //
   // -----Advance needed propulsion system tasks (valve, pyro, sensors, . ..) ----- //
   cli(); // disables interrupts to ensure complete propulsion output state is driven
-  valveTasks(valveArray, PropulsionSysNodeID, outputOverride);
-  pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride);
+  valveTasks(valveArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
+  pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
   sei(); // reenables interrupts after propulsion output state set is completed
   sensorTasks(sensorArray, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
@@ -411,7 +411,7 @@ if (shittyCANTimer >= 1000)
   Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, autoSequenceArray, PropulsionSysNodeID);
   
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 100)
+  if (mainLoopTestingTimer >= 10)
   {
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);

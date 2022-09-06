@@ -13,7 +13,7 @@
     // This function takes the array of pointers that point to the valve objects, and then calls the .stateOperations() method for each valve
     // Make sure valveArray is an array of pointers, as defined in ValveDefinitions.h
 template <typename T, std::size_t size>
-void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn, bool& outputOverride)
+void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn, bool& outputOverride, AutoSequence& mainAutoSequence)
 {
     if (!outputOverride)    //bool will block all stateOps
     {
@@ -22,6 +22,8 @@ void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn, bo
         {
             if (valve->getValveNodeID() == nodeIDReadIn)
             {
+                valve->setCurrentAutoSequenceTime(mainAutoSequence.getCurrentCountdown());
+                valve->controllerStateOperations();
                 valve->stateOperations();
             }
         }
@@ -29,7 +31,7 @@ void valveTasks(const std::array<T, size>& valveArray, uint8_t& nodeIDReadIn, bo
 }
 
 template <typename T, std::size_t size>
-void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn, bool& outputOverride)
+void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn, bool& outputOverride, AutoSequence& mainAutoSequence)
 {
     if (!outputOverride)    //bool will block all stateOps
     {
@@ -38,6 +40,8 @@ void pyroTasks(const std::array<T, size>& pyroArray, uint8_t& nodeIDReadIn, bool
         {
         if (pyro->getPyroNodeID() == nodeIDReadIn)
             {
+                pyro->setCurrentAutoSequenceTime(mainAutoSequence.getCurrentCountdown());
+                pyro->controllerStateOperations();
                 pyro->stateOperations();
             }
         }

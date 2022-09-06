@@ -246,10 +246,10 @@ else
     pressLineVent.setState(pressLineVentStateBang1);
 }
 
-// controller Valve object stateOperations
+/* // controller Valve object stateOperations
     primaryPressValve.controllerStateOperations();
     pressLineVent.controllerStateOperations();
-    tankVent.controllerStateOperations();
+    tankVent.controllerStateOperations(); */
 }
 
 void TankPressController::setPIDSensorInput1(float proportionalValue, float integralValue, float derivativeValue)

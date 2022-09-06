@@ -4,8 +4,8 @@
 
 
 
-Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setALARA_HP_Channel, uint32_t setLiveOutTime,  bool setNodeIDCheck)
-                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, ALARA_HP_Channel{setALARA_HP_Channel}, liveOutTime{setLiveOutTime}, nodeIDCheck{setNodeIDCheck}
+Pyro::Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setALARA_HP_Channel, uint32_t setLiveOutTime_Default,  bool setNodeIDCheck)
+                : pyroID{setPyroID}, pyroNodeID{setPyroNodeID}, ALARA_HP_Channel{setALARA_HP_Channel}, liveOutTime_Default{setLiveOutTime_Default}, nodeIDCheck{setNodeIDCheck}
 {
     liveOutTime = liveOutTime_Default;
     state = PyroState::Off;
@@ -102,12 +102,10 @@ void Pyro::controllerStateOperations()
         break;
 
     case PyroState::On:
-        //digitalWriteFast(firePin, 1);
-        //digitalWriteFast(armPin, 1);
         if(timer >= liveOutTime)
         {
             state = PyroState::Fired;
-            timer = 0;
+            //timer = 0;
         }
         break;
 
@@ -128,6 +126,13 @@ void Pyro::controllerStateOperations()
     case PyroState::Off:
         //timer = 0;
         break;        
+    case PyroState::FireCommanded:
+        if (currentAutosequenceTime >= fireSequenceActuation)
+        {
+            
+            state = PyroState::OnCommanded;
+        }
+        break;
     case PyroState::Fired:
         //do I need anything for Fired?
         break;        
@@ -136,6 +141,12 @@ void Pyro::controllerStateOperations()
     default:
         break;
     }
+
+/*             Serial.print("pyro fire commanded time check: ");
+            Serial.print(currentAutosequenceTime);
+            Serial.print(" >= ");
+            Serial.print(fireSequenceActuation);
+            Serial.println(); */
 }
 
 

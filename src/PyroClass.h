@@ -21,13 +21,15 @@ class Pyro
         uint32_t liveOutTime_Default;
         bool nodeIDCheck;                           // Whether this object should operate on this node
         bool controllerUpdate = false;
+        int64_t fireSequenceActuation;              // time on autosequence to actuate IF FireCommanded is used
+        int64_t currentAutosequenceTime;              // time of autosequence for comparison under FireCommanded
 
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
         Pyro(uint32_t setPyroID, uint32_t setPyroNodeID, uint8_t setALARA_HP_Channel, uint32_t liveOutTime_Default, bool setNodeIDCheck = false); 
     // default constructor
-        Pyro(uint32_t setLiveOutTime = 250);
+        Pyro(uint32_t setLiveOutTime = 250000);
     // Alternate constructor with future full implementation, needs the clonedpyro features still
     //    Pyro(int setPyroID, int setPyroNodeID, int setFirePin, int setShuntPin, int setContPin, uint32_t setFireDelay = 0);
 
@@ -48,6 +50,8 @@ class Pyro
         //uint32_t getshuntPin(){return shuntPin;}
         //uint32_t getContPin(){return contCheckPin;}        
         uint32_t getLiveOutTime(){return liveOutTime;}
+        int64_t getCurrentAutoSequenceTime(){return currentAutosequenceTime;}
+        int64_t getFireTime(){return fireSequenceActuation;}
         PyroState getState(){return state;}
         PyroState getSyncState();
         
@@ -64,6 +68,31 @@ class Pyro
                 }
                 state = newState;
             }    // set the Node ID Check bool function
+        void setState(PyroState newState, int64_t fireTimeIn) 
+            {
+            Serial.print("pyro fireTimeIn: ");
+            Serial.print(fireTimeIn);
+            Serial.print(" fireSequenceActuation ");
+            Serial.print(fireSequenceActuation);
+            Serial.println();
+                // Only do anything in the case of the fireTimeIn if the state sent is FireCommanded
+                //if (newState == PyroState::FireCommanded)
+                    //{
+                    if (newState != state)
+                        {
+                        priorState = state;
+                        // set the autosequence firing time
+                        fireSequenceActuation = fireTimeIn;
+                        }
+                    state = newState;
+                    //}
+
+            }    // set the Node ID Check bool function
+        // set function for current autosequence time
+        void setCurrentAutoSequenceTime(int64_t timeSetIn)
+        {
+            currentAutosequenceTime = timeSetIn;
+        }
         // Bypasses state logic to reset the Pyro to Off, used to reset after device has been fired
         void resetPyro(){state = PyroState::Off;}
 

@@ -40,7 +40,9 @@ class Valve
         bool abortHaltDeviceBool;                    // Whether this valve is set by the abort halt flag override
         uint16_t controlSensor1Value;               // For use in control schemes, really a template placement pending needed number and type of samples
         bool controllerUpdate = false;              // flag for when valve stateOps does a state change to update in the controllers
-
+        int64_t fireSequenceActuation;              // time on autosequence to actuate IF FireCommanded is used
+        int64_t currentAutosequenceTime;              // time of autosequence for comparison under FireCommanded
+    
     public:
     
     // constructor, define the valve ID here, and the pin that controls the valve, setFireDelay is only parameter that can be left blank
@@ -67,6 +69,8 @@ class Valve
         ValveState getSyncState();
         ValveState getPriorState(){return priorState;}
         uint32_t getTimer(){return timer;}
+        int64_t getCurrentAutoSequenceTime(){return currentAutosequenceTime;}
+        int64_t getFireTime(){return fireSequenceActuation;}
         bool getNodeIDCheck(){return nodeIDCheck;}
         bool getAbortHaltDeviceBool(){return abortHaltDeviceBool;}
 
@@ -82,7 +86,24 @@ class Valve
                     {
                         // do nothing
                     }
-                    
+            }
+        void setState(ValveState newState, int64_t fireTimeIn) 
+            {
+                // Only do anything in the case of the fireTimeIn if the state sent is FireCommanded
+                //if (newState == ValveState::FireCommanded)
+                    //{
+                    if (newState != state)
+                        {
+                        priorState = state;
+                        state = newState;
+                        // set the autosequence firing time
+                        fireSequenceActuation = fireTimeIn;
+                        }
+                    else
+                        {
+                        // do nothing
+                        }
+                    //}
             }
 
 /*
@@ -130,7 +151,11 @@ class Valve
  */            
         //every time a state is set, the timer should reset
         //Is the above still true?
-
+        // set function for current autosequence time
+        void setCurrentAutoSequenceTime(int64_t timeSetIn)
+        {
+            currentAutosequenceTime = timeSetIn;
+        }
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
     //set functions 

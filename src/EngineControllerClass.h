@@ -29,6 +29,7 @@ class EngineController
         SensorState sensorState;                    // Use one sensor state inside here to toggle all sensors on controller
         int64_t currentAutosequenceTime;
         bool abortFlag = false;         //controller can trigger an abort by flipping this flag true, sets the main vehicle state to abort
+        bool deviceCommand = false;     // only send the direct device state commands while true
         int64_t fuelMVAutosequenceActuation_Default;
         int64_t loxMVAutosequenceActuation_Default;
         int64_t igniter1Actuation_Default;
@@ -75,7 +76,7 @@ class EngineController
     // constructor
         //EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
     // constructor 2
-        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, float setCurrentPcTarget_Default, Valve* setPilotMVFuelValve, Valve* setPilotMVLoxValve, Valve* setPneumaticVent, Pyro* setIgniter1, Pyro* setIgniter2, int64_t fuelMVAutosequenceActuation = 0, int64_t loxMVAutosequenceActuation = 0, int64_t igniter1Actuation = 0, int64_t igniter2Actuation = 0, bool setNodeIDCheck = false);
+        EngineController(uint32_t setControllerID, uint8_t setControllerNodeID, float setCurrentPcTarget_Default, Valve* setPilotMVFuelValve, Valve* setPilotMVLoxValve, Valve* setPneumaticVent, Pyro* setIgniter1, Pyro* setIgniter2, int64_t setFuelMVAutosequenceActuation_Default = 0, int64_t setLoxMVAutosequenceActuation_Default = 0, int64_t setIgniter1Actuation_Default = 0, int64_t setIgniter2Actuation_Default = 0, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 

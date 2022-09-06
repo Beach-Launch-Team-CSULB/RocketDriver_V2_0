@@ -704,7 +704,11 @@ void Valve::controllerStateOperations()
         break;
     
     case ValveState::FireCommanded:
-        //not sure what to do here to fix issues
+        if (currentAutosequenceTime >= fireSequenceActuation)
+        {
+            
+            state = ValveState::OpenCommanded;
+        }
 
         break;
     // All other states require no action
