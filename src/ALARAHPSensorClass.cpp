@@ -1,15 +1,16 @@
-#include "EXTSensorClass.h"
+#include "ALARAHPSensorClass.h"
 #include <Arduino.h>
 #include <ADC.h>
 #include <array>
-#include <InternalTemperature.h>
 
 //#include <ADC_util.h>
 
 //using std::string;
 
+/* ///// ADC /////
+ADC* adc = new ADC();
 
-void MCUADCSetup(ADC& adc)
+void MCUADCSetup()
 { 
 //Ideally get some conditionals here for which MCU it is so this is compatible at least also with Teensy LC
 
@@ -17,27 +18,27 @@ void MCUADCSetup(ADC& adc)
   // reference can be ADC_REFERENCE::REF_3V3, ADC_REFERENCE::REF_1V2 or ADC_REFERENCE::REF_EXT.
   //adc->setReference(ADC_REFERENCE::REF_1V2, ADC_0); // change all 3.3 to 1.2 if you change the reference to 1V2
 
-  adc.adc0->setReference(ADC_REFERENCE::REF_1V2);
-  adc.adc0->setAveraging(4);                                    // set number of averages
-  adc.adc0->setResolution(16);                                   // set bits of resolution
-  adc.adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc.adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
-  adc.adc0->recalibrate();
+  adc->adc0->setReference(ADC_REFERENCE::REF_1V2);
+  adc->adc0->setAveraging(4);                                    // set number of averages
+  adc->adc0->setResolution(16);                                   // set bits of resolution
+  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
+  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
+  adc->adc0->recalibrate();
 
 ///// ADC1 /////
-  adc.adc1->setReference(ADC_REFERENCE::REF_1V2);
-  adc.adc1->setAveraging(4);                                    // set number of averages
-  adc.adc1->setResolution(16);                                   // set bits of resolution
-  adc.adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc.adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
-  adc.adc1->recalibrate();
+  adc->adc1->setReference(ADC_REFERENCE::REF_1V2);
+  adc->adc1->setAveraging(4);                                    // set number of averages
+  adc->adc1->setResolution(16);                                   // set bits of resolution
+  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
+  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
+  adc->adc1->recalibrate();
 
-}
+} */
 
 
 // Initializer 1
-EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off)
-                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, fluidSim{*setFluidSim}, sampleRateSlowMode_Default{setSampleRateSlowMode_Default}, sampleRateMedMode_Default{setSampleRateMedMode_Default}, sampleRateFastMode_Default{setSampleRateFastMode_Default}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
+/* ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off)
+                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, sampleRateSlowMode_Default{setSampleRateSlowMode_Default}, sampleRateMedMode_Default{setSampleRateMedMode_Default}, sampleRateFastMode_Default{setSampleRateFastMode_Default}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
 {
   // setting stuff to defaults at initialization
   sampleRateSlowMode = sampleRateSlowMode_Default;
@@ -53,20 +54,17 @@ EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t s
   EMA = EMA_Default;
   alphaEMA = alphaEMA_Default;
   regressionSamples = regressionSamples_Default;
-}
+} */
 
 // Initializer 2
-EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource)
-                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, fluidSim{*setFluidSim}, sensorSource{setSensorSource}
+ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Slow)
+                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
 {
   // setting stuff to defaults at initialization
   sampleRateSlowMode = sampleRateSlowMode_Default;
   sampleRateMedMode = sampleRateMedMode_Default;
   sampleRateFastMode = sampleRateFastMode_Default;
   sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
-  //temporarily default initialize the simulated sensors to a given rate
-  //currentSampleRate = 200;
-  sensorState = SensorState::Fast;
 
   linConvCoef1_m = linConvCoef1_m_Default;
   linConvCoef1_b = linConvCoef1_b_Default;
@@ -78,28 +76,21 @@ EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t s
   regressionSamples = regressionSamples_Default;
 }
 
-void EXT_SENSOR::begin()
+
+void ALARAHP_SENSOR::begin()
 {
-    
     if (nodeIDCheck)
-    {
-        //rolling array setup
-        convertedValueArray[0] = {3};
-        convertedValueArray[1] = {3};
-        convertedValueArray[2] = {static_cast<float>(regressionSamples)};
-    }
-    if (nodeIDCheck && sensorSource == TeensyMCUADC)
     {
         pinMode(ADCinput, INPUT);
     }
 }
 
-void EXT_SENSOR::resetTimer()
+void ALARAHP_SENSOR::resetTimer()
 {
     timer = 0;
 }
 
-void EXT_SENSOR::resetAll()
+void ALARAHP_SENSOR::resetAll()
 {
   //
   sampleRateSlowMode = sampleRateSlowMode_Default;
@@ -116,23 +107,20 @@ void EXT_SENSOR::resetAll()
   alphaEMA = alphaEMA_Default;
 }
 
-void EXT_SENSOR::setState(SensorState newState) 
+void ALARAHP_SENSOR::setState(SensorState newState) 
 {
     sensorState = newState;
 }
 
-void EXT_SENSOR::read(ADC& adc)
+void ALARAHP_SENSOR::read(ADC& adc)
 {
     //Add in sample rate code here to check if a sensor is up to be read
     //This is also where alternate ADC sources would be used - I do have the RTD sensors over ITC right now
     //I'll have to change how it's written though, right now it's ADC* adc which is specific to Teensy MCU ADC
-if (sensorSource == TeensyMCUADC)
-    {
         if (currentSampleRate != 0)     //math says no divide by zero, use separate conditional for sample rate of 0
         {
         if (timer >= (1000000/currentSampleRate))   // Divides 1 second in microseconds by current sample rate in Hz
             {
-                
                     currentRawValue = adc.analogRead(ADCinput);
                     pullTimestamp = true;
                     //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
@@ -140,28 +128,10 @@ if (sensorSource == TeensyMCUADC)
                     // This automatically stores converted value for the on board nodes
                     priorConvertedValue = currentConvertedValue; //shifts previous converted value into prior variable
                     currentConvertedValue = linConvCoef1_m*currentRawValue + linConvCoef1_b;
-                    writeToRollingArray(convertedValueArray, currentConvertedValue);
+                    //writeToRollingArray(convertedValueArray, currentConvertedValue);
                     exponentialMovingAverage();
-                    accumulatedI_float();
-                    //currentLinReg_a1 = linearRegressionLeastSquared_PID();
+                    //accumulatedI_float();
 
-                //if (sensorID == 58)
-                //{
-    /*             Serial.print("sensorID: ");
-                Serial.print(sensorID);
-                Serial.print(", currentRawValue: ");
-                Serial.println(currentRawValue);
-                Serial.print(", currentConvertedValue: ");
-                Serial.println(currentConvertedValue); */
-                //}
-    /*             Serial.print("sensorID: ");
-                Serial.print(sensorID);
-                Serial.print(", currentRawValue: ");
-                Serial.println(currentRawValue);
-                Serial.print(", currentRollingAverage: ");
-                Serial.println(getCurrentRollingAverage()); */
-                //Serial.println("newSensorREADbefore");
-                //Serial.println(newSensorValueCheck);
                 newSensorValueCheck_CAN = true;
                 newSensorValueCheck_Log = true;
                 newSensorConvertedValueCheck_CAN = true;
@@ -171,33 +141,12 @@ if (sensorSource == TeensyMCUADC)
                 //Serial.println(newSensorValueCheck);
                 timer = 0;
             }
-        }
-    }
+        
+      }
 
-if (sensorSource == simulatedInput)
-    {
-        if (currentSampleRate != 0)     //math says no divide by zero, use separate conditional for sample rate of 0
-        {
-        if (timer >= (1000000/currentSampleRate))   // Divides 1 second in microseconds by current sample rate in Hz
-            {
-                
-                    //currentRawValue = adc->analogRead(ADCinput);
-                    //setRollingSensorArrayRaw(currentRollingArrayPosition, currentRawValue);
-                    /////linear conversions here, y = m*x + b
-                    // This automatically stores converted value for the on board nodes
-                    pullTimestamp = true;
-                    priorConvertedValue = currentConvertedValue; //shifts previous converted value into prior variable
-                    currentConvertedValue = fluidSim.analogRead(ADCinput);
-                    writeToRollingArray(convertedValueArray, currentConvertedValue);
-                    exponentialMovingAverage();
-                    accumulatedI_float();
-                    timer = 0;
-            }
-        }
-    }
 }
 
-void EXT_SENSOR::stateOperations()
+void ALARAHP_SENSOR::stateOperations()
 {
 
     switch (sensorState)
@@ -224,7 +173,7 @@ void EXT_SENSOR::stateOperations()
     }
 }
 
-void EXT_SENSOR::linearConversion()
+void ALARAHP_SENSOR::linearConversion()
 {
     /////linear conversions here, y = m*x + b
     //if (newSensorValueCheck && newConversionCheck == false)
@@ -244,7 +193,7 @@ void EXT_SENSOR::linearConversion()
     }
 }
 
-void EXT_SENSOR::exponentialMovingAverage()
+void ALARAHP_SENSOR::exponentialMovingAverage()
 {
   //function written to accept and return floats
   //alpha must be between 0 and 1, force overflows to max and min weights
@@ -274,7 +223,7 @@ void EXT_SENSOR::exponentialMovingAverage()
 }
 
 
-void EXT_SENSOR::initializeLinReg(uint8_t arraySizeIn)
+void ALARAHP_SENSOR::initializeLinReg(uint8_t arraySizeIn)
 {
     if(!enableLinearRegressionCalc) //only initializes the array if it wasn't already
     {
@@ -303,7 +252,7 @@ void EXT_SENSOR::initializeLinReg(uint8_t arraySizeIn)
 }
 
 
-float EXT_SENSOR::linearRegressionLeastSquared_PID()
+float ALARAHP_SENSOR::linearRegressionLeastSquared_PID()
 {
   uint32_t arrayIndexFirstValueLinReg = 0;
   uint32_t arrayWrapSizeLinReg = 0;
@@ -318,7 +267,7 @@ float EXT_SENSOR::linearRegressionLeastSquared_PID()
   float denLeastSquare = 0;
   float a0LeastSquare = 0;
   float a1LeastSquare = 0;
-  
+
   sumX = 0;
   sumY = 0;
   sumXX = 0;
@@ -425,7 +374,7 @@ float EXT_SENSOR::linearRegressionLeastSquared_PID()
   return a1LeastSquare;
 }
 
-void EXT_SENSOR::accumulatedI_float()
+void ALARAHP_SENSOR::accumulatedI_float()
 {
 float accumIfuncOutput = 0;
 float timeStepAccumI = 0;

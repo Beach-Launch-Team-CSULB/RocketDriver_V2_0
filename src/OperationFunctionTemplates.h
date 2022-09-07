@@ -94,7 +94,7 @@ void autoSequenceTasks(const std::array<T, size>& autoSequenceArray, uint8_t& no
 
 template <typename T, std::size_t size>
 //void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
-void sensorTasks(const std::array<T, size>& sensorArray, uint8_t& nodeIDReadIn, uint32_t& rocketDriverSeconds, uint32_t&  rocketDriverMicros)
+void sensorTasks(const std::array<T, size>& sensorArray, ADC& adc, uint8_t& nodeIDReadIn, uint32_t& rocketDriverSeconds, uint32_t&  rocketDriverMicros)
 {
     // iterate through valve array and run the stateOperations method
     for(auto sensor : sensorArray)
@@ -104,7 +104,7 @@ void sensorTasks(const std::array<T, size>& sensorArray, uint8_t& nodeIDReadIn, 
         {
             sensor->stateOperations();
             //Serial.print("LoopRan");
-            sensor->read();
+            sensor->read(adc);
             myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
             sensor->setSYSTimestamp(rocketDriverSeconds, rocketDriverMicros);
             //sensor->linearConversion();
@@ -116,7 +116,29 @@ void sensorTasks(const std::array<T, size>& sensorArray, uint8_t& nodeIDReadIn, 
     }
 }
 
-
+template <typename T, std::size_t size>
+//void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
+void ALARAHPsensorTasks(const std::array<T, size>& sensorArray, ADC& adc, uint8_t& nodeIDReadIn, uint32_t& rocketDriverSeconds, uint32_t&  rocketDriverMicros)
+{
+    // iterate through valve array and run the stateOperations method
+    for(auto sensor : sensorArray)
+    {
+    
+        if (sensor->getSensorNodeID() == nodeIDReadIn)
+        {
+            sensor->stateOperations();
+            //Serial.println("LoopRan for HP sensor tasks: ");
+            sensor->read(adc);
+            myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+            sensor->setSYSTimestamp(rocketDriverSeconds, rocketDriverMicros);
+            //sensor->linearConversion();
+        }
+/*         else if (nodeIDReadIn == 6) //shitty way to make logger node only convert
+        {
+            sensor->linearConversion();
+        } */
+    }
+}
 
 // CALL THIS FUNCTION ONCE IN SETUP, THIS SETS THE VALVE PINMODES
     // make sure to pass this function valveArray, as defined in ValveDefinitions.h

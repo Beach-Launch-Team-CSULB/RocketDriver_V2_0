@@ -82,6 +82,9 @@ using std::string;
 
 #define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
 
+///// ADC /////
+ADC* adc = new ADC();
+
 MS5607 ALARAbaro;
 
 uint32_t rocketDriverSeconds;
@@ -226,7 +229,7 @@ void setup() {
   Can0.begin(CAN2busSpeed);
 
   // -----Initialize ADCs-----
-  MCUADCSetup();
+  MCUADCSetup(*adc);
 
   // -----Run Valve PropulsionSysNodeID Check-----
   ValveNodeIDCheck(valveArray, PropulsionSysNodeID);
@@ -236,6 +239,7 @@ void setup() {
 
   // -----Run Sensor PropulsionSysNodeID Check-----
   SensorNodeIDCheck(sensorArray, PropulsionSysNodeID);
+  SensorNodeIDCheck(HPsensorArray, PropulsionSysNodeID);
 
   // -----Run Valve Setup-----
   valveSetUp(valveArray, ALARA_HP_Array);
@@ -254,6 +258,7 @@ void setup() {
   
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
+  sensorSetUp(HPsensorArray);
 
 
   //sensorSetUp(sensorArray, rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
@@ -389,7 +394,8 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
   sei(); // reenables interrupts after propulsion output state set is completed
-  sensorTasks(sensorArray, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  sensorTasks(sensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
 
   // -----Update States on EEPROM -----
   //change to only write if something new to write!!! Make wrapper function that checks for new info?
@@ -413,7 +419,33 @@ if (shittyCANTimer >= 1000)
 ///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 10)
   {
-  SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
+  
+/*     for(auto sensor : HPsensorArray)
+    {
+        if (sensor->getSensorNodeID() == PropulsionSysNodeID)
+        {
+        sensor->setState(SensorState::Fast);
+         
+            Serial.print("SensorID: ");
+            Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
+            //Serial.print( ": new converted bool: ");
+            //Serial.print( ": new raw bool: ");
+            //Serial.print(sensor->getNewSensorValueCheckCAN());
+            //Serial.print(sensor->getNewSensorConversionCheck());
+            Serial.print( ": raw value: ");
+            Serial.print(sensor->getCurrentRawValue());
+            Serial.print( ": converted: ");
+            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
+            Serial.print( ": EMA: ");
+            Serial.print(sensor->getEMAConvertedValue(),10);
+            Serial.println(": ");
+
+        }
+    
+    }
+ */  
+  
+  SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   }

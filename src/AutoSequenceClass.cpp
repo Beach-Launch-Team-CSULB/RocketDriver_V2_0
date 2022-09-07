@@ -1,5 +1,4 @@
 #include "AutoSequenceClass.h"
-//#include "AutoSequenceStates.h"
 #include <Arduino.h>
 
 //int64_t maxcountdownint = 36028797018963968; //7 byte (56 bit) signed int max value, this is to stay inside 7 CAN bytes

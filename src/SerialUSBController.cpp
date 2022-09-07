@@ -1,6 +1,6 @@
 #include "SerialUSBController.h"
 
-void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
 {
     // Only print if both this bool is true and CSV print bool is false
     if (propStatusPrints && !propCSVStreamPrints)
@@ -193,6 +193,30 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(sensor->getLinRegSlope(),10);
             //}
             
+            Serial.println(": ");
+
+        }
+    
+    }
+
+    for(auto sensor : HPsensorArray)
+    {
+        if (sensor->getSensorNodeID() == propulsionNodeIDIn)
+        {
+        sensor->setState(SensorState::Fast);
+         
+            Serial.print("SensorID: ");
+            Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
+            //Serial.print( ": new converted bool: ");
+            //Serial.print( ": new raw bool: ");
+            //Serial.print(sensor->getNewSensorValueCheckCAN());
+            //Serial.print(sensor->getNewSensorConversionCheck());
+            Serial.print( ": raw value: ");
+            Serial.print(sensor->getCurrentRawValue());
+            Serial.print( ": converted: ");
+            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
+            Serial.print( ": EMA: ");
+            Serial.print(sensor->getEMAConvertedValue(),10);
             Serial.println(": ");
 
         }

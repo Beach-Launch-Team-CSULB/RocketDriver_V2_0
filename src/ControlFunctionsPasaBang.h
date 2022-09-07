@@ -8,6 +8,7 @@
 #include "PyroClass.h"
 #include "AutoSequenceClass.h"
 #include "EXTSensorClass.h"
+#include "ALARAHPSensorClass.h"
 #include "TankPressControllerClass.h"
 #include "EngineControllerClass.h"
 #include "configurationSet.h"
@@ -22,6 +23,7 @@
 #define NUM_PYROS 2
 #define NUM_AUTOSEQUENCES 1
 #define NUM_SENSORS 15
+#define NUM_HPSENSORS 10
 #define NUMINTERNAL_SENSORS 13      // On EACH ALARA
 #define NUM_TANKPRESSCONTROLLERS 3
 #define NUM_ENGINECONTROLLERS 1

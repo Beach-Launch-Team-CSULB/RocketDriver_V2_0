@@ -1,5 +1,6 @@
 #ifndef SENSORSTATES_H
 #define SENSORSTATES_H
+#pragma once
 
 enum SensorState
 {
