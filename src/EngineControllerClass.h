@@ -69,6 +69,7 @@ class EngineController
     //vector<throttlePoint> throttleProgram;
 
     public:
+    // Eventually make the throttle program private and setup get functions that return the iterator so I can use for loops still
     vector<throttlePoint> throttleProgram;
     //std::size_t throttleProgramPos;
     std::vector<throttlePoint>::iterator throttleProgramPos;
@@ -96,7 +97,10 @@ class EngineController
         ValveState getPneumaticVentState(){return pneumaticVent.getState();}
         float getCurrentPcTarget(){return currentPcTarget;}
         bool getAbortFlag(){return abortFlag;}
-
+        int32_t getFuelMVAutosequenceActuation(){return static_cast<int32_t>(fuelMVAutosequenceActuation);}
+        int32_t getLoxMVAutosequenceActuation(){return static_cast<int32_t>(loxMVAutosequenceActuation);}
+        int32_t getIgniter1Actuation(){return static_cast<int32_t>(igniter1Actuation);}
+        int32_t getIgniter2Actuation(){return static_cast<int32_t>(igniter2Actuation);}
     // set functions, allows the setting of a variable
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
@@ -124,8 +128,8 @@ class EngineController
     // can config set functions
         void setFuelMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){fuelMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);}}
         void setLoxMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){loxMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);}}
-        void setIgniter1ActuationActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter1Actuation = static_cast<int64_t>(actuationTimeIn);}}
-        void setIgniter2ActuationActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter2Actuation = static_cast<int64_t>(actuationTimeIn);}}
+        void setIgniter1Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter1Actuation = static_cast<int64_t>(actuationTimeIn);}}
+        void setIgniter2Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter2Actuation = static_cast<int64_t>(actuationTimeIn);}}
         void setPcTarget(float currentPcTargetIn){if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600){currentPcTarget = currentPcTargetIn;}}
     // throttle program set point function
         bool throttlePointCheck(throttlePoint &pt, vector<throttlePoint> &throttleProgram);

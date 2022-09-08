@@ -57,6 +57,30 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In, fl
 
     return frameToPackage;
 }
+
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, float float1In)
+{
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t func_uint32Value;             //unsigned 32 bit
+        uint8_t func_uint8Value4X[4];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
+    frameToPackage.id = msgIDIn;
+    frameToPackage.len = 4;
+    func_floatValue = float1In;
+    frameToPackage.buf[0] = func_uint8Value4X[3];
+    frameToPackage.buf[1] = func_uint8Value4X[2];
+    frameToPackage.buf[2] = func_uint8Value4X[1];
+    frameToPackage.buf[3] = func_uint8Value4X[0];
+
+    return frameToPackage;
+}
+
 CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1In, uint32_t uint32_t2In)
 {
     CAN_message_t frameToPackage;
@@ -85,6 +109,91 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, uint32_t uint32_t1
     return frameToPackage;
 }
 
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, int32_t int32_t1In, int32_t int32_t2In)
+{
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        int32_t func_int32Value;             //signed 32 bit
+        uint8_t func_uint8Value4X[4];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
+    frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
+    frameToPackage.len = 8;
+    func_int32Value = int32_t1In;
+    frameToPackage.buf[0] = func_uint8Value4X[3];
+    frameToPackage.buf[1] = func_uint8Value4X[2];
+    frameToPackage.buf[2] = func_uint8Value4X[1];
+    frameToPackage.buf[3] = func_uint8Value4X[0];
+    func_int32Value = int32_t2In;
+    frameToPackage.buf[4] = func_uint8Value4X[3];
+    frameToPackage.buf[5] = func_uint8Value4X[2];
+    frameToPackage.buf[6] = func_uint8Value4X[1];
+    frameToPackage.buf[7] = func_uint8Value4X[0];
+    
+    return frameToPackage;
+}
+
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint point1In, throttlePoint point2In)
+{
+    // for double throttle point
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t func_uint32Value;             //unsigned 32 bit
+        uint8_t func_uint8Value4X[4];
+        uint8_t func_uint16Value2X[2];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
+    frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
+    frameToPackage.len = 8;
+    func_uint16Value2X[0] = static_cast<uint16_t>(point1In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[1] = static_cast<uint16_t>(point1In.targetPcValue+0.5);
+    frameToPackage.buf[0] = func_uint8Value4X[1];
+    frameToPackage.buf[1] = func_uint8Value4X[0];
+    frameToPackage.buf[2] = func_uint8Value4X[3];
+    frameToPackage.buf[3] = func_uint8Value4X[2];
+    func_uint16Value2X[0] = static_cast<uint16_t>(point2In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[1] = static_cast<uint16_t>(point2In.targetPcValue+0.5);
+    frameToPackage.buf[4] = func_uint8Value4X[1];
+    frameToPackage.buf[5] = func_uint8Value4X[0];
+    frameToPackage.buf[6] = func_uint8Value4X[3];
+    frameToPackage.buf[7] = func_uint8Value4X[2];
+    
+    return frameToPackage;
+}
+
+CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint point1In)
+{
+    // for single throttle point
+    CAN_message_t frameToPackage;
+    union                       // union for storing bus bytes and pulling as desired value format
+    {
+        uint32_t func_uint32Value;             //unsigned 32 bit
+        uint8_t func_uint8Value4X[4];
+        uint8_t func_uint16Value2X[2];
+        float func_floatValue = 0;
+    };
+
+    frameToPackage.flags.extended = 0;
+    frameToPackage.flags.remote = 0;
+    frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
+    frameToPackage.len = 4;
+    func_uint16Value2X[0] = static_cast<uint16_t>(point1In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[1] = static_cast<uint16_t>(point1In.targetPcValue+0.5);
+    frameToPackage.buf[0] = func_uint8Value4X[1];
+    frameToPackage.buf[1] = func_uint8Value4X[0];
+    frameToPackage.buf[2] = func_uint8Value4X[3];
+    frameToPackage.buf[3] = func_uint8Value4X[2];
+    
+    return frameToPackage;
+}
 
 
 void FlexCan3Controller::generateHPObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn)
@@ -512,6 +621,7 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 16,tankPressController->getVentFailsafePressure()));
             tankPressControllerReportsStruct.quasistaticSendBool = false;
             }
 
@@ -534,6 +644,45 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             
         }
         
+    }
+}
+
+void FlexCan3Controller::generateEngineControllermsgs(FlexCAN& CANbus, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const uint8_t& propulsionNodeIDIn)
+{
+    for (auto engine : engineControllerArray)
+    {
+        // Throttle program
+        uint16_t controllerID = 1000 + (engine->getControllerID()*100);
+        throttlePoint point1;
+        throttlePoint point2;
+        bool point1bool = false;
+        bool point2bool = false;
+        for (auto i = engine->throttleProgram.begin(); i != engine->throttleProgram.end(); ++i)
+        {
+            if (!point1bool)
+            {
+                point1.autoSequenceTimeValue = i->autoSequenceTimeValue;
+                point1.targetPcValue = i->targetPcValue;
+                point1bool = true;
+                break;
+            }
+            else if (!point2bool)
+            {
+                point2.autoSequenceTimeValue = i->autoSequenceTimeValue;
+                point2.targetPcValue = i->targetPcValue;
+                point2bool = true;
+            }
+            if (point1bool && point2bool)
+            {
+            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1, point2));
+            }
+            else if (i == (engine->throttleProgram.end()-1) && point1bool)
+            {
+            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1));
+            }
+        }
+        CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 2), engine->getFuelMVAutosequenceActuation(),engine->getLoxMVAutosequenceActuation()));
+        CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 4), engine->getIgniter1Actuation(),engine->getIgniter2Actuation()));
     }
 }
 
@@ -593,6 +742,12 @@ void FlexCan3Controller::generateAutoSequenceUpdatemsg(FlexCAN& CANbus, const st
         }
     //}
 }
+
+void FlexCan3Controller::generateFluidSimmsgs(FlexCAN& CANbus, FluidSystemSimulation& fluidSim, const uint8_t& propulsionNodeIDIn)
+{
+    // Get all the things for Fluid Sim settings in here
+}
+
 void FlexCan3Controller::generatePropNodeStateReport(FlexCAN& CANbus,  VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn)
 {
     CAN_message_t stateReport;
@@ -615,7 +770,7 @@ void FlexCan3Controller::generatePropNodeStateReport(FlexCAN& CANbus,  VehicleSt
     CANbus.write(stateReport);
 }
 
-void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, FluidSystemSimulation& fluidSim, const uint8_t& propulsionNodeIDIn)
 {
     //call this every loop of main program
     //call all the types of messages inside this function and execute as needed
@@ -668,6 +823,8 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
 
 
     generateTankControllermsgs(Can0,tankPressControllerArray,propulsionNodeIDIn);
+    generateEngineControllermsgs(Can0,engineControllerArray,propulsionNodeIDIn);
+    generateFluidSimmsgs(Can0, fluidSim, propulsionNodeIDIn);
     //reset external state change bool
     externalStateChange = false;
 }

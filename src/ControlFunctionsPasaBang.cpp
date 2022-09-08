@@ -1173,10 +1173,10 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     engineController->setLoxMVAutosequenceActuation(currentConfigMSG.int32Value);
                     break;
                 case 3:
-                    engineController->setIgniter1ActuationActuation(currentConfigMSG.int32Value);
+                    engineController->setIgniter1Actuation(currentConfigMSG.int32Value);
                     break;
                 case 4:
-                    engineController->setIgniter2ActuationActuation(currentConfigMSG.int32Value);
+                    engineController->setIgniter2Actuation(currentConfigMSG.int32Value);
                     break;
                 case 5:
                     engineController->setThrottleProgramPoint(currentConfigMSG.uint16Value2X[0],currentConfigMSG.uint16Value2X[1]);

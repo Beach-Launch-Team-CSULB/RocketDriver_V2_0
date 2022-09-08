@@ -414,7 +414,7 @@ if (shittyCANTimer >= 1000)
   shittyCANTimer = 0;
 }
   
-  Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, PropulsionSysNodeID);
+  Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
   
 ///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 10)
