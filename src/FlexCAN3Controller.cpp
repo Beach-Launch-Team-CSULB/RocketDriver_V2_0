@@ -143,7 +143,7 @@ void FlexCan3Controller::generateHPObjectStateReportmsgs(FlexCAN& CANbus, const 
     writeObjectByteArray(nodeObjectStateReportStruct.objectIDByteArray, nodeObjectStateReportStruct.objectIDmsg, msgID);
 }
 
-void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
 {
     bool isFirstSample = true;
     ALARA_RawSensorReadmsg sensorReadStruct;
@@ -158,6 +158,43 @@ void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array
         //Serial.print(" :i of msg loop: ");
         //Serial.println(i);
         for (auto sensor : sensorArray)
+        {
+            if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorValueCheckCAN()) // if on this node and a new value to send
+            {
+                //timestamp format is single seconds digits, measured down to micros precision
+                currentIteratoinTimeStamp = ((sensor->getTimestampSeconds() % 10)*1000000) + sensor->getTimestampMicros();
+                if (!isFirstSample)
+                {
+                    // if the next sample timestamp exceeds the tolerance range, break the for loop
+                    if (currentIteratoinTimeStamp - sensorReadStruct.sensorTimestampMicros[0] >= sensorReadStruct.timestampTolerance)
+                    {
+                        break;
+                    }
+                }
+                sensorReadStruct.sensorID[i] = sensor->getSensorID();
+                //sensorReadStruct.sensorTimestampSeconds[i] = sensor->getTimestampSeconds();
+                sensorReadStruct.sensorTimestampMicros[i] = currentIteratoinTimeStamp;
+
+                // for Teensy ADC cast the raw int down to 16 bits
+                if (sensor->getADCtype() == ADCType::TeensyMCUADC)
+                {
+                    sensorReadStruct.sensorRawValue[i] = static_cast<uint16_t>(sensor->getCurrentRawValue(true));
+                }
+
+
+                isFirstSample = false;
+                
+                i++;
+        sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
+                if (i == 3)
+                {
+                    break;
+                }
+            }
+        
+        //sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
+        }
+        for (auto sensor : HPsensorArray)
         {
             if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorValueCheckCAN()) // if on this node and a new value to send
             {
@@ -272,7 +309,7 @@ CANbus.write(sensorReadStruct.packedSensorCAN2);
 
 //NOT CHANGED YET FROM RAW VERSION!!!! Needs to pull converted values at a given rate (if new available) and set the new converted false when reading just like with raw
 //Use a one decimal place shifted version of the float as Int, will give up to ~6500.0 PSI max value on all the pressures.
-bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
 {
     //if (convertedValueUpdateTimer >= 0)
     //if (convertedValueUpdateTimer >= (1000/convertedSendRateHz))
@@ -296,6 +333,47 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
             //Serial.println(i);
             //for (auto sensor : sensorArray)
             for (auto sensor : sensorArray)
+            {
+                if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorConversionCheck()) // if on this node and a new value to send
+                {
+                    //timestamp format is single seconds digits, measured down to micros precision
+                    currentIteratoinTimeStamp = ((sensor->getTimestampSeconds() % 10)*1000000) + sensor->getTimestampMicros();
+                    if (!isFirstSample)
+                    {
+                        // if the next sample timestamp exceeds the tolerance range, break the for loop
+                        if (currentIteratoinTimeStamp - sensorReadStruct.sensorTimestampMicros[0] >= sensorReadStruct.timestampTolerance)
+                        {
+                            break;
+                        }
+                    }
+                    sensorReadStruct.sensorID[i] = (sensor->getSensorID())+1;
+                    //sensorReadStruct.sensorTimestampSeconds[i] = sensor->getTimestampSeconds();
+                    sensorReadStruct.sensorTimestampMicros[i] = currentIteratoinTimeStamp;
+
+                    // for Teensy ADC cast the raw int down to 16 bits
+                    if (sensor->getADCtype() == ADCType::TeensyMCUADC)
+                    {
+                        sensorReadStruct.sensorConvertedValue[i] = static_cast<uint16_t>(sensor->getCurrentConvertedValue(true)*10);
+                    }
+
+
+                    isFirstSample = false;
+                    
+                    i++;
+            sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
+                    if (i == 3)
+                    {
+                        break;
+                    }
+                }
+            
+            
+            //if (sensorArray.end() == sensor)
+            //{
+                /* code */
+            //}
+            }
+            for (auto sensor : HPsensorArray)
             {
                 if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorConversionCheck()) // if on this node and a new value to send
                 {
@@ -537,7 +615,7 @@ void FlexCan3Controller::generatePropNodeStateReport(FlexCAN& CANbus,  VehicleSt
     CANbus.write(stateReport);
 }
 
-void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
+void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const uint8_t& propulsionNodeIDIn)
 {
     //call this every loop of main program
     //call all the types of messages inside this function and execute as needed
@@ -571,16 +649,16 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
     {
     //auto sensorConvertedIt = sensorArray.begin();
         // Lazy way to make sure I send all the possible queued up conversions
-        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
-        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
-        generateConvertedSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         convertedValueUpdateTimer = 0;
     }
 
     //set this up to run until raw messages all cleared each loop
-    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
-    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
-    generateRawSensormsgs(Can0, sensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+    generateRawSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
 
     if (AutoSequenceReportTimer >= 200)
     {
