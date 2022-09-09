@@ -5,44 +5,16 @@
 //
 // -------------------------------------------------------------
 // Use top level define conditional to determine which system the code is operating
-// Maintain definition header sets for a given propulsion system and update here accordingly
-#define RENEGADESF
-
-//----- Pasafire BangBang Static Fire Stand/Vehicle -----
-#ifdef PASABANG
-//#include "ValveDefinitionsPasaBang.h"
-#include "PyroDefinitionsPasaBang.h"
-#include "AutoSequenceDefinitionsPasaBang.h"
-#include "SensorDefinitionsPasaBang.h"
-#include "TankPressControllerDefinitionsPasaBang.h"
-#include "EngineControllerDefinitionsPasaBang.h"
-#include "ControlFunctionsPasaBang.h"
-#include "ALARASensorControllerDefinitionsPasaBang.h"
-#endif
-
-//----- Renegade Static Fire Stand -----
-#ifdef RENEGADESF
-//#include "ValveDefinitionsRenegadeSF.h"
-#include "PyroDefinitionsRenegadeSF.h"
-#include "AutoSequenceDefinitionsRenegadeSF.h"
-#include "SensorDefinitionsRenegadeSF.h"
-#include "TankPressControllerDefinitionsRenegadeSF.h"
-#include "EngineControllerDefinitionsRenegadeSF.h"
-#include "ControlFunctionsRenegadeSF.h"
-#include "ALARASensorControllerDefinitionsRenegadeSF.h"
-#endif
-
-//----- BabyShark -----
-#ifdef BABYSHARK
-#include "ValveDefinitionsRenegadeBabyShark.h"
-#include "PyroDefinitionsRenegadeBabyShark.h"
-#include "AutoSequenceDefinitionsRenegadeBabyShark.h"
-#include "SensorDefinitionsRenegadeBabyShark.h"
-#include "TankPressControllerDefinitionsBabyShark.h"
-#include "EngineControllerDefinitionsBabyShark.h"
-#include "ControlFunctionsRenegadeBabyShark.h"
-#include "ALARASensorControllerDefinitionsBabyShark.h"
-#endif
+// Maintain definition header sets for a given propulsion system
+#include "ControlFunctions.h"
+#include "ValveDefinitions.h"
+#include "PyroDefinitions.h"
+#include "AutoSequenceDefinitions.h"
+#include "SensorDefinitions.h"
+#include "TankPressControllerDefinitions.h"
+#include "EngineControllerDefinitions.h"
+#include "ControlFunctions.h"
+#include "ALARASensorControllerDefinitions.h"
 // -------------------------------------------------------------
 
 // ----- "COTS" includes ----- //

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <array>
 using std::array;
-#include "ControlFunctionsPasaBang.h" //need to shift the include tree into generic control function includes probably but for now leave it just PasaBang
+#include "ControlFunctions.h" //need to shift the include tree into generic control function includes probably but for now leave it just PasaBang
 
 class SerialUSBController
 {

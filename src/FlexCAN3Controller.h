@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <FlexCAN.h>
-#include "ControlFunctionsPasaBang.h" //need to shift the include tree into generic control function includes probably but for now leave it just PasaBang
+#include "ControlFunctions.h" //need to shift the include tree into generic control function includes probably but for now leave it just PasaBang
 #include <array>
 using std::array;
 #include <vector>

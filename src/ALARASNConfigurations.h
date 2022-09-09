@@ -12,6 +12,28 @@ V2_0,
 V2_1,
 };
 
+struct calibrationCoefs
+{
+    float m_coef;
+    float b_coef;
+};
+
+struct ALARACalibrations
+{
+    calibrationCoefs HP1_Calibration;
+    calibrationCoefs HP2_Calibration;
+    calibrationCoefs HP3_Calibration;
+    calibrationCoefs HP4_Calibration;
+    calibrationCoefs HP5_Calibration;
+    calibrationCoefs HP6_Calibration;
+    calibrationCoefs HP7_Calibration;
+    calibrationCoefs HP8_Calibration;
+    calibrationCoefs HP9_Calibration;
+    calibrationCoefs HP10_Calibration;
+    calibrationCoefs rail3V3Calibration;
+    calibrationCoefs rail5V0Calibration;
+};
+
 // Add any board characteristics or configuration parameters to the following struct
 // Update the map for all SNs whenever adding a parameter
 struct ALARASN
@@ -32,6 +54,7 @@ struct ALARASN
     uint32_t NOR6_size;
     uint32_t NOR7_size;
     uint32_t NOR8_size;
+    ALARACalibrations boardCalStruct;
 };
 
 void lookupALARASNmap(ALARASN& thisALARA, uint8_t ALARAnodeID);

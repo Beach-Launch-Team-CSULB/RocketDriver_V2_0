@@ -101,7 +101,7 @@ class TankPressController
         uint32_t valveMinimumDeenergizeTime;    // in MICROS
 
     // constructor - hipress
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setVentFailsafePressure_Default, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setVentFailsafePressure_Default, bool setIsSystemBang = false, bool setNodeIDCheck = false);
     // constructor - tank bangers
         TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* primaryPressValve, Valve* pressLineVent, Valve* tankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool isSystemBang = true, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
