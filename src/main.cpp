@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#define PROPULSIONSYSNODEIDPRESET 8;     //NOT in use normally, for testing with the address IO register inactive
+#define PROPULSIONSYSNODEIDPRESET 2;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -273,7 +273,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   {
     //Serial.println("Command Entered");
   }
-  Serial.println("Do I get to live?");
+  //Serial.println("Do I get to live?");
   
   //while (Serial.available())
   //{
@@ -327,43 +327,43 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   NewCommandMessage = readRemoveVectorBuffer(currentCommandMSG);
   currentCommand = currentCommandMSG.commandEnum;
   }
-  Serial.println("Do I get past new command message?");
+  //Serial.println("Do I get past new command message?");
   //process command
   //if (commandExecuteTimer >= 2000)
   //{
   commandExecute(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
-  Serial.println("Do I get past command execute?");
+  //Serial.println("Do I get past command execute?");
   //}
   //pull next config message from buffer, if there is one
   NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
-  Serial.println("Do I get past new config msg?");
+  //Serial.println("Do I get past new config msg?");
   //process config message
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
-  Serial.println("Do I get past config msg read?");
+  //Serial.println("Do I get past config msg read?");
 ///// ------------------------------------ /////  
 
   if (ezModeControllerTimer >= 50) // 5 = 200Hz controller rate
   {
-  Serial.println("Do I get into ezModeControllerTimer?");
+  //Serial.println("Do I get into ezModeControllerTimer?");
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, boardController, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
-  Serial.println("Do I get past vehicleStateMachine?");
+  //Serial.println("Do I get past vehicleStateMachine?");
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
-  Serial.println("Do I get past misionStateMachine?");
+  //Serial.println("Do I get past misionStateMachine?");
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
-  Serial.println("Do I get past controllerDataSync?");
+  //Serial.println("Do I get past controllerDataSync?");
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
-  Serial.println("Do I get past autoSequenceTasks?");
+  //Serial.println("Do I get past autoSequenceTasks?");
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
-  Serial.println("Do I get past tankPressControllerTasks?");
+  //Serial.println("Do I get past tankPressControllerTasks?");
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
-  Serial.println("Do I get past engineControllerTasks?");
+  //Serial.println("Do I get past engineControllerTasks?");
   //autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
-  Serial.println("Do I get past controllerDeviceSync?");
+  //Serial.println("Do I get past controllerDeviceSync?");
   //fluid sim run
   waterGoesVroom.fluidSystemUpdate();
-  Serial.println("Is this Pizza's fault?");
+  //Serial.println("Is this Pizza's fault?");
   ezModeControllerTimer = 0;
 
 //ALARAbaro.update();
