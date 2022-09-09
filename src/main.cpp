@@ -6,7 +6,7 @@
 // -------------------------------------------------------------
 // Use top level define conditional to determine which system the code is operating
 // Maintain definition header sets for a given propulsion system and update here accordingly
-#define PASABANG
+#define RENEGADESF
 
 //----- Pasafire BangBang Static Fire Stand/Vehicle -----
 #ifdef PASABANG
@@ -22,7 +22,7 @@
 
 //----- Renegade Static Fire Stand -----
 #ifdef RENEGADESF
-#include "ValveDefinitionsRenegadeSF.h"
+//#include "ValveDefinitionsRenegadeSF.h"
 #include "PyroDefinitionsRenegadeSF.h"
 #include "AutoSequenceDefinitionsRenegadeSF.h"
 #include "SensorDefinitionsRenegadeSF.h"
