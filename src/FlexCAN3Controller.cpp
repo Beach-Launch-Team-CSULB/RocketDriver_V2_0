@@ -145,7 +145,7 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint poin
     {
         uint32_t func_uint32Value;             //unsigned 32 bit
         uint8_t func_uint8Value4X[4];
-        uint8_t func_uint16Value2X[2];
+        uint16_t func_uint16Value2X[2];
         float func_floatValue = 0;
     };
 
@@ -153,13 +153,13 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint poin
     frameToPackage.flags.remote = 0;
     frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
     frameToPackage.len = 8;
-    func_uint16Value2X[0] = static_cast<uint16_t>(point1In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[0] = point1In.autoSequenceTimeValue/1000;
     func_uint16Value2X[1] = static_cast<uint16_t>(point1In.targetPcValue+0.5);
     frameToPackage.buf[0] = func_uint8Value4X[1];
     frameToPackage.buf[1] = func_uint8Value4X[0];
     frameToPackage.buf[2] = func_uint8Value4X[3];
     frameToPackage.buf[3] = func_uint8Value4X[2];
-    func_uint16Value2X[0] = static_cast<uint16_t>(point2In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[0] = point2In.autoSequenceTimeValue/1000;
     func_uint16Value2X[1] = static_cast<uint16_t>(point2In.targetPcValue+0.5);
     frameToPackage.buf[4] = func_uint8Value4X[1];
     frameToPackage.buf[5] = func_uint8Value4X[0];
@@ -177,7 +177,7 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint poin
     {
         uint32_t func_uint32Value;             //unsigned 32 bit
         uint8_t func_uint8Value4X[4];
-        uint8_t func_uint16Value2X[2];
+        uint16_t func_uint16Value2X[2];
         float func_floatValue = 0;
     };
 
@@ -185,7 +185,7 @@ CAN_message_t writeDouble4ByteDataCAN2Frame(uint16_t msgIDIn, throttlePoint poin
     frameToPackage.flags.remote = 0;
     frameToPackage.id = msgIDIn;    //I should add bit chopping to make sure it doesn't push into ExtendedID bits
     frameToPackage.len = 4;
-    func_uint16Value2X[0] = static_cast<uint16_t>(point1In.autoSequenceTimeValue/1000);
+    func_uint16Value2X[0] = point1In.autoSequenceTimeValue/1000;
     func_uint16Value2X[1] = static_cast<uint16_t>(point1In.targetPcValue+0.5);
     frameToPackage.buf[0] = func_uint8Value4X[1];
     frameToPackage.buf[1] = func_uint8Value4X[0];
@@ -303,7 +303,7 @@ void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array
         
         //sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
         }
-        for (auto sensor : HPsensorArray)
+/*         for (auto sensor : HPsensorArray)
         {
             if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorValueCheckCAN()) // if on this node and a new value to send
             {
@@ -340,6 +340,7 @@ void FlexCan3Controller::generateRawSensormsgs(FlexCAN& CANbus, const std::array
         
         //sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
         }
+ */
         break;  //if all sensors checked still break even if 3 samples have not been found
 
     }
@@ -358,29 +359,29 @@ sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t
 if (sensorReadStruct.numberSensors == 1)
 {
 sensorReadStruct.packedSensorCAN2.len = 2;
-sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0];
-sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0];
+sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0] >> 8;
 }
 else if (sensorReadStruct.numberSensors == 2)
 {
 sensorReadStruct.packedSensorCAN2.len = 5;
-sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0];
-sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0];
+sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0] >> 8;
 sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
-sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorRawValue[1];
-sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorRawValue[1] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorRawValue[1];
+sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorRawValue[1] >> 8;
 }
 else if (sensorReadStruct.numberSensors == 3)
 {
 sensorReadStruct.packedSensorCAN2.len = 8;
-sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0];
-sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorRawValue[0];
+sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorRawValue[0] >> 8;
 sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
-sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorRawValue[1];
-sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorRawValue[1] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorRawValue[1];
+sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorRawValue[1] >> 8;
 sensorReadStruct.packedSensorCAN2.buf[5] = sensorReadStruct.sensorID[2];
-sensorReadStruct.packedSensorCAN2.buf[6] = sensorReadStruct.sensorRawValue[2];
-sensorReadStruct.packedSensorCAN2.buf[7] = sensorReadStruct.sensorRawValue[2] >> 8;
+sensorReadStruct.packedSensorCAN2.buf[7] = sensorReadStruct.sensorRawValue[2];
+sensorReadStruct.packedSensorCAN2.buf[6] = sensorReadStruct.sensorRawValue[2] >> 8;
 }
 
 sensorReadStruct.frameTotalBits = standardIDCAN2TotalBits[sensorReadStruct.packedSensorCAN2.flags.extended + 1][sensorReadStruct.packedSensorCAN2.len];
@@ -496,7 +497,7 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
                             break;
                         }
                     }
-                    sensorReadStruct.sensorID[i] = (sensor->getSensorID())+1;
+                    sensorReadStruct.sensorID[i] = (sensor->getSensorID());
                     //sensorReadStruct.sensorTimestampSeconds[i] = sensor->getTimestampSeconds();
                     sensorReadStruct.sensorTimestampMicros[i] = currentIteratoinTimeStamp;
 
@@ -537,29 +538,29 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
     if (sensorReadStruct.numberSensors == 1)
     {
     sensorReadStruct.packedSensorCAN2.len = 2;
-    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0];
-    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
     }
     else if (sensorReadStruct.numberSensors == 2)
     {
     sensorReadStruct.packedSensorCAN2.len = 5;
-    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0];
-    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
     sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
-    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1];
-    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1];
+    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1] >> 8;
     }
     else if (sensorReadStruct.numberSensors == 3)
     {
     sensorReadStruct.packedSensorCAN2.len = 8;
-    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0];
-    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
     sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
-    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1];
-    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1];
+    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1] >> 8;
     sensorReadStruct.packedSensorCAN2.buf[5] = sensorReadStruct.sensorID[2];
-    sensorReadStruct.packedSensorCAN2.buf[6] = sensorReadStruct.sensorConvertedValue[2];
-    sensorReadStruct.packedSensorCAN2.buf[7] = sensorReadStruct.sensorConvertedValue[2] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[7] = sensorReadStruct.sensorConvertedValue[2];
+    sensorReadStruct.packedSensorCAN2.buf[6] = sensorReadStruct.sensorConvertedValue[2] >> 8;
     }
 
     sensorReadStruct.frameTotalBits = standardIDCAN2TotalBits[sensorReadStruct.packedSensorCAN2.flags.extended + 1][sensorReadStruct.packedSensorCAN2.len];
@@ -655,34 +656,50 @@ void FlexCan3Controller::generateEngineControllermsgs(FlexCAN& CANbus, const std
         uint16_t controllerID = 1000 + (engine->getControllerID()*100);
         throttlePoint point1;
         throttlePoint point2;
+
         bool point1bool = false;
         bool point2bool = false;
-        for (auto i = engine->throttleProgram.begin(); i != engine->throttleProgram.end(); ++i)
+        if (engine->getControllerUpdate())
         {
-            if (!point1bool)
+            for (auto i = engine->throttleProgram.begin(); i != engine->throttleProgram.end();)
             {
-                point1.autoSequenceTimeValue = i->autoSequenceTimeValue;
-                point1.targetPcValue = i->targetPcValue;
-                point1bool = true;
-                break;
+                if (!point1bool)
+                {
+                    //Serial.print(" does point 1 run: ");
+                    point1.autoSequenceTimeValue = i->autoSequenceTimeValue;
+                    point1.targetPcValue = i->targetPcValue;
+                    point1bool = true;
+                    i++;
+                }
+                else if (!point2bool)
+                {
+                    //Serial.print(" does point 2 run: ");
+                    point2.autoSequenceTimeValue = i->autoSequenceTimeValue;
+                    point2.targetPcValue = i->targetPcValue;
+                    point2bool = true;
+                    i++;
+                }
+                if (point1bool && point2bool)
+                {
+                //Serial.println(" does 2 point msg send: ");
+                CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1, point2));
+                point1bool = false;
+                point2bool = false;
+                }
+                else if (i == (engine->throttleProgram.end()) && point1bool)
+                {
+                //Serial.println(" does 1 point msg send: ");
+                CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1));
+                point1bool = false;
+                point2bool = false;
+                }
+                else;
             }
-            else if (!point2bool)
-            {
-                point2.autoSequenceTimeValue = i->autoSequenceTimeValue;
-                point2.targetPcValue = i->targetPcValue;
-                point2bool = true;
-            }
-            if (point1bool && point2bool)
-            {
-            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1, point2));
-            }
-            else if (i == (engine->throttleProgram.end()-1) && point1bool)
-            {
-            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 6), point1));
-            }
+            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 2), engine->getFuelMVAutosequenceActuation(),engine->getLoxMVAutosequenceActuation()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 4), engine->getIgniter1Actuation(),engine->getIgniter2Actuation()));
+            //reset controller update once data sent
+            engine->setControllerUpdate(false);
         }
-        CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 2), engine->getFuelMVAutosequenceActuation(),engine->getLoxMVAutosequenceActuation()));
-        CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 4), engine->getIgniter1Actuation(),engine->getIgniter2Actuation()));
     }
 }
 

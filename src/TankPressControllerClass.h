@@ -123,6 +123,7 @@ class TankPressController
         ValveState getTankVentState(){return tankVent.getState();}
         uint32_t getValveMinEnergizeTime(){return valveMinimumEnergizeTime;}
         uint32_t getValveMinDeEnergizeTime(){return valveMinimumDeenergizeTime;}
+        float getVentFailsafePressure(){return ventFailsafePressure;}
         
         bool getControllerUpdate(){return controllerUpdate;}
         bool getQuasistaticControllerUpdate(){return quasistaticControllerUpdate;}

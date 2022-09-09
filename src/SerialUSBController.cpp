@@ -6,7 +6,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
     if (propStatusPrints && !propCSVStreamPrints)
     {
 
-  //Main Loop state and command print statements - for testing only - TEMPORARY BULLSHIT
+  //Main Loop state and command print statements - for testing only
   Serial.print("prop node ID : ");
   Serial.print(propulsionNodeIDIn);
   Serial.print(" currentVehicleState :");
@@ -192,14 +192,12 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print( ": D: ");
             Serial.print(sensor->getLinRegSlope(),10);
             //}
-            
             Serial.println(": ");
-
         }
     
     }
 
-    for(auto sensor : HPsensorArray)
+/*     for(auto sensor : HPsensorArray)
     {
         if (sensor->getSensorNodeID() == propulsionNodeIDIn)
         {
@@ -218,10 +216,9 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
             Serial.println(": ");
-
         }
-    
     }
+ */
 
   Serial.print("Current Autosequence Time: ");
   Serial.println(autoSequenceArray.at(0)->getCurrentCountdown());

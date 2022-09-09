@@ -275,7 +275,7 @@ void setup() {
 
   SerialUSBdataController.setPropStatusPrints(true);
   SerialUSBdataController.setPropCSVStreamPrints(false);
-    pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
+  pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
 }
 
 void loop() 

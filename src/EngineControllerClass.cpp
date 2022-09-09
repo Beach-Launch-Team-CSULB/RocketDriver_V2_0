@@ -34,6 +34,7 @@ void EngineController::begin()
         pilotMVLoxValve.setState(ValveState::Closed, loxMVAutosequenceActuation);
         igniter1.setState(PyroState::Off, igniter1Actuation);
         igniter2.setState(PyroState::Off, igniter2Actuation);
+        controllerUpdate = true;
     }
 }
 
@@ -50,6 +51,7 @@ void EngineController::resetAll()
     igniter2Actuation = igniter2Actuation_Default;
 
     currentPcTarget = currentPcTarget_Default;
+    controllerUpdate = true;
 }
 
 bool EngineController::throttlePointCheck(throttlePoint &pt, vector<throttlePoint> &throttleProgram)
@@ -86,6 +88,7 @@ bool EngineController::throttlePointCheck(throttlePoint &pt, vector<throttlePoin
 //void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
 void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn)
 {
+    controllerUpdate = true;
     throttlePoint ptIn;
     //only can change throttle vector while controller isn't in active state
     //function should work correctly in any state, but normally do not want to be changing the throttleprogram once running
@@ -136,6 +139,7 @@ void EngineController::throttleProgramReset()
         throttleProgram.push_back(initialThrottlePoint);
         // restarts the iterator
         throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
+        controllerUpdate = true;
     }
 }
 
@@ -161,7 +165,7 @@ void EngineController::throttleProgramReset(uint16_t autoSequenceTimeMillisIn)
             // restarts the iterator
             throttleProgramPos = throttleProgram.begin(); //starts the iterator at first position of array
         }
-
+    controllerUpdate = true;
     }
 }
 
