@@ -60,7 +60,7 @@ class AutoSequence
         void resetTimer() {timer = 0;}
     // reset all configurable settings to defaults
         void resetAll();
-        void setCountdownStart(uint32_t countdownStartIn){if(countdownStartIn >= 1000000 && countdownStartIn <= 60000000){countdownStart = countdownStartIn;}}
+        void setCountdownStart(uint32_t countdownStartIn){if(countdownStartIn >= 1000000 && countdownStartIn <= 60000000){countdownStart = (-1)*static_cast<int32_t>(countdownStartIn);}}
         void stateOperations(); //add into this the functions for managing the countdown initialization and holds
 
 };

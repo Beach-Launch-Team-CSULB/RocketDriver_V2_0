@@ -62,7 +62,10 @@ class EngineController
         bool MVFuelFired = false;
         bool MVLoxFired = false;
 
+        // controllerUpdate is for every controller cycle dynamic data
         bool controllerUpdate = false;
+        // controllerConfigUpdate is for controller settings that only change from user input
+        bool controllerConfigUpdate = false;
 
         //uint32_t igniter1LiveOutTime = 500000;
         //uint32_t igniter2LiveOutTime = 500000;
@@ -104,6 +107,7 @@ class EngineController
         int32_t getIgniter1Actuation(){return static_cast<int32_t>(igniter1Actuation);}
         int32_t getIgniter2Actuation(){return static_cast<int32_t>(igniter2Actuation);}
         bool getControllerUpdate(){return controllerUpdate;}
+        bool getControllerConfigUpdate(){return controllerConfigUpdate;}
     // set functions, allows the setting of a variable
     // set the Node ID Check bool function
         void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
@@ -113,7 +117,7 @@ class EngineController
                 if (newState != state)
                 {
                     priorState = state;
-                    controllerUpdate = true;
+                    controllerConfigUpdate = true;
                 }
                 state = newState;
             }
@@ -130,11 +134,11 @@ class EngineController
         void testSetIgniter2State(PyroState igniter2StateIn) {if(testPass) {igniter2.setState(igniter2StateIn);}}
 
     // can config set functions
-        void setFuelMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){fuelMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);controllerUpdate = true;}}
-        void setLoxMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){loxMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);controllerUpdate = true;}}
-        void setIgniter1Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter1Actuation = static_cast<int64_t>(actuationTimeIn);controllerUpdate = true;}}
-        void setIgniter2Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter2Actuation = static_cast<int64_t>(actuationTimeIn);controllerUpdate = true;}}
-        void setPcTarget(float currentPcTargetIn){if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600){currentPcTarget = currentPcTargetIn;controllerUpdate = true;}}
+        void setFuelMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){fuelMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);controllerConfigUpdate = true;}}
+        void setLoxMVAutosequenceActuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){loxMVAutosequenceActuation = static_cast<int64_t>(actuationTimeIn);controllerConfigUpdate = true;}}
+        void setIgniter1Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter1Actuation = static_cast<int64_t>(actuationTimeIn);controllerConfigUpdate = true;}}
+        void setIgniter2Actuation(int32_t actuationTimeIn){if(actuationTimeIn >= -10000000 && actuationTimeIn <= 10000000){igniter2Actuation = static_cast<int64_t>(actuationTimeIn);controllerConfigUpdate = true;}}
+        void setPcTarget(float currentPcTargetIn){if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600){currentPcTarget = currentPcTargetIn;}}
     // throttle program set point function
         bool throttlePointCheck(throttlePoint &pt, vector<throttlePoint> &throttleProgram);
         void setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn, uint16_t currentPcTargetIn);
@@ -144,6 +148,7 @@ class EngineController
     // autosequence get function
         void setCurrentAutosequenceTime(int64_t countdownIn) {currentAutosequenceTime = countdownIn;}
         void setControllerUpdate(bool controllerUpdateIn){controllerUpdate = controllerUpdateIn;}
+        void setControllerConfigUpdate(bool controllerConfigUpdateIn){controllerConfigUpdate = controllerConfigUpdateIn;}
     // functions with executables defined in ValveClasses.cpp
         void resetTimer();              // resets timer to zero, timer increments automatically in microseconds
     // reset all configurable settings to defaults

@@ -301,6 +301,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   {
     //Serial.println("Command Entered");
   }
+  Serial.println("Do I get to live?");
   
   //while (Serial.available())
   //{
@@ -354,33 +355,43 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   NewCommandMessage = readRemoveVectorBuffer(currentCommandMSG);
   currentCommand = currentCommandMSG.commandEnum;
   }
-
+  Serial.println("Do I get past new command message?");
   //process command
   //if (commandExecuteTimer >= 2000)
   //{
   commandExecute(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, NewCommandMessage, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  Serial.println("Do I get past command execute?");
   //}
   //pull next config message from buffer, if there is one
   NewConfigMessage = readRemoveVectorBuffer(currentConfigMSG);
+  Serial.println("Do I get past new config msg?");
   //process config message
   configMSGread(currentConfigMSG, NewConfigMessage, valveArray, pyroArray, sensorArray, autoSequenceArray, tankPressControllerArray, engineControllerArray, waterGoesVroom);
+  Serial.println("Do I get past config msg read?");
 ///// ------------------------------------ /////  
 
   if (ezModeControllerTimer >= 50) // 5 = 200Hz controller rate
   {
-  
+  Serial.println("Do I get into ezModeControllerTimer?");
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, boardController, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
+  Serial.println("Do I get past vehicleStateMachine?");
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
+  Serial.println("Do I get past misionStateMachine?");
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  Serial.println("Do I get past controllerDataSync?");
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
+  Serial.println("Do I get past autoSequenceTasks?");
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
+  Serial.println("Do I get past tankPressControllerTasks?");
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
+  Serial.println("Do I get past engineControllerTasks?");
   //autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
+  Serial.println("Do I get past controllerDeviceSync?");
   //fluid sim run
   waterGoesVroom.fluidSystemUpdate();
-  
+  Serial.println("Is this Pizza's fault?");
   ezModeControllerTimer = 0;
 
 //ALARAbaro.update();
@@ -403,7 +414,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
   // Reset function to reboot Teensy with internal reset register
   // Need to figure out how to rework using this feature with reworked ID system
-  TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
+  //TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
 
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
@@ -417,7 +428,7 @@ if (shittyCANTimer >= 1000)
   Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
   
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 10)
+  if (mainLoopTestingTimer >= 250)
   {
   
 /*     for(auto sensor : HPsensorArray)

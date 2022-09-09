@@ -17,6 +17,7 @@ void AutoSequence::begin()
 void AutoSequence::resetAll()
 {
     //
+    Serial.println("did autosequence restAll run ");
     countdownStart = countdownStart_Default;
 }
 

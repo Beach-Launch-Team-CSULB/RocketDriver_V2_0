@@ -109,9 +109,6 @@ class FlexCan3Controller
         uint32_t convertedSendTimeoutMicros = 500;
 
     public:
-        //throttlePoint point1;
-        //throttlePoint point2;
-
         //assemble message functions
         void generatePropNodeStateReport(FlexCAN& CANbus,  VehicleState& currentState, MissionState& currentMissionState, Command& currentCommand, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const uint8_t& propulsionNodeIDIn);
         void generateHPObjectIDmsgs(FlexCAN& CANbus, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const uint8_t& propulsionNodeIDIn);

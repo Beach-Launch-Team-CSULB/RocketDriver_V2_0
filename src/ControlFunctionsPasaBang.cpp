@@ -1085,6 +1085,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                 switch (currentConfigMSG.ObjectSettingID)
                 {
                 case 0:
+                    Serial.println("did autosequence restAll message get to case 0:  ");
                     autosequence->resetAll();
                     break;
                 case 1:

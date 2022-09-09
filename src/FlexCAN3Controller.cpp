@@ -612,7 +612,8 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             tankPressControllerReportsStruct.controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
             
             // Controller State Report and other quasistatic info to send low rate
-            if (tankPressControllerReportsStruct.quasistaticSendBool || externalStateChange)
+            //if (tankPressControllerReportsStruct.quasistaticSendBool || externalStateChange)
+            if (tankPressController->getControllerConfigUpdate())
             {
             tankPressControllerReportsStruct.controllerStateReportCanFrame.id = tankPressControllerReportsStruct.controllerStateReportID;
             tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.extended = 0;
@@ -623,7 +624,8 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime()));
             CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 16,tankPressController->getVentFailsafePressure()));
-            tankPressControllerReportsStruct.quasistaticSendBool = false;
+            tankPressController->setControllerConfigUpdate(false);
+            //tankPressControllerReportsStruct.quasistaticSendBool = false;
             }
 
             if (tankPressController->getControllerUpdate())
@@ -644,6 +646,29 @@ void FlexCan3Controller::generateTankControllermsgs(FlexCAN& CANbus, const std::
             }
             
         }
+        // If not bang . . .
+        else
+        {
+            tankPressControllerReportsStruct.controllerID = tankPressController->getControllerID();
+            tankPressControllerReportsStruct.controllerStateReportID = (tankPressController->getControllerID()*100) + 1000;
+            
+            // Controller State Report and other quasistatic info to send low rate
+            //if (tankPressControllerReportsStruct.quasistaticSendBool || externalStateChange)
+            if (tankPressController->getControllerConfigUpdate())
+            {
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.id = tankPressControllerReportsStruct.controllerStateReportID;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.extended = 0;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.flags.remote = 0;
+            tankPressControllerReportsStruct.controllerStateReportCanFrame.buf[0] = static_cast<uint8_t>(tankPressController->getState());
+            //CANbus.write(tankPressControllerReportsStruct.controllerStateReportCanFrame);
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 2,tankPressController->getKp(),tankPressController->getKi()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 4,tankPressController->getKd(),tankPressController->getControllerThreshold()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 14,tankPressController->getValveMinEnergizeTime(),tankPressController->getValveMinDeEnergizeTime()));
+            CANbus.write(writeDouble4ByteDataCAN2Frame(tankPressControllerReportsStruct.controllerStateReportID + 16,tankPressController->getVentFailsafePressure()));
+            tankPressController->setControllerConfigUpdate(false);
+            //tankPressControllerReportsStruct.quasistaticSendBool = false;
+            }
+        }
         
     }
 }
@@ -659,7 +684,7 @@ void FlexCan3Controller::generateEngineControllermsgs(FlexCAN& CANbus, const std
 
         bool point1bool = false;
         bool point2bool = false;
-        if (engine->getControllerUpdate())
+        if (engine->getControllerConfigUpdate())
         {
             for (auto i = engine->throttleProgram.begin(); i != engine->throttleProgram.end();)
             {
@@ -698,7 +723,7 @@ void FlexCan3Controller::generateEngineControllermsgs(FlexCAN& CANbus, const std
             CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 2), engine->getFuelMVAutosequenceActuation(),engine->getLoxMVAutosequenceActuation()));
             CANbus.write(writeDouble4ByteDataCAN2Frame((controllerID + 4), engine->getIgniter1Actuation(),engine->getIgniter2Actuation()));
             //reset controller update once data sent
-            engine->setControllerUpdate(false);
+            engine->setControllerConfigUpdate(false);
         }
     }
 }
@@ -821,6 +846,8 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
     {
     //auto sensorConvertedIt = sensorArray.begin();
         // Lazy way to make sure I send all the possible queued up conversions
+        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);

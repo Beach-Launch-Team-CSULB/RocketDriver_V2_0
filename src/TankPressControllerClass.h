@@ -88,6 +88,7 @@ class TankPressController
         bool resetIntegralCalcBool = false;
 
         bool controllerUpdate = false;
+        bool controllerConfigUpdate = false;
         elapsedMillis quasistaticUpdateTimer;
         bool quasistaticControllerUpdate = false;
         bool isWaterFlowSetup = true;
@@ -124,8 +125,9 @@ class TankPressController
         uint32_t getValveMinEnergizeTime(){return valveMinimumEnergizeTime;}
         uint32_t getValveMinDeEnergizeTime(){return valveMinimumDeenergizeTime;}
         float getVentFailsafePressure(){return ventFailsafePressure;}
-        
+
         bool getControllerUpdate(){return controllerUpdate;}
+        bool getControllerConfigUpdate(){return controllerConfigUpdate;}
         bool getQuasistaticControllerUpdate(){return quasistaticControllerUpdate;}
         void setQuasistaticControllerUpdate(bool quasistaticControllerUpdateIn){quasistaticControllerUpdate = quasistaticControllerUpdateIn;}
         elapsedMillis getQuasistaticUpdateTimer(){return quasistaticUpdateTimer;}
@@ -164,6 +166,7 @@ class TankPressController
                 if (newState != state)
                 {
                     priorState = state;
+                    controllerUpdate = true;
                 }
                 state = newState;
             }        
@@ -180,15 +183,15 @@ class TankPressController
         void testSetPressLineVentState(ValveState pressLineVentStateIn) {if(testPass) {pressLineVent.setState(pressLineVentStateIn);}}
         void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVent.setState(tankVentStateIn);}}
     //setting functions - have all inputs bounded to catch nonsense CAN config msg inputs
-        void setVentFailsafePressure(float ventFailsafePressureIn){if (ventFailsafePressureIn <= 10000 && ventFailsafePressureIn >= 0) {ventFailsafePressure = ventFailsafePressureIn;}}
+        void setVentFailsafePressure(float ventFailsafePressureIn){if (ventFailsafePressureIn <= 10000 && ventFailsafePressureIn >= 0) {ventFailsafePressure = ventFailsafePressureIn;controllerUpdate = true;}}
         
-        void setK_p(float K_pin){if (K_pin <= 1000 && K_pin >= -1000) {K_p = K_pin;}}
-        void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;}}
+        void setK_p(float K_pin){if (K_pin <= 1000 && K_pin >= -1000) {K_p = K_pin;controllerUpdate = true;}}
+        void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;controllerUpdate = true;}}
         void setK_i(){K_i = K_i_run;}   //empty input args means reset K_i to K_i_run
-        void setK_d(float K_din){if (K_din <= 1000 && K_din >= -1000) {K_d = K_din;}}
-        void setControllerThreshold(float controllerThresholdIn){if (controllerThresholdIn <= 100 && controllerThresholdIn >= 0) {controllerThreshold = controllerThresholdIn;}}
-        void setValveMinimumEnergizeTime(uint32_t valveMinimumEnergizeTimeIn){if(valveMinimumEnergizeTimeIn >= 0 && valveMinimumEnergizeTimeIn <= 10000){valveMinimumEnergizeTime = valveMinimumEnergizeTimeIn;}}
-        void setValveMinimumDeenergizeTime(uint32_t valveMinimumDeenergizeTimeIn){if(valveMinimumDeenergizeTimeIn >= 0 && valveMinimumDeenergizeTimeIn <= 10000){valveMinimumDeenergizeTime = valveMinimumDeenergizeTimeIn;}}
+        void setK_d(float K_din){if (K_din <= 1000 && K_din >= -1000) {K_d = K_din;controllerUpdate = true;}}
+        void setControllerThreshold(float controllerThresholdIn){if (controllerThresholdIn <= 100 && controllerThresholdIn >= 0) {controllerThreshold = controllerThresholdIn;controllerUpdate = true;}}
+        void setValveMinimumEnergizeTime(uint32_t valveMinimumEnergizeTimeIn){if(valveMinimumEnergizeTimeIn >= 0 && valveMinimumEnergizeTimeIn <= 10000){valveMinimumEnergizeTime = valveMinimumEnergizeTimeIn;controllerUpdate = true;}}
+        void setValveMinimumDeenergizeTime(uint32_t valveMinimumDeenergizeTimeIn){if(valveMinimumDeenergizeTimeIn >= 0 && valveMinimumDeenergizeTimeIn <= 10000){valveMinimumDeenergizeTime = valveMinimumDeenergizeTimeIn;controllerUpdate = true;}}
 
         void setPcTarget(float PcTargetIn);
     
@@ -213,6 +216,7 @@ class TankPressController
         void setControllerTargetValue(float controllerSetPointIn){targetValue = controllerSetPointIn;}
     // set function for controllerUpdateBool that indicates if a new controller calc has been run
         void setControllerUpdate(bool controllerUpdateIn){controllerUpdate = controllerUpdateIn;}
+        void setControllerConfigUpdate(bool controllerConfigUpdateIn){controllerConfigUpdate = controllerConfigUpdateIn;}
         void ventPressureCheck();
 };
 
