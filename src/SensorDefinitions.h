@@ -62,7 +62,7 @@ std::array<SENSORBASE*, NUM_HPSENSORS> HPsensorArray{&PasafireHP1, &PasafireHP2,
 #ifdef RENEGADESF
 
 // define number of sensors here
-#define NUM_SENSORS 18
+#define NUM_SENSORS 26
 
 // initialize all sensor objects here
 // Renegade SF Stand
@@ -80,19 +80,20 @@ EXT_SENSOR LoxInletPropSidePT{60, 2, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 1
 EXT_SENSOR MVPneumaticsPT{56, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 2, 10, 50, false, 0.0186, -126.56};                // 11
 EXT_SENSOR DomeRegFuelPT{79, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 2, 50, 100, false, 0.0186, -126.67};                // 12
 EXT_SENSOR DomeRegLoxPT{80, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 2, 50, 100, false, 0.0185, -133.36};                 // 13
-EXT_SENSOR FuelTankPT{62, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 2, 10, 100, false, 0.0186, -129.3};                    // 14
-EXT_SENSOR LoxTankPT{66, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, false, 0.0187, -125.36};                    // 15
+EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 2, 10, 100, false, 0.0186, -129.3};                    // 14
+EXT_SENSOR FuelTankPT2{62, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 2, 10, 100, false, 0.0186, -129.3};                    // 14
+EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, false, 0.0187, -125.36};                    // 15
+EXT_SENSOR LoxTankPT2{66, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 2, 10, 100, false, 0.0187, -125.36};                    // 15
 EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 2, 10, 50, false, 0.0933, -638.38};                 // 16
 EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 2, 10, 50, false, 0.093, -629.72};                   // 17
 
-/* //FAKESHIT
+//FAKESHIT
 EXT_SENSOR FakeChamberPT1{150, 2, 41, &waterGoesVroom, simulatedInput};                 // 7
 EXT_SENSOR FakeFuelLinePT{158, 2, 32, &waterGoesVroom, simulatedInput};          // 8
 EXT_SENSOR FakeLoxLinePT{160, 2, 22, &waterGoesVroom, simulatedInput};           // 10
 EXT_SENSOR FakeFuelTankPT{162, 3, 31, &waterGoesVroom, simulatedInput};                    // 14
 EXT_SENSOR FakeLoxTankPT{166, 3, 21, &waterGoesVroom, simulatedInput};                    // 15
 EXT_SENSOR FakeHiPressPT{170, 3, 11, &waterGoesVroom, simulatedInput};                 // 16
- */
 
 
 ALARAHP_SENSOR RenegadeEngineHP1{121, 2, ALARA_HIGHPOWER_ANALOGREAD1, 0.0006,1.7800};
@@ -121,7 +122,7 @@ ALARAHP_SENSOR RenegadePropHP10{140, 3, ALARA_HIGHPOWER_ANALOGREAD10, 0.0006,1.7
 std::array<SENSORBASE*, 20> HPsensorArray{&RenegadeEngineHP1, &RenegadeEngineHP2, &RenegadeEngineHP3, &RenegadeEngineHP4, &RenegadeEngineHP5, &RenegadeEngineHP6, &RenegadeEngineHP7, &RenegadeEngineHP8, &RenegadeEngineHP9, &RenegadeEngineHP10, &RenegadePropHP1, &RenegadePropHP2, &RenegadePropHP3, &RenegadePropHP4, &RenegadePropHP5, &RenegadePropHP6, &RenegadePropHP7, &RenegadePropHP8, &RenegadePropHP9, &RenegadePropHP10};
 
 // Sensor Array including Renegade SF only
-std::array<EXT_SENSOR*, NUM_SENSORS> sensorArray{&ThrustMountLoadCell1pos, &ThrustMountLoadCell1neg, &ThrustMountLoadCell2pos, &ThrustMountLoadCell2neg,&ThrustMountLoadCell3pos, &ThrustMountLoadCell3neg, &ChamberPT2, &ChamberPT1, &FuelInletPropSidePT, &FuelInjectorPT, &LoxInletPropSidePT, &MVPneumaticsPT, &DomeRegFuelPT, &DomeRegLoxPT, &FuelTankPT, &LoxTankPT, &HiPressFuelPT};
+std::array<SENSORBASE*, NUM_SENSORS> sensorArray{&ThrustMountLoadCell1pos, &ThrustMountLoadCell1neg, &ThrustMountLoadCell2pos, &ThrustMountLoadCell2neg, &ThrustMountLoadCell3pos, &ThrustMountLoadCell3neg, &ChamberPT2, &ChamberPT1, &FuelInletPropSidePT, &FuelInjectorPT, &LoxInletPropSidePT, &MVPneumaticsPT, &DomeRegFuelPT, &DomeRegLoxPT, &FuelTankPT1, &FuelTankPT2, &LoxTankPT1, &LoxTankPT2, &HiPressFuelPT, &HiPressLoxPT, &FakeChamberPT1, &FakeFuelLinePT, &FakeLoxLinePT, &FakeFuelTankPT, &FakeLoxTankPT, &FakeHiPressPT};
 
 #endif
 #endif

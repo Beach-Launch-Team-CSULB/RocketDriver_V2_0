@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#define PROPULSIONSYSNODEIDPRESET 2;     //NOT in use normally, for testing with the address IO register inactive
+#define PROPULSIONSYSNODEIDPRESET 3;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -85,7 +85,7 @@ uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
 uint32_t ALARAnodeIDfromEEPROM_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromEEPROM_errorFlag;
-uint8_t PropulsionSysNodeID = 8;              //engine node = 2, prop node = 3, Pasafire node = 8
+uint8_t PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;              //engine node = 2, prop node = 3, Pasafire node = 8
 uint8_t PropulsionSysNodeIDfromEEPROM;    //PropulsionSysNodeID read out of EEPROM
 uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
 
