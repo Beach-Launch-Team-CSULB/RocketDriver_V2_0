@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#define PROPULSIONSYSNODEIDPRESET 2;     //NOT in use normally, for testing with the address IO register inactive
+#define PROPULSIONSYSNODEIDPRESET 3;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -399,7 +399,7 @@ if (shittyCANTimer >= 1000)
   Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
   
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 250)
+  if (mainLoopTestingTimer >= 10)
   {
   
 /*     for(auto sensor : HPsensorArray)

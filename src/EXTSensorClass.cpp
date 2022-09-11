@@ -66,7 +66,7 @@ EXT_SENSOR::EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t s
   sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
   //temporarily default initialize the simulated sensors to a given rate
   //currentSampleRate = 200;
-  sensorState = SensorState::Fast;
+  sensorState = SensorState::Slow;
 
   linConvCoef1_m = linConvCoef1_m_Default;
   linConvCoef1_b = linConvCoef1_b_Default;

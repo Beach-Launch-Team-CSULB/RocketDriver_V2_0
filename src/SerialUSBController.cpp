@@ -40,7 +40,8 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
     {
             Serial.print( ": TankControllerState: ");
             Serial.print(static_cast<uint8_t>(tankPressController->getState()));
-            Serial.println(": ");
+            Serial.print( ": Vent Failsafe Pressure: ");
+            Serial.print(tankPressController->getVentFailsafePressure());
             Serial.print(static_cast<uint8_t>(tankPressController->getPrimaryPressValveState()));
             Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));
@@ -55,6 +56,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.println(": "); */
             if (tankPressController->getIsBang())
             {
+            Serial.println();
             Serial.print(": Target");
             Serial.print(tankPressController->getTargetValue(),5);
             Serial.print(": K_p");
@@ -70,9 +72,9 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(": e_d");            
             Serial.print(tankPressController->getDfunc(),5);
             Serial.print(": PID result");
-            Serial.println(tankPressController->getPIDoutput(),5);
+            Serial.print(tankPressController->getPIDoutput(),5);
             }
-
+            Serial.println();
     }    
     for(auto engineController : engineControllerArray)
     {
@@ -178,7 +180,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             //Serial.print(sensor->getTimestampMicros());
 
             Serial.print( ": converted: ");
-            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
+            Serial.print(sensor->getCurrentConvertedValue(),10);
             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
             Serial.print( ": Integral Enabled: ");
@@ -197,11 +199,11 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
     
     }
 
-/*     for(auto sensor : HPsensorArray)
+    for(auto sensor : HPsensorArray)
     {
         if (sensor->getSensorNodeID() == propulsionNodeIDIn)
         {
-        sensor->setState(SensorState::Fast);
+        sensor->setState(SensorState::Slow);
          
             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
@@ -218,7 +220,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.println(": ");
         }
     }
- */
+
 
   Serial.print("Current Autosequence Time: ");
   Serial.println(autoSequenceArray.at(0)->getCurrentCountdown());

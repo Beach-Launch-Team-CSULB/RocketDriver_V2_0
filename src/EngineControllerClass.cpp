@@ -94,11 +94,11 @@ void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn
     //function should work correctly in any state, but normally do not want to be changing the throttleprogram once running
     if(state == EngineControllerState::Passive) 
     {    
-        if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600)
-        {
+        //if(currentPcTargetIn >= 200 && currentPcTargetIn <= 600)
+        //{
             //vector version
-            if (autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000)
-            {
+            //if (autoSequenceTimeMillisIn >= 0 && autoSequenceTimeMillisIn <= 60000)
+            //{
                 ptIn.autoSequenceTimeValue = static_cast<int64_t>(autoSequenceTimeMillisIn*1000);
                 ptIn.targetPcValue = float(currentPcTargetIn);
             
@@ -120,9 +120,9 @@ void EngineController::setThrottleProgramPoint(uint16_t autoSequenceTimeMillisIn
                 }
                         throttleProgram.insert((itPos),ptIn);
             }
-            }
+            //}
 
-        }
+        //}
         throttleProgramPos = throttleProgram.begin(); //sets/resets throttle program iterator
     }
 }

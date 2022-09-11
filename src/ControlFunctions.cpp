@@ -1583,7 +1583,7 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
                     engineController->setIgniter2Actuation(currentConfigMSG.int32Value);
                     break;
                 case 5:
-                    engineController->setThrottleProgramPoint(currentConfigMSG.uint16Value2X[0],currentConfigMSG.uint16Value2X[1]);
+                    engineController->setThrottleProgramPoint(currentConfigMSG.uint16Value2X[1],currentConfigMSG.uint16Value2X[2]);
                     break;
                 case 6:
                     engineController->throttleProgramReset();   //resets entire throttle program, wipes all points and goes back to only T=0 default

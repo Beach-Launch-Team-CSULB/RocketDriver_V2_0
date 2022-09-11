@@ -849,8 +849,8 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
-        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
-        generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+        //generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
+        //generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn);
         convertedValueUpdateTimer = 0;
     }
 
@@ -868,7 +868,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
 
     generateTankControllermsgs(Can0,tankPressControllerArray,propulsionNodeIDIn);
     generateEngineControllermsgs(Can0,engineControllerArray,propulsionNodeIDIn);
-    generateFluidSimmsgs(Can0, fluidSim, propulsionNodeIDIn);
+    //generateFluidSimmsgs(Can0, fluidSim, propulsionNodeIDIn);
     //reset external state change bool
     externalStateChange = false;
 }
