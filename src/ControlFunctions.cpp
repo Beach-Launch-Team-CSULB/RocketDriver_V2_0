@@ -687,33 +687,30 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
 #define IgnitionAutoSequence 0
 
 // sensorArray position defines for pointers
-#define ThrustMountLoadCell1pos_ArrayPointer 0
-#define ThrustMountLoadCell1neg_ArrayPointer 1
-#define ThrustMountLoadCell2pos_ArrayPointer 2
-#define ThrustMountLoadCell2neg_ArrayPointer 3
-#define ThrustMountLoadCell3pos_ArrayPointer 4
-#define ThrustMountLoadCell3neg_ArrayPointer 5
-#define ChamberPT2_ArrayPointer 6
-#define ChamberPT1_ArrayPointer 7
-#define FuelInletPropSidePT_ArrayPointer 8
-#define FuelInjectorPT_ArrayPointer 9
-#define LoxInletPropSidePT_ArrayPointer 10
-#define MVPneumaticsPT_ArrayPointer 11
-#define DomeRegFuelPT_ArrayPointer 12
-#define DomeRegLoxPT_ArrayPointer 13
-#define FuelTank1PT_ArrayPointer 14
-#define FuelTank2PT_ArrayPointer 15
-#define LoxTank1PT_ArrayPointer 16
-#define LoxTank2PT_ArrayPointer 17
-#define HiPressFuelPT_ArrayPointer 18
-#define HiPressLoxPT_ArrayPointer 19
+#define ThrustMountLoadCell1_ArrayPointer 0
+#define ThrustMountLoadCell2_ArrayPointer 2
+#define ThrustMountLoadCell3_ArrayPointer 4
+#define ChamberPT2_ArrayPointer 3
+#define ChamberPT1_ArrayPointer 4
+#define FuelInletPropSidePT_ArrayPointer 5
+#define FuelInjectorPT_ArrayPointer 6
+#define LoxInletPropSidePT_ArrayPointer 7
+#define MVPneumaticsPT_ArrayPointer 8
+#define DomeRegFuelPT_ArrayPointer 9
+#define DomeRegLoxPT_ArrayPointer 10
+#define FuelTank1PT_ArrayPointer 11
+#define FuelTank2PT_ArrayPointer 12
+#define LoxTank1PT_ArrayPointer 13
+#define LoxTank2PT_ArrayPointer 14
+#define HiPressFuelPT_ArrayPointer 15
+#define HiPressLoxPT_ArrayPointer 16
 
-#define FakeChamberPT1_ArrayPointer 20
-#define FakeFuelLinePT_ArrayPointer 21
-#define FakeLoxLinePT_ArrayPointer 22
-#define FakeFuelTankPT_ArrayPointer 23
-#define FakeLoxTankPT_ArrayPointer 24
-#define FakeHiPressPT_ArrayPointer 25
+#define FakeChamberPT1_ArrayPointer 17
+#define FakeFuelLinePT_ArrayPointer 18
+#define FakeLoxLinePT_ArrayPointer 19
+#define FakeFuelTankPT_ArrayPointer 20
+#define FakeLoxTankPT_ArrayPointer 22
+#define FakeHiPressPT_ArrayPointer 23
 
 // actuator position defines for pointers
 #define Engine1TVC_Y_ArrayPointer 0
@@ -1227,23 +1224,7 @@ void missionStateMachine(VehicleState& currentState, VehicleState& priorState, M
 void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, Command& currentCommand, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, bool & haltFlag)
 {
     cli(); // disables interrupts during controller sync to protect from partial propulsion system states
-        // Pasa Bang SF Config
-        // Lox Tank
-/*          valveArray.at(LoxBang_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPrimaryPressValveState());
-        tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang1(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getPressLineVentState());
-        valveArray.at(LoxVent_ArrayPointer)->setState(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTankVentState());
-        // Fuel Tank
-        valveArray.at(FuelBang_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState());
-        tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setPressVentLineStateBang2(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPressLineVentState());
-        valveArray.at(FuelVent_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTankVentState());
-        // COPV/High Press - RUN AFTER PROP TANKS (for now, not sure if necessary long term) - for bang controllers to sync vent line settings
-        valveArray.at(HiPressVent_ArrayPointer)->setState(tankPressControllerArray.at(HighPressTankController_ArrayPointer)->getPressLineVentState());
-         // Engine 1
-        valveArray.at(FuelMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVFuelValveState());
-        valveArray.at(LoxMV_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getPilotMVLoxValveState());
-        pyroArray.at(EngineIgniter1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter1State());
-        pyroArray.at(EngineIgniter2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getIgniter2State());
- */
+
         sensorArray.at(DomeRegFuelPT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelTank1PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelTank2PT_ArrayPointer)->setState(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getControllerSensorState());
@@ -1264,12 +1245,9 @@ void controllerDeviceSync(VehicleState& currentState, VehicleState& priorState, 
         sensorArray.at(ChamberPT1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(FuelInjectorPT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
         sensorArray.at(MVPneumaticsPT_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell1pos_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell1neg_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell2pos_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell2neg_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell3pos_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
-        sensorArray.at(ThrustMountLoadCell3neg_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(ThrustMountLoadCell1_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(ThrustMountLoadCell2_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
+        sensorArray.at(ThrustMountLoadCell3_ArrayPointer)->setState(engineControllerArray.at(Engine1Controller_ArrayPointer)->getControllerSensorState());
   
         fluidSim.FuelTank.SetValveStates(
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->getPrimaryPressValveState(),

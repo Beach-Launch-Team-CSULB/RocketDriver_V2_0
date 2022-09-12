@@ -10,22 +10,9 @@
 #include "fluidSystemSimulation.h"
 #include "ALARAUtilityFunctions.h"
 
-//using std::string;
 
 //Declaring setup of the ADC itself for main to find it
-void MCUADCSetup(ADC& adc);
-
-///// MOVE THIS STUFF FOR NEW POLYMORPHISM SENSOR STRUCTURE /////
-// enum for holding sensor types
-/* enum SensorType
-{
-  pt,
-  loadcellOneWireRead,
-  KtypeTC,
-  TtypeTC,
-  rtd,
-}; */
-
+void MCUADCSetup(ADC& adc, ADC_REFERENCE refIn0, ADC_REFERENCE refIn1, uint8_t averagesIn0, uint8_t averagesIn1);
 
 class EXT_SENSOR : public SENSORBASE
 {
@@ -84,6 +71,10 @@ class EXT_SENSOR : public SENSORBASE
 
     bool enableIntegralCalc = false;
     bool enableLinearRegressionCalc = true; //not currently using, linreg only calculates when get func requests it
+    float maxIntegralSum_Default;
+    float minIntegralSum_Default;
+    float maxIntegralSum;
+    float minIntegralSum;
     float currentIntegralSum = 0;
     float currentLinReg_a1 = 0;
     const uint32_t regressionSamples_Default = 5;
@@ -101,9 +92,9 @@ class EXT_SENSOR : public SENSORBASE
     void stateOperations();
     
     // constructor 1 - standard MCU external ADC read
-    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, float setMaxIntegralSum_Default = 2500, float setMinIntegralSum_Default = -2500, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
     // constructor 2 - simulated sensor object
-    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, ADCType setSensorSource = simulatedInput);
+    EXT_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, FluidSystemSimulation* setFluidSim, float setMaxIntegralSum_Default = 2500, float setMinIntegralSum_Default = -2500, ADCType setSensorSource = simulatedInput);
 
     // Access functions defined in place
     uint32_t getSensorID(){return sensorID;}
@@ -126,7 +117,8 @@ class EXT_SENSOR : public SENSORBASE
     bool getNewSensorConversionCheck(){return newConversionCheck;}
     bool getEnableLinearRegressionCalc(){return enableLinearRegressionCalc;}
     bool getEnableIntegralCalc(){return enableIntegralCalc;}
-    
+    float getMaxIntegralSum(){return maxIntegralSum;}
+    float getMinIntegralSum(){return minIntegralSum;}
     
     float getEMAConvertedValue(){return newEMAOutput;}
     float getIntegralSum(){return currentIntegralSum;}
@@ -173,6 +165,9 @@ class EXT_SENSOR : public SENSORBASE
     void setSampleRateMedMode(uint32_t updateSampleRateMedMode) {if(updateSampleRateMedMode<=2000){sampleRateMedMode = updateSampleRateMedMode;}}
     void setSampleRateFastMode(uint32_t updateSampleRateFastMode) {if(updateSampleRateFastMode<=2000){sampleRateFastMode = updateSampleRateFastMode;}}
     void setAlphaEMA(float alphaEMAIn){if(alphaEMAIn >0 && alphaEMAIn <=1){alphaEMA = alphaEMAIn;}}
+    void setMaxIntegralSum(float maxIntegralSumIn){maxIntegralSum = maxIntegralSumIn;}
+    void setMinIntegralSum(float minIntegralSumIn){maxIntegralSum = minIntegralSumIn;}
+
     //void setRegressionSamples():???
     
     void setTargetValue(float targetValueIn){targetValue = targetValueIn;}

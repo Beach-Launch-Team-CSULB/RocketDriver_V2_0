@@ -30,9 +30,11 @@ class SENSORBASE
     virtual uint32_t getSensorID();
     virtual uint32_t getSensorNodeID();
     virtual uint32_t getADCinput();
+    //virtual uint32_t getADCinput(bool input1);
     virtual uint32_t getCurrentSampleRate();
     virtual uint32_t getCurrentRawValue();
     virtual uint32_t getCurrentRawValue(bool resetRawRead);
+    //virtual uint32_t getCurrentRawValue(bool input1, bool resetRawRead);
     virtual float getCurrentConvertedValue();
     virtual float getCurrentConvertedValue(bool resetConvertedRead);
     virtual uint16_t getCANTimestamp();
@@ -47,7 +49,8 @@ class SENSORBASE
     virtual bool getNewSensorConversionCheck();
     virtual bool getEnableLinearRegressionCalc();
     virtual bool getEnableIntegralCalc();
-    
+    virtual float getMaxIntegralSum();
+    virtual float getMinIntegralSum();
     virtual void setNodeIDCheck(bool updatedNodeIDCheck);
     virtual void setState(SensorState newState);
     virtual void setSYSTimestamp(uint32_t timestampSeconds, uint32_t timestampMicros);

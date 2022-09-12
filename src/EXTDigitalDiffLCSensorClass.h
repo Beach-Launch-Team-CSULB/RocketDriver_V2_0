@@ -1,5 +1,5 @@
-#ifndef ALARAHPSENSORCLASS_H
-#define ALARAHPSENSORCLASS_H
+#ifndef EXTDIGITALDIFFLCSENSORCLASS_H
+#define EXTDIGITALDIFFLCSENSORCLASS_H
 
 #include <Arduino.h>
 #include <string>
@@ -7,9 +7,10 @@
 #include <ADC.h>
 #include "SensorStates.h"
 #include "SensorClass.h"
-//#include "ALARAUtilityFunctions.h"
+#include "fluidSystemSimulation.h"
+#include "ALARAUtilityFunctions.h"
 
-class ALARAHP_SENSOR : public SENSORBASE
+class DIG_LC_SENSOR : public SENSORBASE
 {
   private:
     const uint32_t sensorID;
@@ -17,18 +18,23 @@ class ALARAHP_SENSOR : public SENSORBASE
     ADCType sensorSource = TeensyMCUADC;  //default source here is Teensy ADC
     //const string sens_name;           //your own name for sensor to reference it
     SensorState sensorState;
-    uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
+    uint8_t ADCinput1;               //the input that will be read for this sensor that will get used in the ADC read main loop
+    uint8_t ADCinput2;               //the input that will be read for this sensor that will get used in the ADC read main loop
     const uint32_t sampleRateSlowMode_Default = 1;        //the sample rate this given sensor will be read at
-    const uint32_t sampleRateMedMode_Default = 4;         //the sample rate this given sensor will be read at
-    const uint32_t sampleRateFastMode_Default = 25;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateMedMode_Default = 10;         //the sample rate this given sensor will be read at
+    const uint32_t sampleRateFastMode_Default = 200;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode_Default = 10;        //the sample rate this given sensor will be read at
+    const uint32_t conversionSendRate_Default = 100;        //the sample rate this given sensor will be read at
     uint32_t sampleRateSlowMode;        //the sample rate this given sensor will be read at
     uint32_t sampleRateMedMode;         //the sample rate this given sensor will be read at
     uint32_t sampleRateFastMode;        //the sample rate this given sensor will be read at
     uint32_t sampleRateCalibrationMode;        //the sample rate this given sensor will be read at
+    uint32_t conversionSendRate;        //the sample rate this given sensor will be read at
     uint32_t currentSampleRate = 10;
     elapsedMicros timer;                      // timer for sensor timing operations
-    uint32_t currentRawValue{};               // holds the current value for the sensor
+    uint32_t currentRawValue1{};               // holds the current value for the sensor
+    uint32_t currentRawValue2{};               // holds the current value for the sensor
+    uint32_t currentRawDiffValue{};               // holds the current value for the sensor
     bool newSensorValueCheck_CAN = false;                      // Is the current raw value a new read that hasn't been sent yet?
     bool newSensorConvertedValueCheck_CAN = false;                      // Is the current raw value a new read that hasn't been sent yet?
     bool newSensorValueCheck_Log = false;                      // Is the current raw value a new read that hasn't been sent yet?
@@ -75,10 +81,10 @@ class ALARAHP_SENSOR : public SENSORBASE
     const uint32_t regressionSamples_Default = 5;
     uint32_t regressionSamples;
     float convertedValueArray[5+3] = {};  //should be the same size as regression samples +3 for rolling array index stuff
-    float timeStep = 0.01; //timeStep in seconds
+    float timeStep = 0.01; //timeStep in seconds, placeholder value
     float targetValue = 0;
-
-    //ADC& adc;
+  
+  FluidSystemSimulation &fluidSim;
 
   public:
     bool pullTimestamp = false;
@@ -87,18 +93,18 @@ class ALARAHP_SENSOR : public SENSORBASE
     void stateOperations();
     
     // constructor 1 - standard MCU external ADC read
-    //ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, ADC* setADC, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
-    //ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
-    ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Slow);
-    // constructor 2 - simulated sensor object
+    DIG_LC_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput1, uint8_t setADCinput2, FluidSystemSimulation* setFluidSim, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, uint32_t setConversionSendRate_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, float setMaxIntegralSum_Default = 2500, float setMinIntegralSum_Default = -2500, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off);
 
     // Access functions defined in place
     uint32_t getSensorID(){return sensorID;}
     uint32_t getSensorNodeID(){return sensorNodeID;}
-    uint32_t getADCinput(){return ADCinput;}
+    uint32_t getADCinput(){return ADCinput1;}
+    uint32_t getADCinput2(){return ADCinput2;}
     uint32_t getCurrentSampleRate(){return currentSampleRate;}
-    uint32_t getCurrentRawValue(){return currentRawValue;}
-    uint32_t getCurrentRawValue(bool resetRawRead){if (resetRawRead) {newSensorValueCheck_CAN = false;} return currentRawValue;} //reads and clears new value bool
+    uint32_t getCurrentRawValue(){return currentRawValue1;}
+    //uint32_t getCurrentRawValue(){return currentRawValue2;}
+    uint32_t getCurrentRawValue(bool resetRawRead){if (resetRawRead) {newSensorValueCheck_CAN = false;} return currentRawValue1;} //reads and clears new value bool
+    uint32_t getCurrentRawValue(bool input1, bool resetRawRead){if (resetRawRead) {newSensorValueCheck_CAN = false;} if (!input1) {return currentRawValue1;} else{return currentRawValue2;};} //reads and clears new value bool
     float getCurrentConvertedValue(){return currentConvertedValue;}
     //float getCurrentConvertedValue(bool resetConvertedRead){if (resetConvertedRead) {newSensorConvertedValueCheck_CAN = false;} return currentConvertedValue;} //reads and clears new value bool
     float getCurrentConvertedValue(bool resetConvertedRead){if (resetConvertedRead) {newConversionCheck = false;} return currentConvertedValue;} //reads and clears new value bool
@@ -134,7 +140,8 @@ class ALARAHP_SENSOR : public SENSORBASE
     // set the Node ID Check bool function
     void setNodeIDCheck(bool updatedNodeIDCheck) {nodeIDCheck = updatedNodeIDCheck;}
 
-    void setCurrentRawValue(uint32_t updateCurrentRawValue){currentRawValue = updateCurrentRawValue;}
+    //Why is set raw value here again?
+    void setCurrentRawValue(uint32_t updateCurrentRawValue){currentRawValue1 = updateCurrentRawValue;}
     //resets both the CAN and log bools for when new sample is read
     void setNewSensorValueCheck(bool updateNewSensorValueCheck){newSensorValueCheck_CAN = updateNewSensorValueCheck; newSensorValueCheck_Log = updateNewSensorValueCheck;}
 
@@ -163,6 +170,7 @@ class ALARAHP_SENSOR : public SENSORBASE
     void setAlphaEMA(float alphaEMAIn){if(alphaEMAIn >0 && alphaEMAIn <=1){alphaEMA = alphaEMAIn;}}
     void setMaxIntegralSum(float maxIntegralSumIn){maxIntegralSum = maxIntegralSumIn;}
     void setMinIntegralSum(float minIntegralSumIn){maxIntegralSum = minIntegralSumIn;}
+    
     //void setRegressionSamples():???
     
     void setTargetValue(float targetValueIn){targetValue = targetValueIn;}
@@ -187,7 +195,31 @@ class ALARAHP_SENSOR : public SENSORBASE
 
     void accumulatedI_float();
 
+
+/*     //void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
+    void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
+      {
+        rollingSensorArrayRaw[arrayPosition] = sensorValueToArray;
+        arrayPosition++;
+      } */
+
+/*     void setCurrentCalibrationValue()
+    {
+    for (size_t i = 0; i < 10; i++)
+    {
+      currentRunningSUM = currentRunningSUM + rollingSensorArrayRaw[i];
+    }
+    currentCalibrationValue = currentRunningSUM / 10;
+    } */
+    //};
 };
+
+// need to add differential read toggle somehow 
+// - differential boolean variable that allows second input to be chosen or defaulted to correct option
+// need to add a way to set other SENSOR types like the RTD sensors over I2C (we'd probably want multiple classes. ADCsensors, I2C sensors, SPI sensors etc - Mat)
+// - maybe not the right call to roll into this? Hmm. Need to establish use of SENSOR class with sample rates and real read/sends to see what is better
+// That will set me up for incorporating the external ADCs later
+
 
 
 #endif

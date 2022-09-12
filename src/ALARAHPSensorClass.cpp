@@ -400,5 +400,13 @@ float timeStepAccumI = 0;
         Serial.println(timeStepAccumI,10); */
 
         currentIntegralSum += timeStepAccumI * (((currentConvertedValue - targetValue) + (priorConvertedValue - targetValue))/2);
+        if (currentIntegralSum >= maxIntegralSum)
+        {
+          currentIntegralSum = maxIntegralSum;
+        }
+        else if (currentIntegralSum <= minIntegralSum)
+        {
+          currentIntegralSum = minIntegralSum;
+        }
     }
 }

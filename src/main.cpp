@@ -56,6 +56,11 @@ using std::string;
 
 ///// ADC /////
 ADC* adc = new ADC();
+// All ALARA boards need to be set to REF_1V2
+ADC_REFERENCE ref0 = ADC_REFERENCE::REF_1V2;
+ADC_REFERENCE ref1 = ADC_REFERENCE::REF_1V2;
+uint8_t averages0 = 4;
+uint8_t averages1 = 4;
 
 MS5607 ALARAbaro;
 
@@ -68,6 +73,7 @@ elapsedMillis mainLoopTestingTimer;
 elapsedMillis ezModeControllerTimer;
 elapsedMillis commandExecuteTimer;
 elapsedMillis shittyCANTimer;
+elapsedMillis crashTimer;
 
 //For use in doing serial inputs as CAN commands for testing
 uint8_t fakeCANmsg; //CAN2.0 byte array, first 4 bytes are ID field for full extended ID compatibility
@@ -105,6 +111,7 @@ elapsedMillis sinceLED;
 CAN_message_t message;
 CAN_message_t rxmsg;
 CAN_message_t extended;
+CAN_stats_t Can0stats;
 bool CANSensorReportConverted = false;
 bool NewCommandMessage{false};
 bool NewConfigMessage{false};
@@ -201,7 +208,14 @@ void setup() {
   Can0.begin(CAN2busSpeed);
 
   // -----Initialize ADCs-----
-  MCUADCSetup(*adc);
+  // Quick and dirty way to setup unique ADC use case on the LC/TC Teensy node
+  #ifdef TEENSY3_X
+    ref0 = ADC_REFERENCE::REF_1V2;
+    ref1 = ADC_REFERENCE::REF_3V3;
+    averages0 = 32;
+    averages1 = 32;
+  #endif
+  MCUADCSetup(*adc, ref0, ref1, averages0, averages1);
 
   // -----Run Valve PropulsionSysNodeID Check-----
   ValveNodeIDCheck(valveArray, PropulsionSysNodeID);
@@ -248,6 +262,7 @@ void setup() {
   SerialUSBdataController.setPropStatusPrints(true);
   SerialUSBdataController.setPropCSVStreamPrints(false);
   pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
+  Can0.startStats();
 }
 
 void loop() 
@@ -374,11 +389,14 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   cli(); // disables interrupts to ensure complete propulsion output state is driven
   valveTasks(valveArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
   pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
+  //MUST KEEP HP OVERRIDE AFTER VALVE/PYRO TASKS
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
   sei(); // reenables interrupts after propulsion output state set is completed
+  //Serial.println("Do I get past valveTasks,PyroTasks, and HPOverride?");
   sensorTasks(sensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  //Serial.println("Do I get past sensorTasks?");
   ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
-
+  //Serial.println("Do I get past HPsensorTasks?");
   // -----Update States on EEPROM -----
   //change to only write if something new to write!!! Make wrapper function that checks for new info?
   //tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
@@ -396,10 +414,16 @@ if (shittyCANTimer >= 1000)
   shittyCANTimer = 0;
 }
   
-  Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
-  
+  //Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
+/*   Serial.println("Do I get past Can2 controllerTasks?");
+  Can0stats = Can0.getStats();
+  Serial.print("Can0stats.ringRxMax? ");
+  Serial.println(Can0stats.ringRxMax);
+  Serial.print("Can0stats.ringTxHighWater? ");
+  Serial.println(Can0stats.ringTxHighWater); */
+
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 10)
+  if (mainLoopTestingTimer >= 250)
   {
   
 /*     for(auto sensor : HPsensorArray)
@@ -447,4 +471,7 @@ uint8_t NodeIDAddressRead;
   Serial.print("nodeID Read: ");
   Serial.println(NodeIDAddressRead);
  */
+//Serial.print(" Crash Timer Millis: ");
+//Serial.println(crashTimer);
+
 }

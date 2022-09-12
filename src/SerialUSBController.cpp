@@ -16,7 +16,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
 
 //vectorBufferPrintout();
 
-  Serial.print(" currentConfigMSG :");
+/*   Serial.print(" currentConfigMSG :");
   Serial.print(" targetID :");
   Serial.print(currentConfigMSG.TargetObjectID);
   Serial.print(" settingID:");
@@ -24,9 +24,9 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
   Serial.print(" float:");
   Serial.print(currentConfigMSG.floatValue);
   Serial.print(" uint8:");
-  Serial.print(currentConfigMSG.uint8Value);
+  Serial.print(currentConfigMSG.uint8Value); */
 
-  Serial.println();
+/*   Serial.println();
   Serial.print(fluidSim.TimeDelta, 10);
   Serial.print(" : ");
   Serial.print(fluidSim.FuelTank.CurrPressure/6895, 5);
@@ -34,7 +34,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
   Serial.print(fluidSim.LoxTank.CurrPressure/6895, 5);
   Serial.print(" : ");
   Serial.print(fluidSim.HiPressTank.CurrPressure/6895, 5);
-  Serial.println(" fluid sim update ran");
+  Serial.println(" fluid sim update ran"); */
 
     for(auto tankPressController : tankPressControllerArray)
     {
@@ -90,14 +90,14 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(static_cast<uint8_t>(engineController->getIgniter2State()));
             Serial.println(": ");
 
-            for (auto i = engineController->throttleProgram.begin(); i != engineController->throttleProgram.end(); ++i)
+/*             for (auto i = engineController->throttleProgram.begin(); i != engineController->throttleProgram.end(); ++i)
             {
                 Serial.print(" throttle program point: ");
                 Serial.print(" time: ");
                 Serial.print(i->autoSequenceTimeValue);
                 Serial.print(" Pc: ");
                 Serial.println(i->targetPcValue);
-            }
+            } */
 
     }
     
@@ -112,12 +112,12 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
         {
             Serial.print(" ValveID: ");
             Serial.print(static_cast<uint8_t>(valve->getValveID()));
-            Serial.print( ": priorState: ");
-            Serial.print(static_cast<uint8_t>(valve->getPriorState()));
+            //Serial.print( ": priorState: ");
+            //Serial.print(static_cast<uint8_t>(valve->getPriorState()));
             Serial.print( ": ValveState: ");
             Serial.print(static_cast<uint8_t>(valve->getState()));
-            Serial.print( ": firesequenceactuationtime: ");
-            Serial.print(valve->getFireTime());
+            //Serial.print( ": firesequenceactuationtime: ");
+            //Serial.print(valve->getFireTime());
             //Serial.print(": ");
 /*             Serial.print( ": ValveType: ");
             Serial.print(static_cast<uint8_t>(valve->getValveType()));
@@ -145,8 +145,8 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(static_cast<uint8_t>(pyro->getPyroID()));
             Serial.print( ": PyroState:  ");
             Serial.print(static_cast<uint8_t>(pyro->getState()));
-            Serial.print( ": firesequenceactuationtime: ");
-            Serial.print(pyro->getFireTime());
+            //Serial.print( ": firesequenceactuationtime: ");
+            //Serial.print(pyro->getFireTime());
 /*             Serial.print( ": HP Channel: ");
             Serial.print(pyro->getHPChannel());
             Serial.print( ": PinDigital: ");
@@ -183,16 +183,16 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(sensor->getCurrentConvertedValue(),10);
             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
-            Serial.print( ": Integral Enabled: ");
-            Serial.print(sensor->getEnableIntegralCalc());
-            Serial.print( ": I: ");
-            Serial.print(sensor->getIntegralSum(),10);
+            //Serial.print( ": Integral Enabled: ");
+            //Serial.print(sensor->getEnableIntegralCalc());
+            //Serial.print( ": I: ");
+            //Serial.print(sensor->getIntegralSum(),10);
             //if (sensor->getEnableLinearRegressionCalc())
             //{
-            Serial.print( ": LinReg Enabled: ");
-            Serial.print(sensor->getEnableLinearRegressionCalc());
-            Serial.print( ": D: ");
-            Serial.print(sensor->getLinRegSlope(),10);
+            //Serial.print( ": LinReg Enabled: ");
+            //Serial.print(sensor->getEnableLinearRegressionCalc());
+            //Serial.print( ": D: ");
+            //Serial.print(sensor->getLinRegSlope(),10);
             //}
             Serial.println(": ");
         }

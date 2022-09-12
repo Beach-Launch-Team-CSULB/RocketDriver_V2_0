@@ -54,7 +54,7 @@ void configMSGread(configMSG& currentConfigMSG, bool& NewConfigMessage, const st
 #define NUM_VALVES 10
 #define NUM_PYROS 2
 #define NUM_AUTOSEQUENCES 1
-#define NUM_SENSORS 26
+#define NUM_SENSORS 23
 #define NUM_HPSENSORS 20
 #define NUMINTERNAL_SENSORS 13      // On EACH ALARA
 #define NUM_TANKPRESSCONTROLLERS 3
