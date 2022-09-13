@@ -52,10 +52,11 @@ enum class EngineControllerState
 enum class ALARAV2SensorControllerState
 {
     Passive,                    // 0
-    Active,                     // 1
-    GNCOnly,                    // 2
-    InternalOnly,               // 3
-    ControllerState_SIZE,       // 4
+    Standby,                    // 1
+    Active,                     // 2
+    GNCOnly,                    // 3
+    InternalOnly,               // 4
+    ControllerState_SIZE,       // 5
 };
 
 #endif

@@ -3,60 +3,8 @@
 #include <ADC.h>
 #include <array>
 
-//#include <ADC_util.h>
-
-//using std::string;
-
-/* ///// ADC /////
-ADC* adc = new ADC();
-
-void MCUADCSetup()
-{ 
-//Ideally get some conditionals here for which MCU it is so this is compatible at least also with Teensy LC
-
-///// ADC0 /////
-  // reference can be ADC_REFERENCE::REF_3V3, ADC_REFERENCE::REF_1V2 or ADC_REFERENCE::REF_EXT.
-  //adc->setReference(ADC_REFERENCE::REF_1V2, ADC_0); // change all 3.3 to 1.2 if you change the reference to 1V2
-
-  adc->adc0->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc0->setAveraging(4);                                    // set number of averages
-  adc->adc0->setResolution(16);                                   // set bits of resolution
-  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
-  adc->adc0->recalibrate();
-
-///// ADC1 /////
-  adc->adc1->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc1->setAveraging(4);                                    // set number of averages
-  adc->adc1->setResolution(16);                                   // set bits of resolution
-  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);     // change the sampling speed
-  adc->adc1->recalibrate();
-
-} */
-
 
 // Initializer 1
-/* ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, uint32_t setSampleRateSlowMode_Default, uint32_t setSampleRateMedMode_Default, uint32_t setSampleRateFastMode_Default, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Off)
-                : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, sampleRateSlowMode_Default{setSampleRateSlowMode_Default}, sampleRateMedMode_Default{setSampleRateMedMode_Default}, sampleRateFastMode_Default{setSampleRateFastMode_Default}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
-{
-  // setting stuff to defaults at initialization
-  sampleRateSlowMode = sampleRateSlowMode_Default;
-  sampleRateMedMode = sampleRateMedMode_Default;
-  sampleRateFastMode = sampleRateFastMode_Default;
-  sampleRateCalibrationMode = sampleRateCalibrationMode_Default;
-
-  linConvCoef1_m = linConvCoef1_m_Default;
-  linConvCoef1_b = linConvCoef1_b_Default;
-  linConvCoef2_m = linConvCoef2_m_Default;
-  linConvCoef2_b = linConvCoef2_b_Default;
-
-  EMA = EMA_Default;
-  alphaEMA = alphaEMA_Default;
-  regressionSamples = regressionSamples_Default;
-} */
-
-// Initializer 2
 ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Slow)
                 : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
 {

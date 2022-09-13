@@ -7,6 +7,7 @@
 #include "SensorStates.h"
 #include "PyroStates.h"
 #include "ALARASNConfigurations.h"
+#include "ALARAHPSensorClass.h"
 
 class ALARAV2SensorController
 {
@@ -18,6 +19,7 @@ class ALARAV2SensorController
         ALARAV2SensorControllerState priorState;
         SensorState sensorStateInternal;                    // Use one sensor state inside here to toggle all sensors on controller
         SensorState sensorStateGNC;                    // Use one sensor state inside here to toggle all sensors on controller
+        SensorState sensorStateALARAHP;                    // Use one sensor state inside here to toggle all sensors on controller
         
         // bools for if the possible on board sensors are active
         // set default as false and flip to true based on board configuration and use case  
@@ -30,6 +32,18 @@ class ALARAV2SensorController
         bool ALARA_VINRail_active;
         bool ALARA_5VRail_active;
         bool ALARA_3V3Rail_active;
+
+/*         ALARAHP_SENSOR &HP1;
+        ALARAHP_SENSOR &HP2;
+        ALARAHP_SENSOR &HP3;
+        ALARAHP_SENSOR &HP4;
+        ALARAHP_SENSOR &HP5;
+        ALARAHP_SENSOR &HP6;
+        ALARAHP_SENSOR &HP7;
+        ALARAHP_SENSOR &HP8;
+        ALARAHP_SENSOR &HP9;
+        ALARAHP_SENSOR &HP10; */
+        
     public:
     
     // constructor
@@ -38,6 +52,7 @@ class ALARAV2SensorController
                                 bool setALARA_VINRail_active = false, bool setALARA_5VRail_active = false, bool setALARA_3V3Rail_active = false);
     // a start up method, to set pins from within setup()
         void begin();
+        //void setALARAHPSensors(ALARAHP_SENSOR* setHP1, ALARAHP_SENSOR* setHP2, ALARAHP_SENSOR* setHP3,ALARAHP_SENSOR* setHP4, ALARAHP_SENSOR* setHP5, ALARAHP_SENSOR* setHP6,ALARAHP_SENSOR* setHP7, ALARAHP_SENSOR* setHP8, ALARAHP_SENSOR* setHP9, ALARAHP_SENSOR* setHP10);
 
     // get functions, return the current value of that variable
         uint32_t getControllerID(){return controllerID;}

@@ -263,6 +263,7 @@ void setup() {
   SerialUSBdataController.setPropCSVStreamPrints(false);
   pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
   Can0.startStats();
+  Can0.setTxBufferSize(64);
 }
 
 void loop() 
@@ -414,7 +415,7 @@ if (shittyCANTimer >= 1000)
   shittyCANTimer = 0;
 }
   
-  //Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
+  Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
 /*   Serial.println("Do I get past Can2 controllerTasks?");
   Can0stats = Can0.getStats();
   Serial.print("Can0stats.ringRxMax? ");
@@ -454,6 +455,8 @@ if (shittyCANTimer >= 1000)
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
+  Serial.print(" Crash Timer Millis: ");
+  Serial.println(crashTimer);
   }
 
 // Resets the startup bool, DO NOT REMOVE

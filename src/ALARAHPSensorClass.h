@@ -18,9 +18,9 @@ class ALARAHP_SENSOR : public SENSORBASE
     //const string sens_name;           //your own name for sensor to reference it
     SensorState sensorState;
     uint8_t ADCinput;               //the input that will be read for this sensor that will get used in the ADC read main loop
-    const uint32_t sampleRateSlowMode_Default = 1;        //the sample rate this given sensor will be read at
-    const uint32_t sampleRateMedMode_Default = 4;         //the sample rate this given sensor will be read at
-    const uint32_t sampleRateFastMode_Default = 25;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateSlowMode_Default = 2;        //the sample rate this given sensor will be read at
+    const uint32_t sampleRateMedMode_Default = 5;         //the sample rate this given sensor will be read at
+    const uint32_t sampleRateFastMode_Default = 10;        //the sample rate this given sensor will be read at
     const uint32_t sampleRateCalibrationMode_Default = 10;        //the sample rate this given sensor will be read at
     uint32_t sampleRateSlowMode;        //the sample rate this given sensor will be read at
     uint32_t sampleRateMedMode;         //the sample rate this given sensor will be read at

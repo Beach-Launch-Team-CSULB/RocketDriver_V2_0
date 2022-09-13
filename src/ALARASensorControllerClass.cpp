@@ -15,6 +15,22 @@ void ALARAV2SensorController::begin()
     }
 }
 
+/* void ALARAV2SensorController::setALARAHPSensors(ALARAHP_SENSOR* setHP1, ALARAHP_SENSOR* setHP2, ALARAHP_SENSOR* setHP3,ALARAHP_SENSOR* setHP4, ALARAHP_SENSOR* setHP5, ALARAHP_SENSOR* setHP6,ALARAHP_SENSOR* setHP7, ALARAHP_SENSOR* setHP8, ALARAHP_SENSOR* setHP9, ALARAHP_SENSOR* setHP10)
+{
+    // won't work, these objects are only inside this scope. I was hoping to dodge shitty constructor here but odn't see how
+    ALARAHP_SENSOR &HP1 = *setHP1;
+    ALARAHP_SENSOR &HP2 = *setHP2;
+    ALARAHP_SENSOR &HP3 = *setHP3;
+    ALARAHP_SENSOR &HP4 = *setHP4;
+    ALARAHP_SENSOR &HP5 = *setHP5;
+    ALARAHP_SENSOR &HP6 = *setHP6;
+    ALARAHP_SENSOR &HP7 = *setHP7;
+    ALARAHP_SENSOR &HP8 = *setHP8;
+    ALARAHP_SENSOR &HP9 = *setHP9;
+    ALARAHP_SENSOR &HP10 = *setHP10;
+}
+ */
+
 void ALARAV2SensorController::resetTimer()
 {
     //timer = 0;
@@ -22,7 +38,28 @@ void ALARAV2SensorController::resetTimer()
 
 void ALARAV2SensorController::stateOperations()
 {
+    switch (state)
+    {
+    case ALARAV2SensorControllerState::Passive:
+        sensorStateInternal = SensorState::Off;
+        sensorStateALARAHP = SensorState::Off;
+        break;
+    case ALARAV2SensorControllerState::Standby:
+        sensorStateInternal = SensorState::Slow;
+        sensorStateALARAHP = SensorState::Slow;
+        break;
+    case ALARAV2SensorControllerState::Active:
+        sensorStateInternal = SensorState::Fast;
+        sensorStateALARAHP = SensorState::Fast;
+        break;
+    case ALARAV2SensorControllerState::InternalOnly:
+        sensorStateInternal = SensorState::Fast;
+        sensorStateALARAHP = SensorState::Off;
+        break;
     
+    default:
+        break;
+    }
 }
 
 void ALARAV2SensorController::ALARAconfigurationSensorSet(ALARASN& thisALARA)
@@ -53,7 +90,7 @@ void ALARAV2SensorController::ALARAconfigurationSensorSet(ALARASN& thisALARA)
     }
     if (thisALARA.boardRev == ALARAversion::V2_1)          // ALARA V2_1
     {
-        ALARA_VINRail_active = true;
+        ALARA_VINRail_active = true; //Did this make it to V2_1 production??
         ALARA_5VRail_active = true;
         ALARA_3V3Rail_active = true;
     }
