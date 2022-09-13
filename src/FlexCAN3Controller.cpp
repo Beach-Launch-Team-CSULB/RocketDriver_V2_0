@@ -452,7 +452,7 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
             //Serial.print(" :i of msg loop: ");
             //Serial.println(i);
             
-            for (auto sensor : HPsensorArray)
+/*             for (auto sensor : HPsensorArray)
             {
                 if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorConversionCheck()) // if on this node and a new value to send
                 {
@@ -480,7 +480,7 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
                     }
                 }
             }
-            
+ */            
             for (auto sensor : sensorArray)
             {
             // check to see if we've reached last element in array
@@ -538,6 +538,137 @@ bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std:
 
         }
 
+            //Serial.print("do I get past i loop");
+            //Serial.println(sensorReadStruct.numberSensors);
+    sensorReadStruct.packedSensorCAN2.flags.extended = 1;
+    sensorReadStruct.packedSensorCAN2.flags.remote = 0;
+    sensorReadStruct.packedSensorCAN2.id = sensorReadStruct.sensorID[0] + ((uint64_t(sensorReadStruct.sensorTimestampMicros[0])*uint64_t(max18bitvalue)/10000000) << 11);
+
+    //below values are total frame bits including all overhead for this format using extended ID and the number of data bytes
+    if (sensorReadStruct.numberSensors == 1)
+    {
+    sensorReadStruct.packedSensorCAN2.len = 2;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    }
+    else if (sensorReadStruct.numberSensors == 2)
+    {
+    sensorReadStruct.packedSensorCAN2.len = 5;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
+    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1];
+    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1] >> 8;
+    }
+    else if (sensorReadStruct.numberSensors == 3)
+    {
+    sensorReadStruct.packedSensorCAN2.len = 8;
+    sensorReadStruct.packedSensorCAN2.buf[1] = sensorReadStruct.sensorConvertedValue[0];
+    sensorReadStruct.packedSensorCAN2.buf[0] = sensorReadStruct.sensorConvertedValue[0] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[2] = sensorReadStruct.sensorID[1];
+    sensorReadStruct.packedSensorCAN2.buf[4] = sensorReadStruct.sensorConvertedValue[1];
+    sensorReadStruct.packedSensorCAN2.buf[3] = sensorReadStruct.sensorConvertedValue[1] >> 8;
+    sensorReadStruct.packedSensorCAN2.buf[5] = sensorReadStruct.sensorID[2];
+    sensorReadStruct.packedSensorCAN2.buf[7] = sensorReadStruct.sensorConvertedValue[2];
+    sensorReadStruct.packedSensorCAN2.buf[6] = sensorReadStruct.sensorConvertedValue[2] >> 8;
+    }
+
+    sensorReadStruct.frameTotalBits = standardIDCAN2TotalBits[sensorReadStruct.packedSensorCAN2.flags.extended + 1][sensorReadStruct.packedSensorCAN2.len];
+
+
+    // write message to bus - for now just write immediately out of this function
+    // long term I think it's better for this to return the struct and have parent function use it to run through all the sensors ready to read each loop
+    if (sensorReadStruct.numberSensors >= 1)
+    {
+/*     Serial.println(" do I get to send Converted CAN msg ");
+            Serial.print(sensorReadStruct.numberSensors);
+            Serial.print(" id: ");
+            Serial.print(sensorReadStruct.packedSensorCAN2.id);
+            Serial.print(" timestamp: ");
+            Serial.print(sensorReadStruct.sensorTimestampMicros[0]);
+            
+        for (size_t i = 0; i < sensorReadStruct.packedSensorCAN2.len; i++)
+        {
+            Serial.print(" : ");
+            Serial.print(sensorReadStruct.packedSensorCAN2.buf[i]);
+            Serial.print(" : ");
+        }
+        Serial.println(); */
+        
+
+    //CANbus.write(sensorReadStruct.packedSensorCAN2);
+    }
+
+    if (sensorReadStruct.numberSensors >= 1)
+    {
+    CANbus.write(sensorReadStruct.packedSensorCAN2);
+    }
+    //}
+    return samplesRemaining;
+}
+
+bool FlexCan3Controller::generateConvertedSensormsgs(FlexCAN& CANbus, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
+{
+        bool samplesRemaining = true;
+        bool isFirstSample = true;
+        ALARA_ConvertedSensorReadmsg sensorReadStruct;
+
+        sensorReadStruct.timestampTolerance = 1000000; //anything within 10 Hz window is good enough for packing converted values together
+        uint32_t currentIteratoinTimeStamp = 0;
+        // grab up to 3 samples
+        for (size_t i = 0; i < 3;)
+        {
+            //Serial.print(" :i of msg loop: ");
+            //Serial.println(i);
+            
+            for (auto sensor : HPsensorArray)
+            {
+            // check to see if we've reached last element in array
+            if (!HPsensorArray.empty())
+            {
+                if (sensor == HPsensorArray.back())
+                {
+                    //Serial.print("Did I reach the last element of HPsensorArray??? ");
+                    //Serial.print(" sensorID: ");
+                    //Serial.println(sensor->getSensorID());
+                    samplesRemaining = false;
+                }
+            }
+            else   
+            {
+                // In case that the sensorArray is empty, don't want to hang while loop
+                samplesRemaining = false;
+            }
+            // Grab sensor values
+                if (sensor->getSensorNodeID() == propulsionNodeIDIn && sensor->getNewSensorConversionCheck()) // if on this node and a new value to send
+                {
+                    //timestamp format is single seconds digits, measured down to micros precision
+                    currentIteratoinTimeStamp = ((sensor->getTimestampSeconds() % 10)*1000000) + sensor->getTimestampMicros();
+                    if (!isFirstSample)
+                    {
+                        // if the next sample timestamp exceeds the tolerance range, break the for loop
+                        if (currentIteratoinTimeStamp - sensorReadStruct.sensorTimestampMicros[0] >= sensorReadStruct.timestampTolerance)
+                        {
+                            break;
+                        }
+                    }
+                    sensorReadStruct.sensorID[i] = (sensor->getSensorID())+1;
+                    //sensorReadStruct.sensorTimestampSeconds[i] = sensor->getTimestampSeconds();
+                    sensorReadStruct.sensorTimestampMicros[i] = currentIteratoinTimeStamp;
+                    sensorReadStruct.sensorConvertedValue[i] = static_cast<uint16_t>(sensor->getCurrentConvertedValue(true)*10);
+                    
+                    isFirstSample = false;
+                    
+                    i++;
+            sensorReadStruct.numberSensors = i; //I think, might need to be just i and I'm dumb
+                    if (i == 3)
+                    {
+                        break;
+                    }
+                }
+            }
+            break;  //if all sensors checked still break even if 3 samples have not been found
+        }
             //Serial.print("do I get past i loop");
             //Serial.println(sensorReadStruct.numberSensors);
     sensorReadStruct.packedSensorCAN2.flags.extended = 1;
@@ -859,6 +990,7 @@ void FlexCan3Controller::controllerTasks(FlexCAN& CANbus, VehicleState& currentS
         // While loop to check through all conversions waiting to send
         whileTimerConverted = 0;
         while(generateConvertedSensormsgs(Can0, sensorArray, HPsensorArray, propulsionNodeIDIn) && (whileTimerConverted <= 250));
+        while(generateConvertedSensormsgs(Can0, HPsensorArray, propulsionNodeIDIn) && (whileTimerConverted <= 250));
         //Serial.print("convertedValue while timer micros: ");
         //Serial.println(whileTimerConverted);
         convertedValueUpdateTimer = 0;
