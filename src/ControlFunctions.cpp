@@ -1613,5 +1613,24 @@ if (NewConfigMessage) //only run all this nonsense if there is a new config mess
             }
         //}
     }
+    // Global config calls
+    if (idSearch)
+    {
+        if (currentConfigMSG.TargetObjectID == 255)
+        {
+            switch (currentConfigMSG.ObjectSettingID)
+            {
+            case 0:
+                // Put resetAll for every config object here
+                fluidSim.resetAll();
+                break;
+            case 1:
+                // Put ping config msgs for every config object here
+                
+                break;
+            }
+        }
+        
+    }
 }
 }

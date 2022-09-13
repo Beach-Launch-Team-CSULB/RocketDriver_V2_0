@@ -231,7 +231,7 @@ void TankPressController::stateOperations()
     }
 
 //External bangbang vent line logic
-if (pressLineVentStateBang1 != pressLineVentStateBang2)
+/* if (pressLineVentStateBang1 != pressLineVentStateBang2)
 {
     //logic for when they don't agree - I should explicitly define all possible states but that's tomorrow me's problem
     //Most important one, allows the vent line opened if either bang tank controller commands it
@@ -244,7 +244,7 @@ if (pressLineVentStateBang1 != pressLineVentStateBang2)
 else
 {
     pressLineVent.setState(pressLineVentStateBang1);
-}
+} */
 
 /* // controller Valve object stateOperations
     primaryPressValve.controllerStateOperations();
