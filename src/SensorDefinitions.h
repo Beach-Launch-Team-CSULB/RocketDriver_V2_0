@@ -78,12 +78,12 @@ EXT_SENSOR FuelInletPropSidePT{58, 2, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 
 EXT_SENSOR FuelInjectorPT{54, 2, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 200, 0.0186, -123.27};             // 9
 EXT_SENSOR LoxInletPropSidePT{60, 2, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 150, 0.0186, -128.58};           // 10
 EXT_SENSOR MVPneumaticsPT{56, 2, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 10, 50, 0.0186, -126.56};                // 11
-EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 50, 100, 0.0186, -126.67};                // 12
-EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 50, 100, 0.0185, -133.36};                 // 13
-EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 10, 100, 0.0186, -129.3};                    // 14
-EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0186, -129.3};                    // 14
-EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 10, 100, 0.0187, -125.36};                    // 15
-EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 10, 100, 0.0187, -125.36};                    // 15
+EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 50, 100, 0.0196, -127.95};                // 12
+EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 50, 100, 0.0194, -134.95};                 // 13
+EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 10, 100, 0.0192, -125.04};                    // 14
+EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0194, -125.08};                    // 14
+EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 10, 100, 0.0192, -122.78};                    // 15
+EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 10, 100, 0.0191, -126.90};                    // 15
 EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 50, 0.0933, -638.38};                 // 16
 EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 50, 0.093, -629.72};                   // 17
 
