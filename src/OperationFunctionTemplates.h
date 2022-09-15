@@ -140,6 +140,25 @@ void ALARAHPsensorTasks(const std::array<T, size>& sensorArray, ADC& adc, uint8_
     }
 }
 
+template <typename T, std::size_t size>
+//void sensorTasks(const std::array<T, size>& sensorArray, ADC*adc, uint32_t& secondsRD,uint32_t& microsecondsRD, uint8_t& nodeIDReadIn)
+void TCsensorTasks(const std::array<T, size>& TCsensorArray, ADC& adc, uint8_t& nodeIDReadIn, uint32_t& rocketDriverSeconds, uint32_t&  rocketDriverMicros)
+{
+    // iterate through valve array and run the stateOperations method
+    for(auto sensor : TCsensorArray)
+    {
+        if (sensor->getSensorNodeID() == nodeIDReadIn)
+        {
+            sensor->stateOperations();
+            //Serial.println("LoopRan for HP sensor tasks: ");
+            sensor->read(adc);
+            myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+            sensor->setSYSTimestamp(rocketDriverSeconds, rocketDriverMicros);
+            //sensor->linearConversion();
+        }
+    }
+}
+
 // CALL THIS FUNCTION ONCE IN SETUP, THIS SETS THE VALVE PINMODES
     // make sure to pass this function valveArray, as defined in ValveDefinitions.h
 template <typename T, std::size_t size>
@@ -225,33 +244,6 @@ void fakesensorShit(uint32_t& rocketDriverSeconds, uint32_t& rocketDriverMicros,
         //Serial.print("LoopRan");
     //}
 }
-
-/* void MCUADCSetup()
-{ 
-//Ideally get some conditionals here for which MCU it is so this is compatible at least also with Teensy LC
-
-///// ADC0 /////
-  // reference can be ADC_REFERENCE::REF_3V3, ADC_REFERENCE::REF_1V2 or ADC_REFERENCE::REF_EXT.
-  //adc->setReference(ADC_REFERENCE::REF_1V2, ADC_0); // change all 3.3 to 1.2 if you change the reference to 1V2
-
-  adc->adc0->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc0->setAveraging(8);                                    // set number of averages
-  adc->adc0->setResolution(16);                                   // set bits of resolution
-  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);     // change the sampling speed
-  adc->adc0->recalibrate();
-
-///// ADC1 /////
-  adc->adc1->setReference(ADC_REFERENCE::REF_1V2);
-  adc->adc1->setAveraging(8);                                    // set number of averages
-  adc->adc1->setResolution(16);                                   // set bits of resolution
-  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS); // change the conversion speed
-  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);     // change the sampling speed
-  adc->adc1->recalibrate();
-
-}
- */
-
 
 template <typename T, std::size_t size>
 void ValveNodeIDCheck(const std::array<T, size>& valveArray, uint8_t nodeIDfromMain)

@@ -1,5 +1,5 @@
 #ifndef SENSORCLASS_H
-#define SENSORSCLASS_H
+#define SENSORCLASS_H
 
 #include <Arduino.h>
 #include <string>

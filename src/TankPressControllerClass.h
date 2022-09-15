@@ -27,6 +27,7 @@ class TankPressController
         Valve &tankVent;
         //Valve MainValve{};
         bool abortFlag = false;         //controller can trigger an abort by flipping this flag true
+        bool ventFailsafeArm = false;   // for setting whether a tank controller has the vent failsafe armed
         bool ventFailsafeFlag = false;  //for making vent failsafe require successive controller loops to open vents
         float ventFailsafePressure;
         float ventFailsafePressure_Default;
@@ -54,9 +55,9 @@ class TankPressController
         float controllerTimeStep = 0.01; //default to 100Hz assumption for controller refresh
         float sensorIntervalTimeStep = 0.01;
 
-        bool trustBangSensor1 = false;
-        bool trustBangSensor2 = false;
-        bool trustBangSensor3 = true;
+        bool trustBangSensor1 = true;
+        bool trustBangSensor2 = true;
+        bool trustBangSensor3 = false;
         float bangSensor1EMA = 0;   //primary PT
         float bangSensor2EMA = 0;   //secondary PT
         float bangSensor3EMA = 0;   //simulated PT
@@ -101,9 +102,9 @@ class TankPressController
         uint32_t valveMinimumDeenergizeTime;    // in MICROS
 
     // constructor - hipress
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setVentFailsafePressure_Default, bool setIsSystemBang = false, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setVentFailsafePressure_Default, bool setVentFailsafeArm = false, bool setIsSystemBang = false, bool setNodeIDCheck = false);
     // constructor - tank bangers
-        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool isSystemBang = true, bool setNodeIDCheck = false);
+        TankPressController(uint32_t controllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool setVentFailsafeArm = false, bool isSystemBang = false, bool setNodeIDCheck = false);
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -125,6 +126,7 @@ class TankPressController
         uint32_t getValveMinEnergizeTime(){return valveMinimumEnergizeTime;}
         uint32_t getValveMinDeEnergizeTime(){return valveMinimumDeenergizeTime;}
         float getVentFailsafePressure(){return ventFailsafePressure;}
+        bool getVentFailsafeArm(){return ventFailsafeArm;}
 
         bool getControllerUpdate(){return controllerUpdate;}
         bool getControllerConfigUpdate(){return controllerConfigUpdate;}
@@ -184,7 +186,8 @@ class TankPressController
         void testSetTankVentState(ValveState tankVentStateIn) {if(testPass) {tankVent.setState(tankVentStateIn);}}
     //setting functions - have all inputs bounded to catch nonsense CAN config msg inputs
         void setVentFailsafePressure(float ventFailsafePressureIn){if (ventFailsafePressureIn <= 10000 && ventFailsafePressureIn >= 0) {ventFailsafePressure = ventFailsafePressureIn;controllerConfigUpdate = true;}}
-        
+        void setVentFailsafeArm(bool armIn){ventFailsafeArm = armIn;}
+
         void setK_p(float K_pin){if (K_pin <= 1000 && K_pin >= -1000) {K_p = K_pin;controllerConfigUpdate = true;}}
         void setK_i(float K_iin){if (K_iin <= 1000 && K_iin >= -1000) {K_i = K_iin;controllerConfigUpdate = true;}}
         void setK_i(){K_i = K_i_run;}   //empty input args means reset K_i to K_i_run

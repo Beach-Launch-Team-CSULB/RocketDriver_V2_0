@@ -1,13 +1,13 @@
 #include "TankPressControllerClass.h"
 #include <Arduino.h>
 
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setVentFailsafePressure_Default, bool setIsSystemBang, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setVentFailsafePressure_Default, bool setVentFailsafeArm = false, bool setIsSystemBang, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, ventFailsafeArm{setVentFailsafeArm}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
 {
     // Instantiation stuff?
 }
-TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool setIsSystemBang, bool setNodeIDCheck) 
-                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetPcValue_Default{setTargetPcValue_Default}, tankToChamberDp_Default{setTankToChamberDp_Default}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, K_p_Default{set_K_p_Default}, K_i_Default{set_K_i_Default}, K_d_Default{set_K_d_Default}, controllerThreshold_Default{setControllerThreshold_Default}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
+TankPressController::TankPressController(uint32_t setControllerID, uint8_t setControllerNodeID, Valve* setPrimaryPressValve, Valve* setPressLineVent, Valve* setTankVent, float setTargetPcValue_Default, float setTankToChamberDp_Default, float setVentFailsafePressure_Default, float set_K_p_Default, float set_K_i_Default, float set_K_d_Default, float setControllerThreshold_Default, bool setVentFailsafeArm = false, bool setIsSystemBang, bool setNodeIDCheck) 
+                                        : controllerID{setControllerID}, controllerNodeID{setControllerNodeID}, primaryPressValve{*setPrimaryPressValve}, pressLineVent{*setPressLineVent}, tankVent{*setTankVent}, targetPcValue_Default{setTargetPcValue_Default}, tankToChamberDp_Default{setTankToChamberDp_Default}, ventFailsafePressure_Default{setVentFailsafePressure_Default}, K_p_Default{set_K_p_Default}, K_i_Default{set_K_i_Default}, K_d_Default{set_K_d_Default}, controllerThreshold_Default{setControllerThreshold_Default}, ventFailsafeArm{setVentFailsafeArm}, isSystemBang{setIsSystemBang}, nodeIDCheck{setNodeIDCheck}
 {
     // Instantiate operational values from the default values given
     // Allows a reset to defaults after having changed settings via config messages
@@ -47,14 +47,14 @@ void TankPressController::resetTimer()
 
 void TankPressController::ventPressureCheck()
 {
-    if (isSystemBang)   // lazy check to not run on high press currently, would break on dome reg system for tanks
+    if (ventFailsafeArm)
     {
-    
+    // tank sensors still have bang names, but they're really just the tank pressure readings
     if (bangSensorWeightedEMA >= ventFailsafePressure)
     {
         if (ventFailsafeFlag)
         {
-        //tankVent.setState(ValveState::OpenCommanded);
+        tankVent.setState(ValveState::OpenCommanded);
         }
         ventFailsafeFlag = true;
         //Serial.print(bangSensor1EMA);

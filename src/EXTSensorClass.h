@@ -18,7 +18,7 @@ class EXT_SENSOR : public SENSORBASE
 {
   private:
     const uint32_t sensorID;
-    const uint32_t sensorNodeID;                      // NodeID the valve is controlled by
+    const uint32_t sensorNodeID;                      // NodeID the sensor is controlled by
     ADCType sensorSource = TeensyMCUADC;  //default source here is Teensy ADC
     //const string sens_name;           //your own name for sensor to reference it
     SensorState sensorState;

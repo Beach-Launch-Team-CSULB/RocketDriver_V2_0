@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-#define PROPULSIONSYSNODEIDPRESET 3;     //NOT in use normally, for testing with the address IO register inactive
+//#define PROPULSIONSYSNODEIDPRESET 4;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -91,9 +91,12 @@ uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
 uint32_t ALARAnodeIDfromEEPROM_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromEEPROM_errorFlag;
-uint8_t PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;              //engine node = 2, prop node = 3, Pasafire node = 8
+//uint8_t PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;              //engine node = 2, prop node = 3, Pasafire node = 8
+uint8_t PropulsionSysNodeID;              //engine node = 2, prop node = 3, Pasafire node = 8
 uint8_t PropulsionSysNodeIDfromEEPROM;    //PropulsionSysNodeID read out of EEPROM
 uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
+uint32_t vehicleStatefromEEPROM_errorFlag;
+uint32_t missionStatefromEEPROM_errorFlag;
 
 const uint8_t configVerificationKey = 166; //upgrade to a map later
 
@@ -130,9 +133,9 @@ uint32_t loopCount {0};// for debugging
 // Set the global command, and global state
 Command currentCommand{command_NOCOMMAND}; 
 VehicleState currentVehicleState{VehicleState::passive};
-VehicleState priorVehicleState;
-MissionState currentMissionState(MissionState::passive);
-MissionState priorMissionState;
+VehicleState priorVehicleState{VehicleState::passive};
+MissionState currentMissionState{MissionState::passive};
+MissionState priorMissionState{MissionState::passive};
 // SET "staticTest = true" FOR GROUND TESTING, "false" FOR FLIGHT!!!!!
 bool staticTest = true;
 
@@ -165,13 +168,14 @@ uint16_t nodeIDAddress1{22};
 uint16_t nodeIDAddress2{23};
 uint16_t nodeIDAddress3{24};
 
-///// Temp Sensor for TC Cold Junction /////        ----- Move into sensor classes (if this is even retained)
-//Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
-//int roundedtemp;
-
 //-------------------------------------------------------//
 void setup() {
   startup = true;   // Necessary to set startup to true for the code loop so it does one startup loop for the state machine before entering regular loop behavior
+  Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
+  Wire.begin();
+  SPI.begin();
+
+  #ifdef ALARAV2_1
   // ----- MUX Setups for ALARA -----
   // Board Addressing MUX
   MUXSetup(true, ALARA_DIGITAL_ADDRESS_1, ALARA_DIGITAL_ADDRESS_2, ALARA_DIGITAL_ADDRESS_3, ALARA_DIGITAL_ADDRESS_4);
@@ -182,14 +186,19 @@ void setup() {
 
   // NOR Flash CS pin MUX
   MUXSetup(false, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
+  #endif
 ///// ----- Insert a board rev check to pin defines here, if it fails disable our GPIO? ------ //
 
   // -----Read Last State off eeprom and update -----
   currentVehicleState = static_cast<VehicleState>(tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStateAddressfromEEPROM_errorFlag));
   currentMissionState = static_cast<MissionState>(tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStateAddressfromEEPROM_errorFlag));
-  
-  PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
-  nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
+  // Only write to EEPROM the node ID if manual ID define is present at top of Main
+  #ifdef PROPULSIONSYSNODEIDPRESET
+  tripleEEPROMwrite(static_cast<uint8_t>(4), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
+  #endif
+  //PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
+  PropulsionSysNodeID = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
+  //nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
   startupStateCheck(currentVehicleState, currentCommand);
 
   // ----- Run the Node ID Detection Function -----
@@ -210,8 +219,11 @@ void setup() {
   // -----Initialize ADCs-----
   // Quick and dirty way to setup unique ADC use case on the LC/TC Teensy node
   #ifdef TEENSY3_X
-    ref0 = ADC_REFERENCE::REF_1V2;
-    ref1 = ADC_REFERENCE::REF_3V3;
+    // Setting alt I2C pins because I used default I2C pins
+    //Wire.setSDA(8);
+    //Wire.setSCL(7);
+    ref0 = ADC_REFERENCE::REF_3V3;
+    ref1 = ADC_REFERENCE::REF_1V2;
     averages0 = 32;
     averages1 = 32;
   #endif
@@ -226,6 +238,7 @@ void setup() {
   // -----Run Sensor PropulsionSysNodeID Check-----
   SensorNodeIDCheck(sensorArray, PropulsionSysNodeID);
   SensorNodeIDCheck(HPsensorArray, PropulsionSysNodeID);
+  SensorNodeIDCheck(TCsensorArray, PropulsionSysNodeID);
 
   // -----Run Valve Setup-----
   valveSetUp(valveArray, ALARA_HP_Array);
@@ -245,35 +258,36 @@ void setup() {
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
   sensorSetUp(HPsensorArray);
-
+  sensorSetUp(TCsensorArray);
+  #ifdef TEENSY3_X
+  coldJunctionRenegade.begin();
+  #endif
 
   //sensorSetUp(sensorArray, rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
   // ----- Set Controller Dependent Sensor Settings -----
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
 
-
-  Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
-
-  Wire.begin();
-  SPI.begin();
+  #ifdef ALARAV2_1
+  pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
   ALARAbaro.init(ALARA_BPS_CSN,OSR_1024);
   boardController.begin();
-
+  #endif
+  
   SerialUSBdataController.setPropStatusPrints(true);
   SerialUSBdataController.setPropCSVStreamPrints(false);
-  pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
   Can0.startStats();
   Can0.setTxBufferSize(64);
 }
 
 void loop() 
 {
+// Lazy "SensorTasks" for the RTD sensor
+if (coldJunctionRenegade.getSensorNodeID() == PropulsionSysNodeID)
+{
+  coldJunctionRenegade.read();
+}
 
 //fakesensorShit(rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
-
-  //Display the node number with serial print statement start of each loop
-  //Serial.print("PropulsionSysNodeID: ");
-  //Serial.println(PropulsionSysNodeID);
 
 ///// Custom function for tracking miliseconds and seconds level system time for timestamping /////
 // let it run each loop in addition to when called to keep it synced up
@@ -291,50 +305,6 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   }
   //Serial.println("Do I get to live?");
   
-  //while (Serial.available())
-  //{
-/*   {
-    Serial.print("available");
-    Serial.print(Serial.available());
-    Serial.println();
-  for (fakeCanIterator; fakeCanIterator < Serial.available(); fakeCanIterator++)
-  {
-    fakeCANmsg[fakeCanIterator] = Serial.read();
-    Serial.print("i");
-    Serial.println(fakeCanIterator);
-  }
-  }
-  //else {fakeCanIterator = 0;}
-  
-
-    Serial.print("fakeCANmsg");
-    Serial.println();
-  for (size_t i = 0; i < 12; i++)
-  {
-    Serial.print(fakeCANmsg[i]);
-    Serial.print(" : ");
-  }
-    Serial.println(); */
-
-    //Serial.print(Serial.read());
-    //Serial.println();
-    //fakeCANmsg = Serial.read();
-
-      //if(fakeCANmsg[0]  < command_SIZE) //enter 0 inter serial to trigger command read
-      //{
-          //add in code here to prompt for command code and update current command from this
-          //Serial.println("Enter Command Byte");
-          //CurrentCommand = Serial.read();
-              
-              //if(fakeCANmsg < command_SIZE)                                           // this checks if the message at that location in the buffer could be a valid command
-              //{
-                  //currentCommand = static_cast<Command>(fakeCANmsg);
-                  //NewCommandMessage = true;
-              //}
-          //Serial.println("Command Entered");
-        //}
-    //mainLoopTestingTimer = 0;
-    //}
 
 ///// ------ MESSAGE PROCESSING BLOCK ----- /////  
   //pull next command message from buffer, if there is one
@@ -358,7 +328,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past config msg read?");
 ///// ------------------------------------ /////  
 
-  if (ezModeControllerTimer >= 50) // 5 = 200Hz controller rate
+  if (ezModeControllerTimer >= 20) // 5 = 200Hz controller rate, 20 = 50Hz rate
   {
   //Serial.println("Do I get into ezModeControllerTimer?");
   // -----Process Commands Here-----
@@ -366,7 +336,10 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past vehicleStateMachine?");
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
   //Serial.println("Do I get past misionStateMachine?");
+  // controllerDataSync for some reason fucking up the Teensy only node code and crashing
+  #ifdef ALARAV2_1
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  #endif
   //Serial.println("Do I get past controllerDataSync?");
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
   //Serial.println("Do I get past autoSequenceTasks?");
@@ -391,17 +364,38 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   valveTasks(valveArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
   pyroTasks(pyroArray, PropulsionSysNodeID, outputOverride, *autoSequenceArray.at(0));
   //MUST KEEP HP OVERRIDE AFTER VALVE/PYRO TASKS
+  #ifdef ALARAV2_1
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
+  #endif
   sei(); // reenables interrupts after propulsion output state set is completed
   //Serial.println("Do I get past valveTasks,PyroTasks, and HPOverride?");
   sensorTasks(sensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past sensorTasks?");
   ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past HPsensorTasks?");
+  TCsensorTasks(TCsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  //Serial.println("Do I get past HPsensorTasks?");
   // -----Update States on EEPROM -----
-  //change to only write if something new to write!!! Make wrapper function that checks for new info?
-  //tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
-
+  // ONLY write if something new to write!!! Don't spam EEMPROM it will kill the memory bytes physically if overused
+  if ((static_cast<uint8_t>(currentVehicleState)) != (tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStatefromEEPROM_errorFlag)))
+  {
+  tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
+/*   Serial.println("Does current vs prior state EEPROM protect work as expected? ");
+  Serial.print(" priorVehicleState : ");
+  Serial.print(static_cast<uint8_t>(priorVehicleState));
+  Serial.print(" currentVehicleState : ");
+  Serial.println(static_cast<uint8_t>(currentVehicleState)); */
+  }
+  if ((static_cast<uint8_t>(currentMissionState)) != (tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStatefromEEPROM_errorFlag)))
+  {
+  tripleEEPROMwrite(static_cast<uint8_t>(currentMissionState), missionStateAddress1, missionStateAddress2, missionStateAddress3);
+  Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
+  Serial.print(" priorMissionState : ");
+  Serial.print(static_cast<uint8_t>(priorMissionState));
+  Serial.print(" currentMissionState : ");
+  Serial.println(static_cast<uint8_t>(currentMissionState));
+  }
+  
   // Reset function to reboot Teensy with internal reset register
   // Need to figure out how to rework using this feature with reworked ID system
   //TeensyInternalReset(localNodeResetFlag, nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3);
@@ -411,7 +405,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 // Run every loop
 if (shittyCANTimer >= 1000)
 {
-  Can2msgController.setExternalStateChange(true); //cheater force for quasi messages
+  Can2msgController.setExternalStateChange(true); //cheater force for quasi messages, AM I USING THIS AT ALL RIGHT NOW???
   shittyCANTimer = 0;
 }
   
@@ -426,32 +420,6 @@ if (shittyCANTimer >= 1000)
 ///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 250)
   {
-  
-/*     for(auto sensor : HPsensorArray)
-    {
-        if (sensor->getSensorNodeID() == PropulsionSysNodeID)
-        {
-        sensor->setState(SensorState::Fast);
-         
-            Serial.print("SensorID: ");
-            Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
-            //Serial.print( ": new converted bool: ");
-            //Serial.print( ": new raw bool: ");
-            //Serial.print(sensor->getNewSensorValueCheckCAN());
-            //Serial.print(sensor->getNewSensorConversionCheck());
-            Serial.print( ": raw value: ");
-            Serial.print(sensor->getCurrentRawValue());
-            Serial.print( ": converted: ");
-            Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
-            Serial.print( ": EMA: ");
-            Serial.print(sensor->getEMAConvertedValue(),10);
-            Serial.println(": ");
-
-        }
-    
-    }
- */  
-  
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
@@ -461,20 +429,5 @@ if (shittyCANTimer >= 1000)
 
 // Resets the startup bool, DO NOT REMOVE
 startup = false;
-
-/* digitalWriteExtended(ALARA_DIGITAL_ADDRESS_OE,HIGH);
-
-uint8_t NodeIDAddressRead;
-  for (size_t i = 0; i < 8; i++)
-  {
-    NodeIDAddressRead = (readOnlyMUX(i, ALARA_DIGITAL_ADDRESS_1, ALARA_DIGITAL_ADDRESS_2, ALARA_DIGITAL_ADDRESS_3, ALARA_DIGITAL_ADDRESS_4) << (i+1))-1;
-  Serial.print("nodeID Read Inside Loop: ");
-  Serial.println(NodeIDAddressRead);
-  }
-  Serial.print("nodeID Read: ");
-  Serial.println(NodeIDAddressRead);
- */
-//Serial.print(" Crash Timer Millis: ");
-//Serial.println(crashTimer);
 
 }

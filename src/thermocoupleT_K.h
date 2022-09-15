@@ -2,6 +2,7 @@
 #ifndef thermocoupleT_K_H
 #define thermocoupleT_K_H
 
+#include <Arduino.h>
 #include <string>
 #include <list>
 using std::string;

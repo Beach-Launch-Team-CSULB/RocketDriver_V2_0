@@ -41,6 +41,8 @@ void ALARABoardController::boardTasks()
 
 void ALARABoardController::setLED(uint8_t LedN, RGB_12bitColor ledInput)
 {
+    // Replace this ifdef with the ALARA Map present bool
+    #ifdef ALARAV2_1
     // For LedN of 1, write to Led1
     if (LedN == 1)
     {
@@ -51,6 +53,7 @@ void ALARABoardController::setLED(uint8_t LedN, RGB_12bitColor ledInput)
     {
     Led2.writeLEDOutput(ALARALEDExtPWM, ledInput);
     }
+    #endif
 }
 
 

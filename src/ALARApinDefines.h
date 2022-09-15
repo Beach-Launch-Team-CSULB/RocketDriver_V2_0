@@ -94,7 +94,7 @@
 #define ALARA_BPS_CSN 53 */
 
 // On board indicators - LEDs and Buzzer
-//#define ALARA_PWM_EXPANDER_OE 
+#define ALARA_PWM_EXPANDER_OE 99
 #define ALARA_BUZZ 30
 
 /* // NRF and LORA external jumper connectors
