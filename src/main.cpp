@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-//#define PROPULSIONSYSNODEIDPRESET 4;     //NOT in use normally, for testing with the address IO register inactive
+//#define PROPULSIONSYSNODEIDPRESET 2;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -220,8 +220,8 @@ void setup() {
   // Quick and dirty way to setup unique ADC use case on the LC/TC Teensy node
   #ifdef TEENSY3_X
     // Setting alt I2C pins because I used default I2C pins
-    //Wire.setSDA(8);
-    //Wire.setSCL(7);
+    Wire.setSDA(8);
+    Wire.setSCL(7);
     ref0 = ADC_REFERENCE::REF_3V3;
     ref1 = ADC_REFERENCE::REF_1V2;
     averages0 = 32;
@@ -238,7 +238,7 @@ void setup() {
   // -----Run Sensor PropulsionSysNodeID Check-----
   SensorNodeIDCheck(sensorArray, PropulsionSysNodeID);
   SensorNodeIDCheck(HPsensorArray, PropulsionSysNodeID);
-  SensorNodeIDCheck(TCsensorArray, PropulsionSysNodeID);
+  //SensorNodeIDCheck(TCsensorArray, PropulsionSysNodeID);
 
   // -----Run Valve Setup-----
   valveSetUp(valveArray, ALARA_HP_Array);
@@ -335,7 +335,6 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past vehicleStateMachine?");
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
   //Serial.println("Do I get past misionStateMachine?");
-  // controllerDataSync for some reason fucking up the Teensy only node code and crashing
   #ifdef ALARAV2_1
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   #endif
@@ -379,20 +378,15 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   if ((static_cast<uint8_t>(currentVehicleState)) != (tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStatefromEEPROM_errorFlag)))
   {
   tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
-/*   Serial.println("Does current vs prior state EEPROM protect work as expected? ");
-  Serial.print(" priorVehicleState : ");
-  Serial.print(static_cast<uint8_t>(priorVehicleState));
-  Serial.print(" currentVehicleState : ");
-  Serial.println(static_cast<uint8_t>(currentVehicleState)); */
   }
   if ((static_cast<uint8_t>(currentMissionState)) != (tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStatefromEEPROM_errorFlag)))
   {
   tripleEEPROMwrite(static_cast<uint8_t>(currentMissionState), missionStateAddress1, missionStateAddress2, missionStateAddress3);
-  Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
+/*   Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
   Serial.print(" priorMissionState : ");
   Serial.print(static_cast<uint8_t>(priorMissionState));
   Serial.print(" currentMissionState : ");
-  Serial.println(static_cast<uint8_t>(currentMissionState));
+  Serial.println(static_cast<uint8_t>(currentMissionState)); */
   }
   
   // Reset function to reboot Teensy with internal reset register
