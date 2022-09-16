@@ -52,7 +52,7 @@ using std::string;
 #include <TimeLib.h>
 #include <DS1307RTC.h>
 
-//#define PROPULSIONSYSNODEIDPRESET 4;     //NOT in use normally, for testing with the address IO register inactive
+//#define PROPULSIONSYSNODEIDPRESET 2;     //NOT in use normally, for testing with the address IO register inactive
 
 ///// ADC /////
 ADC* adc = new ADC();
@@ -193,9 +193,9 @@ void setup() {
   currentVehicleState = static_cast<VehicleState>(tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStateAddressfromEEPROM_errorFlag));
   currentMissionState = static_cast<MissionState>(tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStateAddressfromEEPROM_errorFlag));
   // Only write to EEPROM the node ID if manual ID define is present at top of Main
-  #ifdef PROPULSIONSYSNODEIDPRESET
-  tripleEEPROMwrite(static_cast<uint8_t>(4), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
-  #endif
+  //#ifdef PROPULSIONSYSNODEIDPRESET
+  //tripleEEPROMwrite(static_cast<uint8_t>(3), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
+  //#endif
   //PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   PropulsionSysNodeID = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   //nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
@@ -220,8 +220,8 @@ void setup() {
   // Quick and dirty way to setup unique ADC use case on the LC/TC Teensy node
   #ifdef TEENSY3_X
     // Setting alt I2C pins because I used default I2C pins
-    //Wire.setSDA(8);
-    //Wire.setSCL(7);
+    Wire.setSDA(8);
+    Wire.setSCL(7);
     ref0 = ADC_REFERENCE::REF_3V3;
     ref1 = ADC_REFERENCE::REF_1V2;
     averages0 = 32;
@@ -238,7 +238,7 @@ void setup() {
   // -----Run Sensor PropulsionSysNodeID Check-----
   SensorNodeIDCheck(sensorArray, PropulsionSysNodeID);
   SensorNodeIDCheck(HPsensorArray, PropulsionSysNodeID);
-  SensorNodeIDCheck(TCsensorArray, PropulsionSysNodeID);
+  //SensorNodeIDCheck(TCsensorArray, PropulsionSysNodeID);
 
   // -----Run Valve Setup-----
   valveSetUp(valveArray, ALARA_HP_Array);
@@ -258,7 +258,7 @@ void setup() {
   // -----Run Sensor Setup -----
   sensorSetUp(sensorArray);
   sensorSetUp(HPsensorArray);
-  sensorSetUp(TCsensorArray);
+  //sensorSetUp(TCsensorArray);
   #ifdef TEENSY3_X
   coldJunctionRenegade.begin();
   #endif
@@ -268,8 +268,8 @@ void setup() {
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
 
   #ifdef ALARAV2_1
-  pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
-  ALARAbaro.init(ALARA_BPS_CSN,OSR_1024);
+  //pinModeExtended(ALARA_DIGITAL_ADDRESS_OE, OUTPUT);
+  //ALARAbaro.init(ALARA_BPS_CSN,OSR_1024);
   boardController.begin();
   #endif
   
@@ -338,7 +338,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past misionStateMachine?");
   // controllerDataSync for some reason fucking up the Teensy only node code and crashing
   #ifdef ALARAV2_1
-  controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
+  //controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
   #endif
   //Serial.println("Do I get past controllerDataSync?");
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
@@ -373,7 +373,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past sensorTasks?");
   ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past HPsensorTasks?");
-  TCsensorTasks(TCsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  //TCsensorTasks(TCsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past HPsensorTasks?");
   // -----Update States on EEPROM -----
   // ONLY write if something new to write!!! Don't spam EEMPROM it will kill the memory bytes physically if overused
