@@ -733,6 +733,9 @@ void startupStateCheck(const VehicleState& currentState, Command& currentCommand
     case VehicleState::passive:
         currentCommand = command_passive;
         break;
+    case VehicleState::standby:
+        currentCommand = command_standby;
+        break;
     case VehicleState::test:
         currentCommand = command_test;
         break;

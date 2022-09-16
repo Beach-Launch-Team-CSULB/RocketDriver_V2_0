@@ -70,11 +70,11 @@ class Pyro
             }    // set the Node ID Check bool function
         void setState(PyroState newState, int64_t fireTimeIn) 
             {
-            Serial.print("pyro fireTimeIn: ");
-            Serial.print(fireTimeIn);
-            Serial.print(" fireSequenceActuation ");
-            Serial.print(fireSequenceActuation);
-            Serial.println();
+            //Serial.print("pyro fireTimeIn: ");
+            //Serial.print(fireTimeIn);
+            //Serial.print(" fireSequenceActuation ");
+            //Serial.print(fireSequenceActuation);
+            //Serial.println();
                 // Only do anything in the case of the fireTimeIn if the state sent is FireCommanded
                 //if (newState == PyroState::FireCommanded)
                     //{

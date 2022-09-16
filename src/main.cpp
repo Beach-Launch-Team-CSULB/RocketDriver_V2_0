@@ -200,6 +200,8 @@ void setup() {
   PropulsionSysNodeID = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   //nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
   startupStateCheck(currentVehicleState, currentCommand);
+  // Set NewCommandMessage true so the command from startupStateCheck gets read by commandExecute
+  NewCommandMessage = true;
 
   // ----- Run the Node ID Detection Function -----
   //PropulsionSysNodeID = NodeIDDetect(nodeID, nodeIDdeterminefromEEPROM, nodeIDfromEEPROM); // - OVERHAUL WITH NEW FUNCTION AND SYSTEM
@@ -329,27 +331,27 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
   if (ezModeControllerTimer >= 20) // 5 = 200Hz controller rate, 20 = 50Hz rate
   {
-  Serial.println("Do I get into ezModeControllerTimer?");
+  //Serial.println("Do I get into ezModeControllerTimer?");
   // -----Process Commands Here-----
   vehicleStateMachine(currentVehicleState, priorVehicleState, currentCommand, boardController, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag, outputOverride);
-  Serial.println("Do I get past vehicleStateMachine?");
+  //Serial.println("Do I get past vehicleStateMachine?");
   missionStateMachine(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, boardController, autoSequenceArray, staticTest, abortHaltFlag);
-  Serial.println("Do I get past misionStateMachine?");
-  //#ifdef ALARAV2_1
+  //Serial.println("Do I get past misionStateMachine?");
+  #ifdef ALARAV2_1
   controllerDataSync(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
-  //#endif
-  Serial.println("Do I get past controllerDataSync?");
+  #endif
+  //Serial.println("Do I get past controllerDataSync?");
   autoSequenceTasks(autoSequenceArray, PropulsionSysNodeID);
-  Serial.println("Do I get past autoSequenceTasks?");
+  //Serial.println("Do I get past autoSequenceTasks?");
   tankPressControllerTasks(tankPressControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
-  Serial.println("Do I get past tankPressControllerTasks?");
+  //Serial.println("Do I get past tankPressControllerTasks?");
   engineControllerTasks(engineControllerArray, PropulsionSysNodeID, IgnitionAutoSequence);
-  Serial.println("Do I get past engineControllerTasks?");
+  //Serial.println("Do I get past engineControllerTasks?");
   controllerDeviceSync(currentVehicleState, priorVehicleState, currentCommand, valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray, waterGoesVroom, abortHaltFlag);
-  Serial.println("Do I get past controllerDeviceSync?");
+  //Serial.println("Do I get past controllerDeviceSync?");
   //fluid sim run
   waterGoesVroom.fluidSystemUpdate();
-  Serial.println("Is this Pizza's fault?");
+  //Serial.println("Is this Pizza's fault?");
   ezModeControllerTimer = 0;
 
 //ALARAbaro.update();
@@ -366,13 +368,13 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   ALARAHPOverride(ALARA_HP_Array, outputOverride);
   #endif
   sei(); // reenables interrupts after propulsion output state set is completed
-  Serial.println("Do I get past valveTasks,PyroTasks, and HPOverride?");
+  //Serial.println("Do I get past valveTasks,PyroTasks, and HPOverride?");
   sensorTasks(sensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
-  Serial.println("Do I get past sensorTasks?");
+  //Serial.println("Do I get past sensorTasks?");
   ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros, outputOverride);
-  Serial.println("Do I get past HPsensorTasks?");
+  //Serial.println("Do I get past HPsensorTasks?");
   TCsensorTasks(TCsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
-  Serial.println("Do I get past HPsensorTasks?");
+  //Serial.println("Do I get past HPsensorTasks?");
   // -----Update States on EEPROM -----
   // ONLY write if something new to write!!! Don't spam EEMPROM it will kill the memory bytes physically if overused
   if ((static_cast<uint8_t>(currentVehicleState)) != (tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStatefromEEPROM_errorFlag)))
