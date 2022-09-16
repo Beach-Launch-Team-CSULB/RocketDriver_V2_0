@@ -122,7 +122,7 @@ class EXT_SENSOR : public SENSORBASE
     
     float getEMAConvertedValue(){return newEMAOutput;}
     float getIntegralSum(){return currentIntegralSum;}
-    float getLinRegSlope(){currentLinReg_a1 = linearRegressionLeastSquared_PID(); return currentLinReg_a1;}
+    float getLinRegSlope(){if(nodeIDCheck){currentLinReg_a1 = linearRegressionLeastSquared_PID();} return currentLinReg_a1;}
 
     // further fuctions defined in SensorClass.cpp
 /*     void begin();                     // run in setup to get pins going

@@ -1290,6 +1290,7 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     bool fuelTankControllerResetIntegralCalcBool = false;
     loxTankControllerResetIntegralCalcBool = tankPressControllerArray.at(LoxTankController_ArrayPointer)->getResetIntegralCalcBool();
     fuelTankControllerResetIntegralCalcBool = tankPressControllerArray.at(FuelTankController_ArrayPointer)->getResetIntegralCalcBool();
+    //Serial.println("Do I get past integral bool shit inside controller data sync?");
     // Set each sensor resetIntegralCalc based on corresponding tank press controller bool from above
     sensorArray.at(LoxTank1PT_ArrayPointer)->resetIntegralCalc(loxTankControllerResetIntegralCalcBool, 0);
     sensorArray.at(LoxTank2PT_ArrayPointer)->resetIntegralCalc(loxTankControllerResetIntegralCalcBool, 0);
@@ -1297,22 +1298,22 @@ void controllerDataSync(const std::array<Valve*, NUM_VALVES>& valveArray, const 
     sensorArray.at(FuelTank1PT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
     sensorArray.at(FuelTank2PT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
     sensorArray.at(FakeFuelTankPT_ArrayPointer)->resetIntegralCalc(fuelTankControllerResetIntegralCalcBool, 0);
-  //Serial.println("Do I get past integral shit inside controller data sync?");
+    //Serial.println("Do I get past integral shit inside controller data sync?");
     //Lox Tank sensor target value update
     sensorArray.at(LoxTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
     sensorArray.at(LoxTank2PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
     sensorArray.at(FakeLoxTankPT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(LoxTankController_ArrayPointer)->getTargetValue());
-  //Serial.println("Do I get past Lox Tank sensor target value update inside controller data sync?");
+    //Serial.println("Do I get past Lox Tank sensor target value update inside controller data sync?");
     //Fuel Tank sensor target value update
     sensorArray.at(FuelTank1PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
     sensorArray.at(FuelTank2PT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
     sensorArray.at(FakeFuelTankPT_ArrayPointer)->setTargetValue(tankPressControllerArray.at(FuelTankController_ArrayPointer)->getTargetValue());
-  //Serial.println("Do I get past Fuel Tank sensor target value update inside controller data sync?");
+    //Serial.println("Do I get past Fuel Tank sensor target value update inside controller data sync?");
     //Lox Tank Controller Sensor Data fetch
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(LoxTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank1PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput2(sensorArray.at(LoxTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(LoxTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(LoxTank2PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(LoxTankController_ArrayPointer)->setPIDSensorInput3(sensorArray.at(FakeLoxTankPT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FakeLoxTankPT_ArrayPointer)->getIntegralSum(), sensorArray.at(FakeLoxTankPT_ArrayPointer)->getLinRegSlope());
-    //Lox Tank Controller Sensor Data fetch
+    //Fuel Tank Controller Sensor Data fetch
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput1(sensorArray.at(FuelTank1PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank1PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank1PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput2(sensorArray.at(FuelTank2PT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FuelTank2PT_ArrayPointer)->getIntegralSum(), sensorArray.at(FuelTank2PT_ArrayPointer)->getLinRegSlope());
     tankPressControllerArray.at(FuelTankController_ArrayPointer)->setPIDSensorInput3(sensorArray.at(FakeFuelTankPT_ArrayPointer)->getEMAConvertedValue(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getIntegralSum(), sensorArray.at(FakeFuelTankPT_ArrayPointer)->getLinRegSlope());

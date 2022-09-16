@@ -254,18 +254,26 @@ else
 
 void TankPressController::setPIDSensorInput1(float proportionalValue, float integralValue, float derivativeValue)
 {
+    if (nodeIDCheck)
+    {
     bangSensor1EMA = proportionalValue;
     bangSensor1Integral = integralValue;
     bangSensor1Derivative = derivativeValue;
+    }
 }
 void TankPressController::setPIDSensorInput2(float proportionalValue, float integralValue, float derivativeValue)
 {
+    if (nodeIDCheck)
+    {
     bangSensor2EMA = proportionalValue;
     bangSensor2Integral = integralValue;
     bangSensor2Derivative = derivativeValue;
+    }
 }
 void TankPressController::setPIDSensorInput3(float proportionalValue, float integralValue, float derivativeValue)
 {
+    if (nodeIDCheck)
+    {
     bangSensor3EMA = proportionalValue;
     bangSensor3Integral = integralValue;
     bangSensor3Derivative = derivativeValue;
@@ -275,7 +283,7 @@ void TankPressController::setPIDSensorInput3(float proportionalValue, float inte
     Serial.print(bangSensor3Integral);
     Serial.print(" : ");
     Serial.println(bangSensor3Derivative); */
-
+    }
 }
 
 void TankPressController::PIDinputSetting()
