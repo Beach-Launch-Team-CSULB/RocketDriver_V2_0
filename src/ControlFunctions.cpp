@@ -1175,6 +1175,19 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::BangBangActive);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::FiringAutosequence);
+            // Disable the vent failsafes during fire, only doing this due to concerns over not having tested that trusting the redundant sensors works or is even implemented
+            if(autoSequenceArray.at(0)->getCurrentCountdown() >= -1000000)
+            {
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setVentFailsafeArm(false);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setVentFailsafeArm(false);
+            }
+            // Autoshutdown Engine and rearm VentFailsafes
+            if(autoSequenceArray.at(0)->getCurrentCountdown() >= 20000000)
+            {
+            engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Shutdown);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setVentFailsafeArm(true);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setVentFailsafeArm(true);
+            }
             outputOverride = false;
             break;
 
