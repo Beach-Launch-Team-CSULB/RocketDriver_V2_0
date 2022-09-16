@@ -136,11 +136,24 @@ void TankPressController::stateOperations()
         }
         ventPressureCheck();    //overpress failsafe, opens vent above failsafe pressure. Does not change controller state, only does pressure relief
         break;
-    case TankPressControllerState::Vent:
+    case TankPressControllerState::PropTankVent:
         testPass = false;
         //set abortFlag false going into Vent to be able to vent out of an Abort from abortFlag
         abortFlag = false;
-        if (priorState != TankPressControllerState::Vent)
+        if (priorState != TankPressControllerState::PropTankVent)
+        {
+            //Serial.println("dis u? ");
+        sensorState = SensorState::Fast;
+        primaryPressValve.setState(ValveState::CloseCommanded);
+        pressLineVent.setState(ValveState::OpenCommanded);
+        tankVent.setState(ValveState::OpenCommanded);
+        }
+        break;
+    case TankPressControllerState::HiVent:
+        testPass = false;
+        //set abortFlag false going into Vent to be able to vent out of an Abort from abortFlag
+        abortFlag = false;
+        if (priorState != TankPressControllerState::HiVent)
         {
             //Serial.println("dis u? ");
         sensorState = SensorState::Fast;

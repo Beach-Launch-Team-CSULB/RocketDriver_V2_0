@@ -13,12 +13,13 @@ enum class TankPressControllerState
     RegPressActive,            // 3
     HiPressPassthroughVent,     // 4
     Armed,                      // 5
-    Vent,                       // 6
-    Abort,                      // 7
-    TestPassthrough,            // 8
-    OffNominalPassthrough,      // 9
-    AutosequenceCommanded,      // 10
-    ControllerState_SIZE,       // 11
+    PropTankVent,               // 6
+    HiVent,                     // 7
+    Abort,                      // 8
+    TestPassthrough,            // 9
+    OffNominalPassthrough,      // 10
+    AutosequenceCommanded,      // 11
+    ControllerState_SIZE,       // 12
 };
 
 // generic below, probably supercede/replace as I get to other controllers

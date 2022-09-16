@@ -42,6 +42,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(static_cast<uint8_t>(tankPressController->getState()));
             Serial.print( ": Vent Failsafe Pressure: ");
             Serial.print(tankPressController->getVentFailsafePressure());
+            Serial.println(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getPrimaryPressValveState()));
             Serial.print(": ");
             Serial.print(static_cast<uint8_t>(tankPressController->getPressLineVentState()));

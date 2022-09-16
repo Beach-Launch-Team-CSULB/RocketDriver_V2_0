@@ -1111,9 +1111,9 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             // Set Board LED1 Violet
             boardController.setLED(1,LED_VIOLET);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Hold);
-            tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
-            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Vent);
-            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Vent);
+            tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::HiVent);
+            tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::PropTankVent);
+            tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::PropTankVent);
             engineControllerArray.at(Engine1Controller_ArrayPointer)->setState(EngineControllerState::Passive);
             outputOverride = false;
             break;
