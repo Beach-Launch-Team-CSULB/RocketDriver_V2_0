@@ -59,6 +59,7 @@ class SENSORBASE
     virtual void setTargetValue(float targetValueIn);
 
     virtual float getEMAConvertedValue();
+    //virtual float getDeengergizeOffsetValue();
     virtual float getIntegralSum();
     virtual float getLinRegSlope();
 
@@ -71,7 +72,7 @@ class SENSORBASE
     virtual void setSampleRateMedMode(uint32_t updateSampleRateMedMode);
     virtual void setSampleRateFastMode(uint32_t updateSampleRateFastMode);
     virtual void setAlphaEMA(float alphaEMAIn);
-
+    //virtual void setDeenergizeOffset(ADC& adc, bool outputOverrideIn);
 
 };
 

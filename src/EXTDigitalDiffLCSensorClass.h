@@ -50,7 +50,7 @@ class DIG_LC_SENSOR : public SENSORBASE
     float currentConvertedValue{};
     float priorConvertedValue{};
     bool newConversionCheck = false;                      // Is the current raw value a new read that hasn't been sent yet?
-    
+
     float linConvCoef1_m_Default;                     // Base calibration coefficients
     float linConvCoef1_b_Default;                     // Base calibration coefficients
     float linConvCoef2_m_Default;                     // adjustment calibration coefficients (intended for application specifics like angle load cell mounting)
@@ -121,7 +121,7 @@ class DIG_LC_SENSOR : public SENSORBASE
     bool getEnableIntegralCalc(){return enableIntegralCalc;}
     float getMaxIntegralSum(){return maxIntegralSum;}
     float getMinIntegralSum(){return minIntegralSum;}
-    
+
     float getEMAConvertedValue(){return newEMAOutput;}
     float getIntegralSum(){return currentIntegralSum;}
     float getLinRegSlope(){currentLinReg_a1 = linearRegressionLeastSquared_PID(); return currentLinReg_a1;}
@@ -194,7 +194,6 @@ class DIG_LC_SENSOR : public SENSORBASE
     float linearRegressionLeastSquared_PID();
 
     void accumulatedI_float();
-
 
 /*     //void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)
     void setRollingSensorArrayRaw(uint8_t arrayPosition, uint16_t sensorValueToArray)

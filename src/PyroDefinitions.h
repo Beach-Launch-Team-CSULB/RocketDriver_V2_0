@@ -22,8 +22,8 @@ std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter1, &EngineIgniter2};
 #define NUM_PYROS 2
 // Declare all Pyro Objects here using PyroClass, and add them to the pyroArray
 // Engine Node
-Pyro EngineIgniter1{26, 2, 5, 10000000};   // 0
-Pyro EngineIgniter2{27, 2, 7, 10000000};    // 1
+Pyro EngineIgniter1{26, 2, 5, 300000};   // 0
+Pyro EngineIgniter2{27, 2, 7, 300000};    // 1
 // ADD PYROS TO THIS VALVE ARRAY IN THE FORM: &PYRO
 std::array<Pyro*, NUM_PYROS> pyroArray{&EngineIgniter1, &EngineIgniter2};
 

@@ -100,7 +100,7 @@ DIG_LC_SENSOR ThrustMountLoadCell3{44, 4, A18, A19, &waterGoesVroom, 100, 1000, 
 RTD_BREAKOUT coldJunctionRenegade{99, 4, 24, 3};
 THERMOCOUPLE EngineChamberWallTC{100, 4, A0, A1, T_Type, &coldJunctionRenegade};
 THERMOCOUPLE EngineThroatWallTC{102, 4, A2, A3, T_Type, &coldJunctionRenegade};
-//THERMOCOUPLE EngineNozzleExitWallTC{104, 4, A4, A5, T_Type, &coldJunctionRenegade};  //Need to move I2C lines to clear A4, A5 pins
+THERMOCOUPLE EngineNozzleExitWallTC{104, 4, A4, A5, T_Type, &coldJunctionRenegade};  //Need to move I2C lines to clear A4, A5 pins
 THERMOCOUPLE LoxTankLowerTC{106, 4, A6, A7, T_Type, &coldJunctionRenegade};
 THERMOCOUPLE LoxTankMidTC{108, 4, A8, A9, T_Type, &coldJunctionRenegade};
 THERMOCOUPLE LoxTankUpperTC{110, 4, A10, A11, T_Type, &coldJunctionRenegade};
@@ -129,13 +129,12 @@ ALARAHP_SENSOR RenegadePropHP9{139, 3, ALARA_HIGHPOWER_ANALOGREAD9, 0.0006,1.780
 ALARAHP_SENSOR RenegadePropHP10{140, 3, ALARA_HIGHPOWER_ANALOGREAD10, 0.0006,1.7800};
 
 // ALARA Renegade Engine and Prop Node HP sensor array
-std::array<SENSORBASE*, 20> HPsensorArray{&RenegadeEngineHP1, &RenegadeEngineHP2, &RenegadeEngineHP3, &RenegadeEngineHP4, &RenegadeEngineHP5, &RenegadeEngineHP6, &RenegadeEngineHP7, &RenegadeEngineHP8, &RenegadeEngineHP9, &RenegadeEngineHP10, &RenegadePropHP1, &RenegadePropHP2, &RenegadePropHP3, &RenegadePropHP4, &RenegadePropHP5, &RenegadePropHP6, &RenegadePropHP7, &RenegadePropHP8, &RenegadePropHP9, &RenegadePropHP10};
+std::array<ALARAHP_SENSOR*, 20> HPsensorArray{&RenegadeEngineHP1, &RenegadeEngineHP2, &RenegadeEngineHP3, &RenegadeEngineHP4, &RenegadeEngineHP5, &RenegadeEngineHP6, &RenegadeEngineHP7, &RenegadeEngineHP8, &RenegadeEngineHP9, &RenegadeEngineHP10, &RenegadePropHP1, &RenegadePropHP2, &RenegadePropHP3, &RenegadePropHP4, &RenegadePropHP5, &RenegadePropHP6, &RenegadePropHP7, &RenegadePropHP8, &RenegadePropHP9, &RenegadePropHP10};
 
 // Sensor Array including Renegade SF only
 std::array<SENSORBASE*, NUM_SENSORS> sensorArray{&ThrustMountLoadCell1, &ThrustMountLoadCell2, &ThrustMountLoadCell3, &ChamberPT2, &ChamberPT1, &FuelInletPropSidePT, &FuelInjectorPT, &LoxInletPropSidePT, &MVPneumaticsPT, &DomeRegFuelPT, &DomeRegLoxPT, &FuelTankPT1, &FuelTankPT2, &LoxTankPT1, &LoxTankPT2, &HiPressFuelPT, &HiPressLoxPT, &FakeChamberPT1, &FakeFuelLinePT, &FakeLoxLinePT, &FakeFuelTankPT, &FakeLoxTankPT, &FakeHiPressPT};
 
-std::array<THERMOCOUPLE*, 5> TCsensorArray{&EngineChamberWallTC, &EngineThroatWallTC, &LoxTankLowerTC, &LoxTankMidTC, &LoxTankUpperTC};
-//std::array<THERMOCOUPLE*, 6> TCArray{&EngineChamberWallTC, &EngineThroatWallTC, &EngineNozzleExitWallTC, &LoxTankLowerTC, &LoxTankMidTC, &LoxTankUpperTC};
+std::array<THERMOCOUPLE*, 6> TCsensorArray{&EngineChamberWallTC, &EngineThroatWallTC, &EngineNozzleExitWallTC, &LoxTankLowerTC, &LoxTankMidTC, &LoxTankUpperTC};
 
 #endif
 

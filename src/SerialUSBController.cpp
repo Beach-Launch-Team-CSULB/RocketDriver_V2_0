@@ -1,6 +1,6 @@
 #include "SerialUSBController.h"
 
-void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<SENSORBASE*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
+void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<ALARAHP_SENSOR*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
 {
     // Only print if both this bool is true and CSV print bool is false
     if (propStatusPrints && !propCSVStreamPrints)
@@ -203,7 +203,7 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
     {
         if (sensor->getSensorNodeID() == propulsionNodeIDIn)
         {
-        sensor->setState(SensorState::Slow);
+        //sensor->setState(SensorState::Slow);
          
             Serial.print("SensorID: ");
             Serial.print(static_cast<uint8_t>(sensor->getSensorID()));
@@ -217,6 +217,10 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
             Serial.print(static_cast<float>(sensor->getCurrentConvertedValue()));
             Serial.print( ": EMA: ");
             Serial.print(sensor->getEMAConvertedValue(),10);
+            Serial.print( ": Deenergize offset: ");
+            Serial.print(sensor->getDeengergizeOffsetValue(),10);
+            Serial.print( ": Offset EMA output: ");
+            Serial.print(sensor->getCurrentOutputValue() + 0.05,1);
             Serial.println(": ");
         }
     }

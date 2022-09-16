@@ -5,7 +5,7 @@
 
 
 // Initializer 1
-ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Slow)
+ALARAHP_SENSOR::ALARAHP_SENSOR(uint32_t setSensorID, uint32_t setSensorNodeID, uint8_t setADCinput, float setLinConvCoef1_m_Default = 1, float setLinConvCoef1_b_Default = 0, float setLinConvCoef2_m_Default = 1, float setLinConvCoef2_b_Default = 0, uint32_t setCurrentSampleRate = 0, SensorState setSensorState = Fast)
                 : sensorID{setSensorID}, sensorNodeID{setSensorNodeID}, ADCinput{setADCinput}, linConvCoef1_m_Default{setLinConvCoef1_m_Default}, linConvCoef1_b_Default{setLinConvCoef1_b_Default}, linConvCoef2_m_Default{setLinConvCoef2_m_Default}, linConvCoef2_b_Default{setLinConvCoef2_b_Default}, currentSampleRate{setCurrentSampleRate}, sensorState{setSensorState}
 {
   // setting stuff to defaults at initialization
@@ -92,6 +92,26 @@ void ALARAHP_SENSOR::read(ADC& adc)
         
       }
 
+}
+
+void ALARAHP_SENSOR::setDeenergizeOffset(ADC& adc, bool outputOverrideIn)
+{
+  // read the value but don't flag it as a new value for any messages. This is purely for ripping off a bunch of calibration reads.
+  // only do this during output override so it gaurantees all outputs are full off
+  if (outputOverrideIn)
+  {
+    if (OffsetFunctimer >= (2000))   // 500 Hz fixed, using separate timer to be independant from regular read function
+      {
+        currentRawValue = adc.analogRead(ADCinput);
+        /////linear conversions here, y = m*x + b
+        priorConvertedValue = currentConvertedValue;
+        currentConvertedValue = linConvCoef1_m*currentRawValue + linConvCoef1_b;
+        exponentialMovingAverage();
+        OffsetFunctimer = 0;
+      }
+  // while output override still has this running, update the deenergize offset
+  deenergizeOffset = newEMAOutput;
+  }
 }
 
 void ALARAHP_SENSOR::stateOperations()

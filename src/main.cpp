@@ -193,9 +193,9 @@ void setup() {
   currentVehicleState = static_cast<VehicleState>(tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStateAddressfromEEPROM_errorFlag));
   currentMissionState = static_cast<MissionState>(tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStateAddressfromEEPROM_errorFlag));
   // Only write to EEPROM the node ID if manual ID define is present at top of Main
-  #ifdef PROPULSIONSYSNODEIDPRESET
-  tripleEEPROMwrite(static_cast<uint8_t>(4), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
-  #endif
+  //#ifdef PROPULSIONSYSNODEIDPRESET
+  //tripleEEPROMwrite(static_cast<uint8_t>(3), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
+  //#endif
   //PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   PropulsionSysNodeID = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   //nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
@@ -263,7 +263,6 @@ void setup() {
   coldJunctionRenegade.begin();
   #endif
 
-  //sensorSetUp(sensorArray, rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
   // ----- Set Controller Dependent Sensor Settings -----
   controllerSensorSetup(valveArray, pyroArray, autoSequenceArray, sensorArray, tankPressControllerArray, engineControllerArray);
 
@@ -371,7 +370,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past valveTasks,PyroTasks, and HPOverride?");
   sensorTasks(sensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past sensorTasks?");
-  ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
+  ALARAHPsensorTasks(HPsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros, outputOverride);
   //Serial.println("Do I get past HPsensorTasks?");
   TCsensorTasks(TCsensorArray, *adc, PropulsionSysNodeID, rocketDriverSeconds, rocketDriverMicros);
   //Serial.println("Do I get past HPsensorTasks?");
