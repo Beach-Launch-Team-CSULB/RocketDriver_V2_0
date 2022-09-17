@@ -1,6 +1,10 @@
 #include "RGBLEDcolorDefinitions.h"
 #include "ControlFunctions.h"
 
+// Watchdog timer for autoventing, triggers if sitting in a pressurized state with no change for that time
+elapsedMillis autoVentTimer;
+uint32_t ventTriggerTime = 60000;  //60000 = 10 minutes in millis, this is live during Fire state so DO NOT make shorter than full burn time
+
 #ifdef PASABANG
 // -------------------------------------------------------------
 // CONFIRM All DEFINES MATCH DEVICE DEFINITIONS
@@ -772,6 +776,8 @@ void commandExecute(VehicleState& currentState, VehicleState& priorState, Missio
 {
     if (newCommand)
     {
+        // Any new command = reset to watchdog timer
+        autoVentTimer = 0;
         switch (currentCommand)
         {
             case command_passive:
@@ -1065,6 +1071,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             boardController.setLED(1,LED_WHITE_MIN);
             // Disable all HP outputs
             outputOverride = true;
+            // auto venting watchdog timer
+            autoVentTimer = 0;
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::Passive);
@@ -1072,6 +1080,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
         case VehicleState::standby:
             // Set Board LED1 8% on white
             boardController.setLED(1,LED_WHITE_8percent);
+            // auto venting watchdog timer
+            autoVentTimer = 0;
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setK_i(0);  //turms K_i back off
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setK_i(0); //turms K_i back off
@@ -1084,6 +1094,8 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::test:
+            // auto venting watchdog timer
+            autoVentTimer = 0;
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::TestPassthrough);
@@ -1091,6 +1103,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::offNominal:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::OffNominalPassthrough);
             tankPressControllerArray.at(LoxTankController_ArrayPointer)->setState(TankPressControllerState::OffNominalPassthrough);
             tankPressControllerArray.at(FuelTankController_ArrayPointer)->setState(TankPressControllerState::OffNominalPassthrough);
@@ -1098,6 +1115,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             break;            
         case VehicleState::abort:
             //haltFlag = true; //does this stay here???
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Yellow
             boardController.setLED(1,LED_YELLOW);
             tankPressControllerArray.at(HighPressTankController_ArrayPointer)->setState(TankPressControllerState::Abort);
@@ -1128,6 +1150,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::HiPressPressurized:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Blue
             boardController.setLED(1,LED_BLUE);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -1138,6 +1165,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::TankPressArm:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Lime 
             boardController.setLED(1,LED_LIME);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -1148,6 +1180,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::TankPressPressurized:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Green
             boardController.setLED(1,LED_GREEN);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -1158,6 +1195,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::fireArmed:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Orange
             boardController.setLED(1,LED_ORANGE);
             autoSequenceArray.at(0)->setState(AutoSequenceState::Standby);
@@ -1168,6 +1210,11 @@ void vehicleStateMachine(VehicleState& currentState, VehicleState& priorState, C
             outputOverride = false;
             break;
         case VehicleState::fire:
+            // Change VehicleState to vent if timer is allowed to pass the trigger time
+            if (autoVentTimer >= ventTriggerTime)
+            {
+                currentState = VehicleState::vent;
+            }
             // Set Board LED1 Red
             boardController.setLED(1,LED_RED);
             autoSequenceArray.at(0)->setState(AutoSequenceState::RunCommanded);            
