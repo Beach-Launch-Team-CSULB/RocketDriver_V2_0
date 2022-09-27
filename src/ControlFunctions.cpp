@@ -3,7 +3,7 @@
 
 // Watchdog timer for autoventing, triggers if sitting in a pressurized state with no change for that time
 elapsedMillis autoVentTimer;
-uint32_t ventTriggerTime = 60000;  //60000 = 10 minutes in millis, this is live during Fire state so DO NOT make shorter than full burn time
+uint32_t ventTriggerTime = 600000;  //600000 = 10 minutes in millis, this is live during Fire state so DO NOT make shorter than full burn time
 
 #ifdef PASABANG
 // -------------------------------------------------------------
