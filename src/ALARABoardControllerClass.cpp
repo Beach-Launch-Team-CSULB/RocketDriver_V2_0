@@ -1,18 +1,7 @@
 #include "ALARABoardControllerClass.h"
 
-ALARABoardController::ALARABoardController
-(
-  PCA9685* setALARALEDExtPWM, 
-  uint8_t setPCA9685_OE_Pin, 
-  RGB_LED* setLed1, 
-  RGB_LED* setLed2, 
-  ALARAbuzzer* setbuzzer
-)
-: ALARALEDExtPWM{*setALARALEDExtPWM}, 
-  PCA9685_OE_Pin{setPCA9685_OE_Pin}, 
-  Led1{*setLed1}, 
-  Led2{*setLed2}, 
-  buzzerr{*setbuzzer}
+ALARABoardController::ALARABoardController(PCA9685* setALARALEDExtPWM, uint8_t setPCA9685_OE_Pin, RGB_LED* setLed1, RGB_LED* setLed2, ALARAbuzzer* setbuzzer)
+    : ALARALEDExtPWM{*setALARALEDExtPWM}, PCA9685_OE_Pin{setPCA9685_OE_Pin}, Led1{*setLed1}, Led2{*setLed2}, buzzerr{*setbuzzer}
 {
 
 }
