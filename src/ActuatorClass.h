@@ -23,7 +23,12 @@ class Actuator
     public:
 
     // constructor
-        Actuator(uint32_t setActuatorID, uint8_t setActuatorNodeID, ActuatorType setActuatorType);
+        Actuator
+        (
+            uint32_t setActuatorID, 
+            uint8_t setActuatorNodeID, 
+            ActuatorType setActuatorType
+        );
     // a start up method, to set pins from within setup()
         void begin();
 
@@ -41,7 +46,10 @@ class Actuator
         void stateOperations();
 
     // Sensor pull in function for control
-        void controlSensorFetch(uint16_t updateControlSensor1Value){controlSensor1Value = updateControlSensor1Value;}
+        void controlSensorFetch(uint16_t updateControlSensor1Value)
+        {
+            controlSensor1Value = updateControlSensor1Value;
+        }
 
 
 };
