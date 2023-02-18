@@ -34,6 +34,8 @@
 #include <unordered_map>
 using std::string;
 #include <IntervalTimer.h>
+#include <SPIMemory.h>
+#include <SD.h>
 
 #include "ALARAUtilityFunctions.h"
 #include "ALARABoardControllerClass.h"
@@ -86,7 +88,7 @@ bool outputOverride = true; // initializes as true to block outputs until change
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
 ALARASN thisALARA;
-uint8_t ALARAnodeID = 3;                      // ALARA hardware node address
+uint8_t ALARAnodeID = 2;                      // ALARA hardware node address
 uint8_t ALARAnodeIDfromEEPROM;            //nodeID read out of EEPROM
 uint32_t ALARAnodeIDfromEEPROM_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromEEPROM;           //boolean flag for if startup is to run the nodeID detect read
@@ -124,6 +126,10 @@ CAN_filter_t wtf;
 FlexCan3Controller Can2msgController;
 SerialUSBController SerialUSBdataController;
 
+File onBoardLog;
+std::string logString = "";
+std::string fileLogName = "test.txt";
+
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
 bool startup{true}; // bool for storing if this is the first loop on startup, ESSENTIAL FOR STATE MACHINE OPERATION (maybe not anymore?)
@@ -149,24 +155,22 @@ uint32_t missionStateAddressfromEEPROM_errorFlag;
 //AutoSequence stuff for main
 int64_t currentCountdownForMain;
 
-////// Set EEPROM addresses
-// Change these up occasionally to reduce write cycle wear on the same bytes
-// I could use EEPROM itself to store current start byte of my data and automate iterating this. Good idea for future upgrade.
-uint16_t vehicleStateAddress1{4};
-uint16_t vehicleStateAddress2{5};
-uint16_t vehicleStateAddress3{6};
-uint16_t missionStateAddress1{7};
-uint16_t missionStateAddress2{8};
-uint16_t missionStateAddress3{9};
-uint16_t PropulsionSysNodeIDAddress1{16};
-uint16_t PropulsionSysNodeIDAddress2{17};
-uint16_t PropulsionSysNodeIDAddress3{18};
-uint16_t nodeIDDetermineAddress1{19};
-uint16_t nodeIDDetermineAddress2{20};
-uint16_t nodeIDDetermineAddress3{21};
-uint16_t nodeIDAddress1{22};
-uint16_t nodeIDAddress2{23};
-uint16_t nodeIDAddress3{24};
+////// Set Flash addresses
+uint16_t vehicleStateAddress1{0};
+uint16_t vehicleStateAddress2{2};
+uint16_t vehicleStateAddress3{3};
+uint16_t missionStateAddress1{4};
+uint16_t missionStateAddress2{5};
+uint16_t missionStateAddress3{6};
+uint16_t PropulsionSysNodeIDAddress1{7};
+uint16_t PropulsionSysNodeIDAddress2{8};
+uint16_t PropulsionSysNodeIDAddress3{9};
+uint16_t nodeIDDetermineAddress1{10};
+uint16_t nodeIDDetermineAddress2{11};
+uint16_t nodeIDDetermineAddress3{12};
+uint16_t nodeIDAddress1{13};
+uint16_t nodeIDAddress2{14};
+uint16_t nodeIDAddress3{15};
 
 //-------------------------------------------------------//
 void setup() {
@@ -197,7 +201,7 @@ void setup() {
   //tripleEEPROMwrite(static_cast<uint8_t>(2), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
   //#endif
   //PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
-  PropulsionSysNodeID = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
+  PropulsionSysNodeID = 2; //#tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
   //nodeIDdeterminefromEEPROM = tripleEEPROMread(nodeIDDetermineAddress1, nodeIDDetermineAddress2, nodeIDDetermineAddress3, nodeIDdeterminefromEEPROM_errorFlag);
   startupStateCheck(currentVehicleState, currentCommand);
   // Set NewCommandMessage true so the command from startupStateCheck gets read by commandExecute
@@ -280,7 +284,7 @@ void setup() {
   Can0.setTxBufferSize(64);
 }
 
-void loop() 
+void loop()
 {
 // Lazy "SensorTasks" for the RTD sensor
 if (coldJunctionRenegade.getSensorNodeID() == PropulsionSysNodeID)
@@ -405,12 +409,12 @@ if (shittyCANTimer >= 1000)
 }
   
   Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
-/*   Serial.println("Do I get past Can2 controllerTasks?");
+  /*Serial.println("Do I get past Can2 controllerTasks?");
   Can0stats = Can0.getStats();
   Serial.print("Can0stats.ringRxMax? ");
   Serial.println(Can0stats.ringRxMax);
   Serial.print("Can0stats.ringTxHighWater? ");
-  Serial.println(Can0stats.ringTxHighWater); */
+  Serial.println(Can0stats.ringTxMax);*/
 
 ///// ----- Serial Print Functions ----- /////
   if (mainLoopTestingTimer >= 250)
@@ -421,6 +425,83 @@ if (shittyCANTimer >= 1000)
   Serial.print(" Crash Timer Millis: ");
   Serial.println(crashTimer);
   }
+
+///// ----- SD card writing ----- /////
+ if(!SD.begin(BUILTIN_SDCARD)) 
+ {
+    
+ } 
+ else 
+ {
+  onBoardLog = SD.open(fileLogName.c_str(), FILE_WRITE);
+    
+    if(onBoardLog) 
+    {
+      //time stamp
+      onBoardLog.printf("Time: %lu | ", (unsigned long) millis());
+
+      //state update
+      onBoardLog.printf("State: %u | ", (uint8_t) currentVehicleState);
+
+      //---valve states---
+
+      //high press valves
+      onBoardLog.printf("HP: %u | ", (uint8_t) valveArray[0]->getState());
+      onBoardLog.printf("HV: %u | ", (uint8_t) valveArray[1]->getState());
+
+      //lox valves
+      onBoardLog.printf("LDR: %u | ", (uint8_t) valveArray[5]->getState());
+      onBoardLog.printf("LDV: %u | ", (uint8_t) valveArray[6]->getState());
+      onBoardLog.printf("LV: %u | ", (uint8_t) valveArray[4]->getState());
+      onBoardLog.printf("LMV: %u | ", (uint8_t) valveArray[2]->getState());
+
+      //fuel valves
+      onBoardLog.printf("FDR: %u | ", (uint8_t) valveArray[8]->getState());
+      onBoardLog.printf("FDV: %u | ", (uint8_t) valveArray[9]->getState());
+      onBoardLog.printf("FV: %u | ", (uint8_t) valveArray[7]->getState());
+      onBoardLog.printf("FMV: %u | ", (uint8_t) valveArray[3]->getState());
+
+      //igniters
+      onBoardLog.printf("IG1: %u | ", (uint8_t) pyroArray[0]->getState());
+      onBoardLog.printf("IG2: %u | ", (uint8_t) pyroArray[1]->getState());
+
+      //---PT Data (PSI)---
+
+      //Hish Side PTs
+      onBoardLog.printf("PTHighLoxSide: %u | ", (float) sensorArray[16]->getCurrentConvertedValue());
+      onBoardLog.printf("PTHighFuelSide: %u | ", (float) sensorArray[15]->getCurrentConvertedValue());
+
+      //Lox Tank PTs
+      onBoardLog.printf("PTLoxTank1: %u | ", (float) sensorArray[13]->getCurrentConvertedValue());
+      onBoardLog.printf("PTLoxTank2: %u | ", (float) sensorArray[14]->getCurrentConvertedValue());
+
+      //Fuel Tank PTs
+      onBoardLog.printf("PTFuelTank1: %u | ", (float) sensorArray[11]->getCurrentConvertedValue());
+      onBoardLog.printf("PTFuelTank2: %u | ", (float) sensorArray[12]->getCurrentConvertedValue());
+
+      //Dome Reg PTs
+      onBoardLog.printf("PTLoxDome: %u | ", (float) sensorArray[10]->getCurrentConvertedValue());
+      onBoardLog.printf("PTFuelDome: %u | ", (float) sensorArray[9]->getCurrentConvertedValue());
+
+      //Fuel Engine PTs
+      onBoardLog.printf("PTFuelInlet: %u | ", (float) sensorArray[5]->getCurrentConvertedValue());
+      onBoardLog.printf("PTFuelInjector: %u | ", (float) sensorArray[6]->getCurrentConvertedValue());
+
+      //Lox Engine PTs
+      onBoardLog.printf("PTLoxInlet: %u | ", (float) sensorArray[7]->getCurrentConvertedValue());
+
+      //Main Pneumatics PT
+      onBoardLog.printf("PTMainPneumatics: %u | ", (float) sensorArray[8]->getCurrentConvertedValue());
+      
+      //Chamber PTs
+      onBoardLog.printf("PTChamber1: %u | ", (float) sensorArray[4]->getCurrentConvertedValue());
+      onBoardLog.printf("PTChamber2: %u | ", (float) sensorArray[3]->getCurrentConvertedValue());
+
+      onBoardLog.println("");
+      onBoardLog.close();
+    }
+ }
+
 
 // Resets the startup bool, DO NOT REMOVE
 startup = false;

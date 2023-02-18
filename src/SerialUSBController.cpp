@@ -1,6 +1,29 @@
 #include "SerialUSBController.h"
 
-void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const std::array<ALARAHP_SENSOR*, NUM_HPSENSORS>& HPsensorArray, const uint8_t& propulsionNodeIDIn)
+void SerialUSBController::propulsionNodeStatusPrints
+    (
+    VehicleState& currentVehicleState, 
+    VehicleState& priorVehicleState, 
+    MissionState& currentMissionState, 
+    MissionState& prionMissionState, 
+    Command& currentCommand, 
+    commandMSG& currentCommandMSG, 
+    configMSG& currentConfigMSG, 
+    const std::array<AutoSequence*, 
+    NUM_AUTOSEQUENCES>& autoSequenceArray, 
+    const std::array<EngineController*, 
+    NUM_ENGINECONTROLLERS>& engineControllerArray, 
+    FluidSystemSimulation& fluidSim, 
+    const std::array<TankPressController*, 
+    NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, 
+    const std::array<Valve*, NUM_VALVES>& valveArray, 
+    const std::array<Pyro*, NUM_PYROS>& pyroArray, 
+    const std::array<SENSORBASE*, 
+    NUM_SENSORS>& sensorArray, 
+    const std::array<ALARAHP_SENSOR*, 
+    NUM_HPSENSORS>& HPsensorArray, 
+    const uint8_t& propulsionNodeIDIn
+    )
 {
     // Only print if both this bool is true and CSV print bool is false
     if (propStatusPrints && !propCSVStreamPrints)
@@ -244,7 +267,30 @@ void SerialUSBController::propulsionNodeStatusPrints(VehicleState& currentVehicl
 }
 
 
-void SerialUSBController::propulsionNodeCSVStreamPrints(VehicleState& currentVehicleState, VehicleState& priorVehicleState, MissionState& currentMissionState, MissionState& prionMissionState, Command& currentCommand, commandMSG& currentCommandMSG, configMSG& currentConfigMSG, const std::array<AutoSequence*, NUM_AUTOSEQUENCES>& autoSequenceArray, const std::array<EngineController*, NUM_ENGINECONTROLLERS>& engineControllerArray, FluidSystemSimulation& fluidSim, const std::array<TankPressController*, NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, const std::array<Valve*, NUM_VALVES>& valveArray, const std::array<Pyro*, NUM_PYROS>& pyroArray, const std::array<SENSORBASE*, NUM_SENSORS>& sensorArray, const uint8_t& propulsionNodeIDIn)
+void SerialUSBController::propulsionNodeCSVStreamPrints
+    (
+    VehicleState& currentVehicleState, 
+    VehicleState& priorVehicleState, 
+    MissionState& currentMissionState, 
+    MissionState& prionMissionState, 
+    Command& currentCommand, 
+    commandMSG& currentCommandMSG, 
+    configMSG& currentConfigMSG, 
+    const std::array<AutoSequence*, 
+    NUM_AUTOSEQUENCES>& autoSequenceArray, 
+    const std::array<EngineController*, 
+    NUM_ENGINECONTROLLERS>& engineControllerArray, 
+    FluidSystemSimulation& fluidSim, 
+    const std::array<TankPressController*, 
+    NUM_TANKPRESSCONTROLLERS>& tankPressControllerArray, 
+    const std::array<Valve*, 
+    NUM_VALVES>& valveArray, 
+    const std::array<Pyro*, 
+    NUM_PYROS>& pyroArray, 
+    const std::array<SENSORBASE*, 
+    NUM_SENSORS>& sensorArray, 
+    const uint8_t& propulsionNodeIDIn
+    )
 {
     // Prints active if bool is true
     if (propCSVStreamPrints)

@@ -12,11 +12,11 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "c:/Users/dmorg/OneDrive/Documents/PlatformIO/Projects/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
+            "executable": "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
             "projectEnvName": "ALARAV2_1_teensy36_Renegade",
-            "toolchainBinDir": "C:/Users/dmorg/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/cooli/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/dmorg/.platformio/platforms/teensy/misc/svd/MK66F18.svd",
+            "svdPath": "C:/Users/cooli/.platformio/platforms/teensy/misc/svd/MK66F18.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug (ALARAV2_1_teensy36_Renegade)"
@@ -26,21 +26,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "c:/Users/dmorg/OneDrive/Documents/PlatformIO/Projects/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
+            "executable": "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
             "projectEnvName": "ALARAV2_1_teensy36_Renegade",
-            "toolchainBinDir": "C:/Users/dmorg/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/cooli/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/dmorg/.platformio/platforms/teensy/misc/svd/MK66F18.svd"
+            "svdPath": "C:/Users/cooli/.platformio/platforms/teensy/misc/svd/MK66F18.svd"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "c:/Users/dmorg/OneDrive/Documents/PlatformIO/Projects/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
+            "executable": "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/build/ALARAV2_1_teensy36_Renegade/firmware.elf",
             "projectEnvName": "ALARAV2_1_teensy36_Renegade",
-            "toolchainBinDir": "C:/Users/dmorg/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/cooli/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/dmorg/.platformio/platforms/teensy/misc/svd/MK66F18.svd",
+            "svdPath": "C:/Users/cooli/.platformio/platforms/teensy/misc/svd/MK66F18.svd",
             "loadMode": "manual"
         }
     ]

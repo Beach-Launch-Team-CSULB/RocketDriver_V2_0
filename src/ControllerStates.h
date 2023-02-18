@@ -10,7 +10,7 @@ enum class TankPressControllerState
     Passive,                    // 0
     Standby,                    // 1
     BangBangActive,             // 2
-    RegPressActive,            // 3
+    RegPressActive,             // 3
     HiPressPassthroughVent,     // 4
     Armed,                      // 5
     PropTankVent,               // 6
