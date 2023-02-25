@@ -17,7 +17,6 @@
                 "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/FlexCAN",
                 "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/EEPROM",
                 "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/ADC",
-                "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/SPIMemory/src",
                 "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/PCA9685-Arduino/src",
                 "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/Adafruit MCP9808 Library",
                 "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/Adafruit Unified Sensor",
@@ -132,7 +131,6 @@
                     "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/FlexCAN",
                     "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/EEPROM",
                     "C:/Users/cooli/.platformio/packages/framework-arduinoteensy/libraries/ADC",
-                    "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/SPIMemory/src",
                     "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/PCA9685-Arduino/src",
                     "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/Adafruit MCP9808 Library",
                     "c:/Users/cooli/Documents/BLT/code/RocketDriver/RocketDriver2-0/RocketDriver_V2_0/.pio/libdeps/ALARAV2_1_teensy36_Renegade/Adafruit Unified Sensor",
@@ -237,7 +235,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60106",
+                "PLATFORMIO=60107",
                 "__MK66FX1M0__",
                 "ARDUINO_TEENSY36",
                 "RENEGADESF",

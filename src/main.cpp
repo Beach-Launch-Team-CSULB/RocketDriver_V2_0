@@ -34,7 +34,6 @@
 #include <unordered_map>
 using std::string;
 #include <IntervalTimer.h>
-#include <SPIMemory.h>
 #include <SD.h>
 
 #include "ALARAUtilityFunctions.h"
