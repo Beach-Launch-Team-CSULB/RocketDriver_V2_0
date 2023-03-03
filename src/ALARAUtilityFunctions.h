@@ -5,6 +5,9 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <cstring>
+#include <LittleFS.h>
+#include <string>
+using std::string;
 //#include "piezoSongs.h"
 
 void ALARAHPOverride(uint8_t pinArrayIn[][11], bool& outputOverride);
@@ -12,6 +15,12 @@ void ALARAHPOverride(uint8_t pinArrayIn[][11], bool& outputOverride);
 void tripleEEPROMwrite(uint8_t byteToWrite, uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3);
 
 uint8_t tripleEEPROMread(uint32_t byteAddress1, uint32_t byteAddress2, uint32_t byteAddress3, uint32_t &errorFlag);
+
+void flashSetup(bool format);
+
+void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fileName2, std::string fileName3, uint8_t flashID);
+
+uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::string fileName3, uint32_t &errorFlag, uint8_t flashID);
 
 bool readOnlyMUX(uint8_t pinToReadMUX, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2, uint8_t pinMUX_A); // SN74CB3Q3251 MUX pin read operation for use only when MUX has OE tied to GND
 

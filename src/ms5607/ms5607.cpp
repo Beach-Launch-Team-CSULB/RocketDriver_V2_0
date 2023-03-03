@@ -64,12 +64,12 @@ void MS5607::reset()
     Serial.println("SPI BEGINNING TRANSACTION");
     SPI.beginTransaction(SPISettings(BPS_SPI_RATE, MSBFIRST, SPI_MODE0));
     Serial.println("SPI SETTING CS PIN LOW");
-    //digitalWrite(CS_PIN,0);
+    digitalWrite(CS_PIN,0);
     digitalWrite(ED19,0);
     Serial.println("SPI SENDING RESET COMMAND");
     SPI.transfer(RESET); // send reset command
     Serial.println("SPI SETTING CS PIN HIGH");
-    //digitalWrite(CS_PIN,1);
+    digitalWrite(CS_PIN,1);
     digitalWrite(ED19,1);
     Serial.println("SPI ENDING TRANSACTION");
     SPI.endTransaction();
