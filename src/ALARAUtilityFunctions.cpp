@@ -4,6 +4,15 @@
 #include <EEPROM.h>
 #include <cstring>
 #include "extendedIO/extendedIO.h"
+#include <LittleFS.h>
+#include <string>
+#include "ALARApinDefines.h"
+
+
+using std::string;
+
+LittleFS_SPIFlash flash;
+File file;
 
 // ----- Teensy Internal Reset -----
 // Teensy 3.5/3.6 MCU restart register definitions
@@ -71,6 +80,180 @@ uint8_t tripleEEPROMread(uint32_t byteAddress1, uint32_t byteAddress2, uint32_t 
   else
     errorFlag = (7 >> 24) + (byteReadFrom3 >> 16) + (byteReadFrom2 >> 8) + (byteReadFrom1 >> 0);
     return byteReadFrom1;
+}
+
+void flashSetup(bool format)
+{
+
+  if(!flash.begin(ALARA_NOR_OE, SPI))
+  {
+    Serial.println("Flash did not Begin");
+  }
+  else
+  {
+    Serial.println("Flash Begin");
+    Serial.printf("Total space: %u  | Space used %u\n", flash.totalSize(), flash.usedSize());
+  }
+
+  if(format)
+  {
+    flash.quickFormat();
+    Serial.println("Format Successful");
+  }
+}
+
+void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fileName2, std::string fileName3, uint8_t flashID)
+{
+  SPI_CS_MUX(flashID, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
+
+  //Serial.println("===Flash Write===");
+  //Serial.printf("Data written: %d\n", byteToWrite);
+
+
+  file = flash.open(fileName1.c_str(), FILE_WRITE);
+
+  if(!file)
+  {
+    Serial.println("File 1 write failed");
+  }
+  else
+  {
+    file.seek(0);
+    file.write(byteToWrite);
+    //Serial.printf("File 1: %s\n", file.name());
+    //Serial.println("File 1 write Success");
+  }
+  
+  file.close();
+
+
+  file = flash.open(fileName2.c_str(), FILE_WRITE);
+
+  if(!file)
+  {
+    Serial.println("File 2 write failed");
+  }
+  else
+  {
+    file.seek(0);
+    file.write(byteToWrite);
+    //Serial.printf("File 2: %s\n", file.name());
+    //Serial.println("File 2 write Success");
+  }
+
+  file.close();
+
+
+  file = flash.open(fileName3.c_str(), FILE_WRITE);
+
+  if(!file)
+  {
+    Serial.println("File 3 write failed");
+  }
+  else
+  {
+    file.seek(0);
+    file.write(byteToWrite);
+    //Serial.printf("File 3: %s\n", file.name());
+    //Serial.println("File 3 write Success");
+  }
+
+  file.close();
+  
+}
+
+uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::string fileName3, uint32_t &errorFlag, uint8_t flashID)
+{
+  uint8_t byteReadFrom1;
+  uint8_t byteReadFrom2;
+  uint8_t byteReadFrom3;
+
+  SPI_CS_MUX(flashID, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
+
+  //Serial.println("===Flash Read===");
+
+  file = flash.open(fileName1.c_str(), FILE_READ);
+
+  if(!file)
+  {
+    byteReadFrom1 = 1;
+    Serial.println("File 1 read failed");
+  }
+  else
+  {
+    byteReadFrom1 = file.read();
+    //Serial.printf("File 1: %s\n", file.name());
+    //Serial.print("Data read 1: ");
+    //Serial.println(byteReadFrom1);
+  }
+
+  file.close();
+  
+
+  file = flash.open(fileName2.c_str(), FILE_READ);
+
+  if(!file)
+  {
+    byteReadFrom2 = 1;
+    Serial.println("File 2 read failed");
+  }
+  else
+  {
+    byteReadFrom2 = file.read();
+    //Serial.printf("File 2: %s\n", file.name());
+    //Serial.print("Data read 2: ");
+    //Serial.println(byteReadFrom2);
+  }
+
+  file.close();
+  
+
+  file = flash.open(fileName3.c_str(), FILE_READ);
+
+  if(!file)
+  {
+    byteReadFrom3 = 1;
+    Serial.println("File 3 read failed");
+  }
+  else
+  {
+    byteReadFrom3 = file.read();
+    //Serial.printf("File 3: %s\n", file.name());
+    //Serial.print("Data read 3: ");
+    //Serial.println(byteReadFrom3);
+  }
+
+  file.close();
+
+// Error handling and voting for non matching results
+// errorFlag = 0 means no error, 
+// otherwise bytes 0,1,2 are combined to return to mixed result in totality
+// bits above 24 of EEPROM byte info are set as boolean digits to flag the non matching bytes
+
+  if (byteReadFrom1 == byteReadFrom2 && byteReadFrom1 == byteReadFrom3)
+  {
+    errorFlag = 0;           
+    return byteReadFrom1;
+  }
+  else if (byteReadFrom1 == byteReadFrom2)
+  {
+    errorFlag = (4 >> 24) + (byteReadFrom3 >> 16);
+    return byteReadFrom1;
+  }
+  else if (byteReadFrom1 == byteReadFrom3)
+  {
+    errorFlag = (2 >> 24) + (byteReadFrom2 >> 8);
+    return byteReadFrom1;
+  }
+  else if (byteReadFrom2 == byteReadFrom3)
+  {
+    errorFlag = (1 >> 24) + (byteReadFrom1 >> 0);
+    return byteReadFrom2;
+  }
+  else
+    errorFlag = (7 >> 24) + (byteReadFrom3 >> 16) + (byteReadFrom2 >> 8) + (byteReadFrom1 >> 0);
+    return byteReadFrom1;
+
 }
 
 bool readOnlyMUX(uint8_t pinToReadMUX, uint8_t pinMUX_S0, uint8_t pinMUX_S1, uint8_t pinMUX_S2, uint8_t pinMUX_A) // SN74CB3Q3251 MUX pin read operation for use only when MUX has OE tied to GND
