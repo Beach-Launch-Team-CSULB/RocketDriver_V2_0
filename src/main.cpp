@@ -475,7 +475,7 @@ void loop()
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
-if (shittyCANTimer >= 250)
+if (shittyCANTimer >= 1000)
 {
   Can2msgController.setExternalStateChange(true); //cheater force for quasi messages, AM I USING THIS AT ALL RIGHT NOW???
   shittyCANTimer = 0;
