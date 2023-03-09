@@ -88,7 +88,7 @@ bool outputOverride = true; // initializes as true to block outputs until change
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
 ALARASN thisALARA;
-uint8_t ALARAnodeID; //= 2;                      // ALARA hardware node address
+uint8_t ALARAnodeID;                      // ALARA hardware node address 2 for engine 3 for prop
 uint8_t ALARAnodeIDfromFlash;            //nodeID read out of EEPROM
 uint32_t ALARAnodeIDfromFlash_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromFlash;           //boolean flag for if startup is to run the nodeID detect read
@@ -197,6 +197,9 @@ std::string missionStateFlashFileName3 = "missionState3.txt";
 std::string propSysNodeIDFlashFileName1 = "propSysNodeID1.txt";
 std::string propSysNodeIDFlashFileName2 = "propSysNodeID2.txt";
 std::string propSysNodeIDFlashFileName3 = "propSysNodeID3.txt";
+std::string alaraNodeIDFlashFileName1 = "alaraNodeID1.txt";
+std::string alaraNodeIDFlashFileName2 = "alaraNodeID2.txt";
+std::string alaraNodeIDFlashFileName3 = "alaraNodeID3.txt";
 
 
 //-------------------------------------------------------//
@@ -214,6 +217,8 @@ void setup() {
   
   // MOVE NODEDETECTSHITHERE!!!
   // Check map for ALARASN configutation
+  //tripleFlashwrite(2, alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, 0);
+  ALARAnodeID = tripleFlashread(alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, ALARAnodeIDfromFlash_errorFlag, 0);
   lookupALARASNmap(thisALARA, ALARAnodeID);
 
 
@@ -224,6 +229,8 @@ void setup() {
 ///// ----- Insert a board rev check to pin defines here, if it fails disable our GPIO? ------ //
 
   // -----Read Last State off eeprom and update -----
+  //tripleFlashwrite(2, vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
+  //tripleFlashwrite(1, missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
   //currentVehicleState = static_cast<VehicleState>(tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStateAddressfromEEPROM_errorFlag));
   //currentMissionState = static_cast<MissionState>(tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStateAddressfromEEPROM_errorFlag));
   currentVehicleState = static_cast<VehicleState>(tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStateAddressfromFlash_errorFlag, 0));
@@ -323,16 +330,16 @@ void loop()
 {
 
 // Lazy "SensorTasks" for the RTD sensor
-if (coldJunctionRenegade.getSensorNodeID() == PropulsionSysNodeID)
-{
-  coldJunctionRenegade.read();
-}
+ if (coldJunctionRenegade.getSensorNodeID() == PropulsionSysNodeID)
+ {
+   coldJunctionRenegade.read();
+ }
 
 //fakesensorShit(rocketDriverSeconds, rocketDriverMicros, &myTimeTrackingFunction);
 
 ///// Custom function for tracking miliseconds and seconds level system time for timestamping /////
 // let it run each loop in addition to when called to keep it synced up
-myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
+ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
   // --- Read CAN bus and update current command ---
   if(CANread(Can0, configVerificationKey, NewConfigMessage, currentCommand, currentConfigMSG, PropulsionSysNodeID) && !startup) // do not execute on the first loop
@@ -433,17 +440,32 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
   //tripleFlashwrite(static_cast<uint8_t>(1), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
   //tripleFlashwrite(static_cast<uint8_t>(0), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
   if ((static_cast<uint8_t>(currentVehicleState)) != (tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0)))
-  {
+  { 
+    //Serial.println("===Vehical State Update===");
+    //Serial.print("Current Vehical State: ");
+    //Serial.println(static_cast<uint8_t>(currentVehicleState));
+    //Serial.print("File Vehical State: ");
+    //Serial.println(tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0));
+
     tripleFlashwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
+
+    //Serial.print("Updated File Vehical State: ");
+    //Serial.println(tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0));
   }
   if ((static_cast<uint8_t>(currentMissionState)) != (tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0)))
   {
+    /*Serial.println("===Mission State Update===");
+    Serial.print("Current Mission State: ");
+    Serial.println(static_cast<uint8_t>(currentMissionState));
+    Serial.print("File Mission State: ");
+    Serial.println(tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0));
+    */
+
     tripleFlashwrite(static_cast<uint8_t>(currentMissionState), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
-/*   Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
-  Serial.print(" priorMissionState : ");
-  Serial.print(static_cast<uint8_t>(priorMissionState));
-  Serial.print(" currentMissionState : ");
-  Serial.println(static_cast<uint8_t>(currentMissionState)); */
+
+    //Serial.print("Updated File Mission State: ");
+    //Serial.println(tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0));
+
   }
   
   // Reset function to reboot Teensy with internal reset register
@@ -453,7 +475,7 @@ myTimeTrackingFunction(rocketDriverSeconds, rocketDriverMicros);
 
 ///// ----- All outgoing CAN2 messages managed here ----- /////
 // Run every loop
-if (shittyCANTimer >= 1000)
+if (shittyCANTimer >= 250)
 {
   Can2msgController.setExternalStateChange(true); //cheater force for quasi messages, AM I USING THIS AT ALL RIGHT NOW???
   shittyCANTimer = 0;
