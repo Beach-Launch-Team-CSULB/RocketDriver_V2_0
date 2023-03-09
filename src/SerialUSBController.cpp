@@ -34,6 +34,8 @@ void SerialUSBController::propulsionNodeStatusPrints
   Serial.print(propulsionNodeIDIn);
   Serial.print(" currentVehicleState :");
   Serial.println(static_cast<uint8_t>(currentVehicleState));
+  Serial.print(" currentMissionState :");
+  Serial.println(static_cast<uint8_t>(currentMissionState));
   Serial.print(" currentCommand :");
   Serial.println(currentCommand);
 

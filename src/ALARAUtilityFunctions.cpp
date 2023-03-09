@@ -106,8 +106,8 @@ void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fi
 {
   SPI_CS_MUX(flashID, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
 
-  //Serial.println("===Flash Write===");
-  //Serial.printf("Data written: %d\n", byteToWrite);
+  Serial.println("===Flash Write===");
+  Serial.printf("Data written: %d\n", byteToWrite);
 
 
   file = flash.open(fileName1.c_str(), FILE_WRITE);
@@ -120,8 +120,8 @@ void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fi
   {
     file.seek(0);
     file.write(byteToWrite);
-    //Serial.printf("File 1: %s\n", file.name());
-    //Serial.println("File 1 write Success");
+    Serial.printf("File 1: %s\n", file.name());
+    Serial.println("File 1 write Success");
   }
   
   file.close();
@@ -137,8 +137,8 @@ void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fi
   {
     file.seek(0);
     file.write(byteToWrite);
-    //Serial.printf("File 2: %s\n", file.name());
-    //Serial.println("File 2 write Success");
+    Serial.printf("File 2: %s\n", file.name());
+    Serial.println("File 2 write Success");
   }
 
   file.close();
@@ -154,8 +154,8 @@ void tripleFlashwrite(uint8_t byteToWrite, std::string fileName1, std::string fi
   {
     file.seek(0);
     file.write(byteToWrite);
-    //Serial.printf("File 3: %s\n", file.name());
-    //Serial.println("File 3 write Success");
+    Serial.printf("File 3: %s\n", file.name());
+    Serial.println("File 3 write Success");
   }
 
   file.close();
@@ -170,7 +170,7 @@ uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::strin
 
   SPI_CS_MUX(flashID, ALARA_NOR_S0, ALARA_NOR_S1, ALARA_NOR_S2);
 
-  //Serial.println("===Flash Read===");
+  Serial.println("===Flash Read===");
 
   file = flash.open(fileName1.c_str(), FILE_READ);
 
@@ -182,9 +182,9 @@ uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::strin
   else
   {
     byteReadFrom1 = file.read();
-    //Serial.printf("File 1: %s\n", file.name());
-    //Serial.print("Data read 1: ");
-    //Serial.println(byteReadFrom1);
+    Serial.printf("File 1: %s\n", file.name());
+    Serial.print("Data read 1: ");
+    Serial.println(byteReadFrom1);
   }
 
   file.close();
@@ -200,9 +200,9 @@ uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::strin
   else
   {
     byteReadFrom2 = file.read();
-    //Serial.printf("File 2: %s\n", file.name());
-    //Serial.print("Data read 2: ");
-    //Serial.println(byteReadFrom2);
+    Serial.printf("File 2: %s\n", file.name());
+    Serial.print("Data read 2: ");
+    Serial.println(byteReadFrom2);
   }
 
   file.close();
@@ -218,9 +218,9 @@ uint8_t tripleFlashread(std::string fileName1, std::string fileName2, std::strin
   else
   {
     byteReadFrom3 = file.read();
-    //Serial.printf("File 3: %s\n", file.name());
-    //Serial.print("Data read 3: ");
-    //Serial.println(byteReadFrom3);
+    Serial.printf("File 3: %s\n", file.name());
+    Serial.print("Data read 3: ");
+    Serial.println(byteReadFrom3);
   }
 
   file.close();
