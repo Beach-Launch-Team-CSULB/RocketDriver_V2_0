@@ -88,8 +88,7 @@ bool outputOverride = true; // initializes as true to block outputs until change
 ///// NODE DECLARATION /////
 //default sets to max nodeID intentionally to be bogus until otherwise set
 ALARASN thisALARA;
-uint8_t ALARAnodeID;                      // ALARA hardware node address 2 for engine 3 for prop
-uint8_t ALARAnodeIDfromFlash;            //nodeID read out of EEPROM
+uint8_t ALARAnodeID = 3;                      // ALARA hardware node address    
 uint32_t ALARAnodeIDfromFlash_errorFlag;            //nodeID read out of EEPROM
 bool nodeIDdeterminefromFlash;           //boolean flag for if startup is to run the nodeID detect read
 uint32_t nodeIDdeterminefromFlash_errorFlag;
@@ -178,6 +177,7 @@ uint16_t nodeIDAddress3{15};
 
 ////// Set Flash Vars
 bool reFormateFlash = false;
+bool flashLogged = true;
 
 uint8_t PropulsionSysNodeID;              //engine node = 2, prop node = 3, Pasafire node = 8
 uint8_t PropulsionSysNodeIDfromFlash;    //PropulsionSysNodeID read out of EEPROM
@@ -217,8 +217,8 @@ void setup() {
   
   // MOVE NODEDETECTSHITHERE!!!
   // Check map for ALARASN configutation
-  //tripleFlashwrite(2, alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, 0);
-  ALARAnodeID = tripleFlashread(alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, ALARAnodeIDfromFlash_errorFlag, 0);
+  //tripleFlashwrite(3, alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, 0);
+  //ALARAnodeID = tripleFlashread(alaraNodeIDFlashFileName1, alaraNodeIDFlashFileName2, alaraNodeIDFlashFileName3, ALARAnodeIDfromFlash_errorFlag, 0);
   lookupALARASNmap(thisALARA, ALARAnodeID);
 
 
@@ -376,7 +376,7 @@ void loop()
   //Serial.println("Do I get past config msg read?");
 ///// ------------------------------------ /////  
 
-  if (ezModeControllerTimer >= 20) // 5 = 200Hz controller rate, 20 = 50Hz rate
+  if (ezModeControllerTimer >= 250) // 5 = 200Hz controller rate, 20 = 50Hz rate
   {
   //Serial.println("Do I get into ezModeControllerTimer?");
   // -----Process Commands Here-----
@@ -439,32 +439,19 @@ void loop()
   //}
   //tripleFlashwrite(static_cast<uint8_t>(1), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
   //tripleFlashwrite(static_cast<uint8_t>(0), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
-  if ((static_cast<uint8_t>(currentVehicleState)) != (tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0)))
-  { 
-    //Serial.println("===Vehical State Update===");
-    //Serial.print("Current Vehical State: ");
-    //Serial.println(static_cast<uint8_t>(currentVehicleState));
-    //Serial.print("File Vehical State: ");
-    //Serial.println(tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0));
+  if(flashLogged) {
 
-    tripleFlashwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
+    if ((static_cast<uint8_t>(currentVehicleState)) != (tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0)))
+    { 
+      tripleFlashwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
+    }
 
-    //Serial.print("Updated File Vehical State: ");
-    //Serial.println(tripleFlashread(vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, vehicleStatefromFlash_errorFlag, 0));
-  }
-  if ((static_cast<uint8_t>(currentMissionState)) != (tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0)))
-  {
-    /*Serial.println("===Mission State Update===");
-    Serial.print("Current Mission State: ");
-    Serial.println(static_cast<uint8_t>(currentMissionState));
-    Serial.print("File Mission State: ");
-    Serial.println(tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0));
-    */
+    if ((static_cast<uint8_t>(currentMissionState)) != (tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0)))
+    {
+      tripleFlashwrite(static_cast<uint8_t>(currentMissionState), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
+    }
 
-    tripleFlashwrite(static_cast<uint8_t>(currentMissionState), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
-
-    //Serial.print("Updated File Mission State: ");
-    //Serial.println(tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStatefromFlash_errorFlag, 0));
+    flashLogged = false;
 
   }
   
@@ -490,13 +477,14 @@ if (shittyCANTimer >= 1000)
   Serial.println(Can0stats.ringTxMax);*/
 
 ///// ----- Serial Print Functions ----- /////
-  if (mainLoopTestingTimer >= 250)
+  if (mainLoopTestingTimer >= 1000)
   {
   SerialUSBdataController.propulsionNodeStatusPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, PropulsionSysNodeID);
   SerialUSBdataController.propulsionNodeCSVStreamPrints(currentVehicleState, priorVehicleState, currentMissionState, priorMissionState, currentCommand, currentCommandMSG, currentConfigMSG, autoSequenceArray, engineControllerArray, waterGoesVroom, tankPressControllerArray, valveArray, pyroArray, sensorArray, PropulsionSysNodeID);
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   Serial.print(" Crash Timer Millis: ");
   Serial.println(crashTimer);
+  flashLogged = true;
   }
 
 ///// ----- SD card writing ----- /////
