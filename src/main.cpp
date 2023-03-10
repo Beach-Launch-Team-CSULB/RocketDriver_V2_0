@@ -466,6 +466,9 @@ if (shittyCANTimer >= 1000)
 {
   Can2msgController.setExternalStateChange(true); //cheater force for quasi messages, AM I USING THIS AT ALL RIGHT NOW???
   shittyCANTimer = 0;
+
+  flashLogged = true;
+
 }
   
   Can2msgController.controllerTasks(Can0, currentVehicleState, currentMissionState, currentCommand, engineControllerArray, tankPressControllerArray, valveArray, pyroArray, sensorArray, HPsensorArray, autoSequenceArray, waterGoesVroom, PropulsionSysNodeID);
@@ -484,7 +487,6 @@ if (shittyCANTimer >= 1000)
   mainLoopTestingTimer = 0; //resets timer to zero each time the loop prints
   Serial.print(" Crash Timer Millis: ");
   Serial.println(crashTimer);
-  flashLogged = true;
   }
 
 ///// ----- SD card writing ----- /////
