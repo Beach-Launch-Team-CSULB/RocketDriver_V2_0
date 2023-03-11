@@ -132,6 +132,9 @@ SerialUSBController SerialUSBdataController;
 File onBoardLog;
 std::string logString = "";
 std::string fileLogName = "test.txt";
+bool logValves = true;
+bool logSensorPSI = true;
+bool logSensorRaw = true;
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
@@ -507,63 +510,105 @@ if (shittyCANTimer >= 1000)
       onBoardLog.printf("State: %u | ", (uint8_t) currentVehicleState);
 
       //---valve states---
+      if(logValves)
+      {
 
-      //high press valves
-      onBoardLog.printf("HP: %u | ", (uint8_t) valveArray[0]->getState());
-      onBoardLog.printf("HV: %u | ", (uint8_t) valveArray[1]->getState());
+        //high press valves
+        onBoardLog.printf("HP: %u | ", (uint8_t) valveArray[0]->getState());
+        onBoardLog.printf("HV: %u | ", (uint8_t) valveArray[1]->getState());
 
-      //lox valves
-      onBoardLog.printf("LDR: %u | ", (uint8_t) valveArray[5]->getState());
-      onBoardLog.printf("LDV: %u | ", (uint8_t) valveArray[6]->getState());
-      onBoardLog.printf("LV: %u | ", (uint8_t) valveArray[4]->getState());
-      onBoardLog.printf("LMV: %u | ", (uint8_t) valveArray[2]->getState());
+        //lox valves
+        onBoardLog.printf("LDR: %u | ", (uint8_t) valveArray[5]->getState());
+        onBoardLog.printf("LDV: %u | ", (uint8_t) valveArray[6]->getState());
+        onBoardLog.printf("LV: %u | ", (uint8_t) valveArray[4]->getState());
+        onBoardLog.printf("LMV: %u | ", (uint8_t) valveArray[2]->getState());
 
-      //fuel valves
-      onBoardLog.printf("FDR: %u | ", (uint8_t) valveArray[8]->getState());
-      onBoardLog.printf("FDV: %u | ", (uint8_t) valveArray[9]->getState());
-      onBoardLog.printf("FV: %u | ", (uint8_t) valveArray[7]->getState());
-      onBoardLog.printf("FMV: %u | ", (uint8_t) valveArray[3]->getState());
+        //fuel valves
+        onBoardLog.printf("FDR: %u | ", (uint8_t) valveArray[8]->getState());
+        onBoardLog.printf("FDV: %u | ", (uint8_t) valveArray[9]->getState());
+        onBoardLog.printf("FV: %u | ", (uint8_t) valveArray[7]->getState());
+        onBoardLog.printf("FMV: %u | ", (uint8_t) valveArray[3]->getState());
 
-      //igniters
-      onBoardLog.printf("IG1: %u | ", (uint8_t) pyroArray[0]->getState());
-      onBoardLog.printf("IG2: %u | ", (uint8_t) pyroArray[1]->getState());
+        //igniters
+        onBoardLog.printf("IG1: %u | ", (uint8_t) pyroArray[0]->getState());
+        onBoardLog.printf("IG2: %u | ", (uint8_t) pyroArray[1]->getState());
+
+      }
 
       //---PT Data (PSI)---
+      if(logSensorPSI)
+      {
 
-      //Hish Side PTs
-      onBoardLog.printf("PTHighLoxSide (psi): %.1f | ", (float) sensorArray[16]->getCurrentConvertedValue());
-      onBoardLog.printf("PTHighFuelSide (psi): %.1f | ", (float) sensorArray[15]->getCurrentConvertedValue());
+        //High Side PTs
+        onBoardLog.printf("PTHighLoxSide (psi): %.1f | ", (float) sensorArray[16]->getCurrentConvertedValue());
+        onBoardLog.printf("PTHighFuelSide (psi): %.1f | ", (float) sensorArray[15]->getCurrentConvertedValue());
 
-      //Lox Tank PTs
-      onBoardLog.printf("PTLoxTank1 (psi): %.1f | ", (float) sensorArray[13]->getCurrentConvertedValue());
-      onBoardLog.printf("PTLoxTank2 (psi): %.1f | ", (float) sensorArray[14]->getCurrentConvertedValue());
+        //Lox Tank PTs
+        onBoardLog.printf("PTLoxTank1 (psi): %.1f | ", (float) sensorArray[13]->getCurrentConvertedValue());
+        onBoardLog.printf("PTLoxTank2 (psi): %.1f | ", (float) sensorArray[14]->getCurrentConvertedValue());
 
-      //Fuel Tank PTs
-      onBoardLog.printf("PTFuelTank1 (psi): %.1f | ", (float) sensorArray[11]->getCurrentConvertedValue());
-      onBoardLog.printf("PTFuelTank2 (psi): %.1f | ", (float) sensorArray[12]->getCurrentConvertedValue());
+        //Fuel Tank PTs
+        onBoardLog.printf("PTFuelTank1 (psi): %.1f | ", (float) sensorArray[11]->getCurrentConvertedValue());
+        onBoardLog.printf("PTFuelTank2 (psi): %.1f | ", (float) sensorArray[12]->getCurrentConvertedValue());
 
-      //Dome Reg PTs
-      onBoardLog.printf("PTLoxDome (psi): %.1f | ", (float) sensorArray[10]->getCurrentConvertedValue());
-      onBoardLog.printf("PTFuelDome (psi): %.1f | ", (float) sensorArray[9]->getCurrentConvertedValue());
+        //Dome Reg PTs
+        onBoardLog.printf("PTLoxDome (psi): %.1f | ", (float) sensorArray[10]->getCurrentConvertedValue());
+        onBoardLog.printf("PTFuelDome (psi): %.1f | ", (float) sensorArray[9]->getCurrentConvertedValue());
 
-      //Fuel Engine PTs
-      onBoardLog.printf("PTFuelInlet (psi): %.1f | ", (float) sensorArray[5]->getCurrentConvertedValue());
-      onBoardLog.printf("PTFuelInjector (psi): %.1f | ", (float) sensorArray[6]->getCurrentConvertedValue());
+        //Fuel Engine PTs
+        onBoardLog.printf("PTFuelInlet (psi): %.1f | ", (float) sensorArray[5]->getCurrentConvertedValue());
+        onBoardLog.printf("PTFuelInjector (psi): %.1f | ", (float) sensorArray[6]->getCurrentConvertedValue());
 
-      //Lox Engine PTs
-      onBoardLog.printf("PTLoxInlet (psi): %.1f | ", (float) sensorArray[7]->getCurrentConvertedValue());
+        //Lox Engine PTs
+        onBoardLog.printf("PTLoxInlet (psi): %.1f | ", (float) sensorArray[7]->getCurrentConvertedValue());
 
-      //Main Pneumatics PT
-      onBoardLog.printf("PTMainPneumatics (psi): %.1f | ", (float) sensorArray[8]->getCurrentConvertedValue());
-      
-      //Chamber PTs
-      onBoardLog.printf("PTChamber1 (psi): %.1f | ", (float) sensorArray[4]->getCurrentConvertedValue());
-      onBoardLog.printf("PTChamber2 (psi): %u | ", (float) sensorArray[3]->getCurrentConvertedValue());
+        //Main Pneumatics PT
+        onBoardLog.printf("PTMainPneumatics (psi): %.1f | ", (float) sensorArray[8]->getCurrentConvertedValue());
+        
+        //Chamber PTs
+        onBoardLog.printf("PTChamber1 (psi): %.1f | ", (float) sensorArray[4]->getCurrentConvertedValue());
+        onBoardLog.printf("PTChamber2 (psi): %.1f | ", (float) sensorArray[3]->getCurrentConvertedValue());
 
-      //onBoardLog.printf("PTChamber2 (raw): %u | ", (uint32_t) sensorArray[3]->getCurrentRawValue()); //grabing raw value
+      }
 
-      onBoardLog.println("");
-      onBoardLog.close();
+      //---PT Raw Value---
+      if(logSensorRaw)
+      {
+
+        //High Side PTs
+        onBoardLog.printf("PTHighLoxSide (Raw): %u | ", (float) sensorArray[16]->getCurrentRawValue());
+        onBoardLog.printf("PTHighFuelSide (Raw): %u | ", (float) sensorArray[15]->getCurrentRawValue());
+
+        //Lox Tank PTs
+        onBoardLog.printf("PTLoxTank1 (Raw): %u | ", (float) sensorArray[13]->getCurrentRawValue());
+        onBoardLog.printf("PTLoxTank2 (Raw): %u | ", (float) sensorArray[14]->getCurrentRawValue());
+
+        //Fuel Tank PTs
+        onBoardLog.printf("PTFuelTank1 (Raw): %u | ", (float) sensorArray[11]->getCurrentRawValue());
+        onBoardLog.printf("PTFuelTank2 (Raw): %u | ", (float) sensorArray[12]->getCurrentRawValue());
+
+        //Dome Reg PTs
+        onBoardLog.printf("PTLoxDome (Raw): %u | ", (float) sensorArray[10]->getCurrentRawValue());
+        onBoardLog.printf("PTFuelDome (Raw): %u | ", (float) sensorArray[9]->getCurrentRawValue());
+
+        //Fuel Engine PTs
+        onBoardLog.printf("PTFuelInlet (Raw): %u | ", (float) sensorArray[5]->getCurrentRawValue());
+        onBoardLog.printf("PTFuelInjector (Raw): %u | ", (float) sensorArray[6]->getCurrentRawValue());
+
+        //Lox Engine PTs
+        onBoardLog.printf("PTLoxInlet (Raw): %u | ", (float) sensorArray[7]->getCurrentRawValue());
+
+        //Main Pneumatics PT
+        onBoardLog.printf("PTMainPneumatics (Raw): %u | ", (float) sensorArray[8]->getCurrentRawValue());
+        
+        //Chamber PTs
+        onBoardLog.printf("PTChamber1 (Raw): %u | ", (float) sensorArray[4]->getCurrentRawValue());
+        onBoardLog.printf("PTChamber2 (Raw): %u | ", (float) sensorArray[3]->getCurrentRawValue());
+
+        onBoardLog.println("");
+        onBoardLog.close();
+
+      }
     }
  }
 
