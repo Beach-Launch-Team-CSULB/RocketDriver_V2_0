@@ -69,20 +69,20 @@ std::array<SENSORBASE*, NUM_HPSENSORS> HPsensorArray{&PasafireHP1, &PasafireHP2,
 // initialize all sensor objects here
 // Renegade SF Stand
 //Non LC normal sensor objects
-EXT_SENSOR ChamberPT2{52, 2, ALARA_ANALOG_IN7, &waterGoesVroom, 10, 100, 500, 0.0196, -102.94};                 // 6
-EXT_SENSOR ChamberPT1{50, 2, ALARA_ANALOG_IN8, &waterGoesVroom, 10, 100, 500, 0.0195, -128.88};                 // 7
-EXT_SENSOR FuelInletPropSidePT{58, 2, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 100, 0.0185, -125.74};          // 8
-EXT_SENSOR FuelInjectorPT{54, 2, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 100, 0.0196, -123.27};             // 9
-EXT_SENSOR LoxInletPropSidePT{60, 2, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 100, 0.0196, -128.58};           // 10
-EXT_SENSOR MVPneumaticsPT{56, 2, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 5, 10, 0.0193, -125.56};                // 11
-EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 5, 10, 0.0196, -127.95};                // 12
-EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 5, 10, 0.0194, -134.95};                 // 13
-EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 50, 100, 0.0192, -125.04};                    // 14
-EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0194, -125.08};                    // 14
-EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 50, 100, 0.0192, -122.78};                    // 15
-EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 50, 100, 0.0191, -126.90};                    // 15
-EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 50, 0.0967, -623.11};                 // 16
-EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 50, 0.0981, -630.47};                   // 17
+EXT_SENSOR ChamberPT2{52, 2, ALARA_ANALOG_IN7, &waterGoesVroom, 10, 100, 500, 0.0193, -104.15};                 // 6
+EXT_SENSOR ChamberPT1{50, 2, ALARA_ANALOG_IN8, &waterGoesVroom, 10, 100, 500, 0.0192, -121.56};                 // 7
+EXT_SENSOR FuelInletPropSidePT{58, 2, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 100, 0.0198, -129.739};          // 8
+EXT_SENSOR FuelInjectorPT{54, 2, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 100, 0.0191, -120.68};             // 9
+EXT_SENSOR LoxInletPropSidePT{60, 2, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 100, 0.0192, -125.41};           // 10
+EXT_SENSOR MVPneumaticsPT{56, 2, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 5, 10, 0.0192, -120.99};                // 11
+EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 5, 10, 0.0191, -123.73};                // 12
+EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 5, 10, 0.0191, -133.17};                 // 13
+EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 50, 100, 0.0192, -125.7};                    // 14
+EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0187, -119.97};                    // 14
+EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 50, 100, 0.0187, -120.25};                    // 15
+EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 50, 100, 0.0190, -126.31};                    // 15
+EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 50, 0.0983, -617.13};                 // 16
+EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 50, 0.0960, -624.73};                   // 17
 
 //FAKESHIT
 EXT_SENSOR FakeChamberPT1{150, 2, 41, &waterGoesVroom, simulatedInput};                 // 7
