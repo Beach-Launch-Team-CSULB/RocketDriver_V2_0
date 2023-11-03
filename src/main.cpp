@@ -98,9 +98,9 @@ uint32_t nodeIDdeterminefromFlash_errorFlag;
 //uint32_t nodeIDdeterminefromEEPROM_errorFlag;
 //uint8_t PropulsionSysNodeID = PROPULSIONSYSNODEIDPRESET;              //engine node = 2, prop node = 3, Pasafire node = 8
 //uint8_t PropulsionSysNodeIDfromEEPROM;    //PropulsionSysNodeID read out of EEPROM
-//uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
-//uint32_t vehicleStatefromEEPROM_errorFlag;
-//uint32_t missionStatefromEEPROM_errorFlag;
+uint32_t PropulsionSysNodeIDfromEEPROM_errorFlag;    //PropulsionSysNodeID read out of EEPROM
+uint32_t vehicleStatefromEEPROM_errorFlag;
+uint32_t missionStatefromEEPROM_errorFlag;
 
 const uint8_t configVerificationKey = 166; //upgrade to a map later
 
@@ -131,10 +131,10 @@ SerialUSBController SerialUSBdataController;
 // SD on board data logger stuff
 File onBoardLog;
 std::string logString = "";
-std::string fileLogName = "test.txt";
-bool logValves = false;
-bool logSensorPSI = false;
-bool logSensorRaw = true;
+std::string fileLogName = "StaticFire-11-4-23-prop.txt";
+bool logValves = true;
+bool logSensorPSI = true;
+bool logSensorRaw = false;
 
 const int CAN2busSpeed = 500000; // CAN2.0 baudrate - do not set above 500000 for full distance run bunker to pad
 
@@ -155,8 +155,8 @@ bool staticTest = true;
 commandMSG currentCommandMSG{};
 configMSG currentConfigMSG{};
 
-//uint32_t vehicleStateAddressfromEEPROM_errorFlag;
-//uint32_t missionStateAddressfromEEPROM_errorFlag;
+uint32_t vehicleStateAddressfromEEPROM_errorFlag;
+uint32_t missionStateAddressfromEEPROM_errorFlag;
 
 //AutoSequence stuff for main
 int64_t currentCountdownForMain;
@@ -207,7 +207,7 @@ std::string alaraNodeIDFlashFileName3 = "alaraNodeID3.txt";
 
 //-------------------------------------------------------//
 void setup() {
-  //delay(10000);
+  //delay(1000);
   startup = true;   // Necessary to set startup to true for the code loop so it does one startup loop for the state machine before entering regular loop behavior
   Serial.begin(9600); // Value is arbitrary on Teensy, it will initialize at the MCU dictate baud rate regardless what you feed this
   Wire.begin();
@@ -240,7 +240,7 @@ void setup() {
   currentMissionState = static_cast<MissionState>(tripleFlashread(missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, missionStateAddressfromFlash_errorFlag, 0));
   // Only write to EEPROM the node ID if manual ID define is present at top of Main
   //#ifdef PROPULSIONSYSNODEIDPRESET
-  //tripleEEPROMwrite(static_cast<uint8_t>(2), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
+  //tripleEEPROMwrite(static_cast<uint8_t>(3), PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3);
   //tripleFlashwrite(static_cast<uint8_t>(2), propSysNodeIDFlashFileName1, propSysNodeIDFlashFileName2, propSysNodeIDFlashFileName3, 0);
   //#endif
   //PropulsionSysNodeIDfromEEPROM = tripleEEPROMread(PropulsionSysNodeIDAddress1, PropulsionSysNodeIDAddress2, PropulsionSysNodeIDAddress3, PropulsionSysNodeIDfromEEPROM_errorFlag);
@@ -427,19 +427,21 @@ void loop()
   //Serial.println("Do I get past HPsensorTasks?");
   // -----Update States on EEPROM -----
   // ONLY write if something new to write!!! Don't spam EEMPROM it will kill the memory bytes physically if overused
-  //if ((static_cast<uint8_t>(currentVehicleState)) != (tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStatefromEEPROM_errorFlag)))
-  //{
-  //tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
-  //}
-  //if ((static_cast<uint8_t>(currentMissionState)) != (tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStatefromEEPROM_errorFlag)))
-  //{
-  //tripleEEPROMwrite(static_cast<uint8_t>(currentMissionState), missionStateAddress1, missionStateAddress2, missionStateAddress3);
-/*   Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
-  Serial.print(" priorMissionState : ");
-  Serial.print(static_cast<uint8_t>(priorMissionState));
-  Serial.print(" currentMissionState : ");
-  Serial.println(static_cast<uint8_t>(currentMissionState)); */
-  //}
+  /*
+  if ((static_cast<uint8_t>(currentVehicleState)) != (tripleEEPROMread(vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3, vehicleStatefromEEPROM_errorFlag)))
+  {
+    tripleEEPROMwrite(static_cast<uint8_t>(currentVehicleState), vehicleStateAddress1, vehicleStateAddress2, vehicleStateAddress3);
+  }
+  if ((static_cast<uint8_t>(currentMissionState)) != (tripleEEPROMread(missionStateAddress1, missionStateAddress2, missionStateAddress3, missionStatefromEEPROM_errorFlag)))
+  {
+    tripleEEPROMwrite(static_cast<uint8_t>(currentMissionState), missionStateAddress1, missionStateAddress2, missionStateAddress3);
+  //Serial.println("Does current vs prior MISSION state EEPROM protect work as expected? ");
+  //Serial.print(" priorMissionState : ");
+  //Serial.print(static_cast<uint8_t>(priorMissionState));
+  //Serial.print(" currentMissionState : ");
+  //Serial.println(static_cast<uint8_t>(currentMissionState)); 
+  }
+  */
   //tripleFlashwrite(static_cast<uint8_t>(1), vehicleStateFlashFileName1, vehicleStateFlashFileName2, vehicleStateFlashFileName3, 0);
   //tripleFlashwrite(static_cast<uint8_t>(0), missionStateFlashFileName1, missionStateFlashFileName2, missionStateFlashFileName3, 0);
   if(flashLogged) {
@@ -495,7 +497,7 @@ if (shittyCANTimer >= 1000)
 ///// ----- SD card writing ----- /////
  if(!SD.begin(BUILTIN_SDCARD)) 
  {
-    Serial.println("SD Failed");
+    //Serial.println("SD Failed");
  } 
  else 
  {

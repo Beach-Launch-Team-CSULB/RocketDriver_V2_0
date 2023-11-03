@@ -237,7 +237,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60107",
+                "PLATFORMIO=60111",
                 "__MK66FX1M0__",
                 "ARDUINO_TEENSY36",
                 "RENEGADESF",
@@ -250,7 +250,7 @@
                 "LAYOUT_US_ENGLISH",
                 ""
             ],
-            "cppStandard": "c++14",
+            "cppStandard": "gnu++14",
             "compilerPath": "C:/Users/cooli/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe",
             "compilerArgs": [
                 "-mthumb",

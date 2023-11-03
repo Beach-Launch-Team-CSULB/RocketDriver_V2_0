@@ -75,14 +75,14 @@ EXT_SENSOR FuelInletPropSidePT{58, 2, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 
 EXT_SENSOR FuelInjectorPT{54, 2, ALARA_ANALOG_IN4, &waterGoesVroom, 10, 100, 100, 0.0191, -120.68};             // 9
 EXT_SENSOR LoxInletPropSidePT{60, 2, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 100, 0.0192, -125.41};           // 10
 EXT_SENSOR MVPneumaticsPT{56, 2, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 5, 10, 0.0192, -120.99};                // 11
-EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 5, 10, 0.0191, -123.73};                // 12
-EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 5, 10, 0.0191, -133.17};                 // 13
-EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 50, 100, 0.0192, -125.7};                    // 14
-EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0187, -119.97};                    // 14
-EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 50, 100, 0.0187, -120.25};                    // 15
-EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 50, 100, 0.0190, -126.31};                    // 15
-EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 50, 0.0983, -617.13};                 // 16
-EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 50, 0.0960, -624.73};                   // 17
+EXT_SENSOR DomeRegFuelPT{74, 3, ALARA_ANALOG_IN1, &waterGoesVroom, 5, 5, 10, 0.0191, -122.73};                // 12
+EXT_SENSOR DomeRegLoxPT{76, 3, ALARA_ANALOG_IN2, &waterGoesVroom, 5, 5, 10, 0.0191, -134.17};                 // 13
+EXT_SENSOR FuelTankPT1{62, 3, ALARA_ANALOG_IN3, &waterGoesVroom, 5, 50, 100, 0.0192, -126.7};                    // 14
+EXT_SENSOR FuelTankPT2{64, 3, ALARA_ANALOG_IN8, &waterGoesVroom, 5, 10, 100, 0.0187, -120.97};                    // 14
+EXT_SENSOR LoxTankPT1{66, 3, ALARA_ANALOG_IN4, &waterGoesVroom, 5, 50, 100, 0.0187, -119.25};                    // 15
+EXT_SENSOR LoxTankPT2{68, 3, ALARA_ANALOG_IN7, &waterGoesVroom, 5, 50, 100, 0.0190, -127.31};                    // 15
+EXT_SENSOR HiPressFuelPT{70, 3, ALARA_ANALOG_IN5, &waterGoesVroom, 5, 10, 50, 0.0983, -676.13};                 // 16
+EXT_SENSOR HiPressLoxPT{72, 3, ALARA_ANALOG_IN6, &waterGoesVroom, 5, 10, 50, 0.0960, -623.73};                   // 17
 
 //FAKESHIT
 EXT_SENSOR FakeChamberPT1{150, 2, 41, &waterGoesVroom, simulatedInput};                 // 7
